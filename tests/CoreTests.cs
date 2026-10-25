@@ -53,6 +53,12 @@ internal static class CoreTests
         {
             Assert(Versioning.Compare("0.10.0", "0.9.9") > 0, "confronto numerico delle versioni");
             Assert(Versioning.Compare("14", "14.0") == 0, "versioni equivalenti");
+            Assert(Versioning.Compare("v1.1.4", "1.1.4") == 0, "versione Socketlib con prefisso v");
+            Assert(Versioning.Compare("V1.2.0", "v1.1.4") > 0, "confronto numerico con prefissi v/V");
+            Assert(Versioning.Compatible("v1.1.4", new Dictionary<string, object> { { "minimum", "1.1.0" }, { "maximum", "v1.1.4" } }), "prefisso v con limiti di compatibilità");
+            Assert(!Versioning.Compatible("v1.1.4", new Dictionary<string, object> { { "minimum", "1.2.0" } }), "versione prefissata insufficiente ancora bloccata");
+            Assert(Versioning.Compatible("1.0.0-beta", null), "dipendenza senza limiti non richiede formato numerico");
+            Assert(!Versioning.Compatible(null, null), "versione mancante non accettata");
             Assert(!Versioning.Valid("1.0.0-beta"), "nessuna distribuzione accidentale di prerelease");
             Assert(Versioning.Compatible("14.367", new Dictionary<string, object> { { "maximum", "14" } }), "limite Foundry per generazione");
             Assert(!Versioning.Compatible("15.1", new Dictionary<string, object> { { "maximum", "14" } }), "generazione non compatibile bloccata");
@@ -82,6 +88,17 @@ internal static class CoreTests
             calendar.relationships = Json.Read<Dictionary<string, object>>("{\"requires\":[{\"id\":\"cripta-wiki-sync\",\"compatibility\":{\"minimum\":\"1.1.0\"}}]}");
             Assert(Planner.Scan(install, Catalog(calendar, Release("cripta-wiki-sync", "1.1.0"))).All(r => r.CanUpdate), "dipendenze coordinate pianificate insieme");
             Assert(!Planner.Scan(install, Catalog(calendar))[0].CanUpdate, "dipendenza insufficiente segnalata");
+            // Reproduce the published Automations dependency list, including socketlib's real version format.
+            Manifest(modules, "khuzoe-automations", "0.27.1");
+            foreach (var dependency in new[] { new[] { "cat", "0.0.7" }, new[] { "midi-qol", "13.0.17" }, new[] { "dae", "13.0.4" }, new[] { "socketlib", "v1.1.4" } })
+                Manifest(modules, dependency[0], dependency[1]);
+            Write(Path.Combine(selected, "Data", "systems", "dnd5e", "system.json"), "{\"id\":\"dnd5e\",\"version\":\"5.3.3\"}");
+            var automations = Release("khuzoe-automations", "0.27.2");
+            automations.relationships = Json.Read<Dictionary<string, object>>("{\"systems\":[{\"id\":\"dnd5e\",\"compatibility\":{\"minimum\":\"5.3.3\",\"maximum\":\"5.9.9\"}}],\"requires\":[{\"id\":\"cat\",\"compatibility\":{\"minimum\":\"0.0.7\"}},{\"id\":\"midi-qol\",\"compatibility\":{\"minimum\":\"13.0.17\"}},{\"id\":\"dae\",\"compatibility\":{\"minimum\":\"13.0.4\"}},{\"id\":\"socketlib\"}]}");
+            Assert(Planner.Scan(install, Catalog(automations)).Single().CanUpdate, "Automations aggiornabile con Socketlib v1.1.4 già installato");
+            File.Delete(Path.Combine(modules, "socketlib", "module.json"));
+            var missingSocketlib = Planner.Scan(install, Catalog(automations)).Single();
+            Assert(!missingSocketlib.CanUpdate && missingSocketlib.Detail.Contains("Dipendenza mancante: socketlib"), "Socketlib davvero mancante ancora segnalato");
             Network.Validate(Catalog(Release("khuzoe-merchant", "1.1.0")));
             Assert(true, "catalogo del repository previsto accettato");
             Reject(() => Network.Validate(Catalog(Release("foreign-module", "1.0.0"))), "modulo estraneo rifiutato dal catalogo");

@@ -81,13 +81,22 @@ namespace KhuzoeUpdater
     }
     public static class Versioning
     {
+        static string Numeric(string version)
+        {
+            if (version == null) return null;
+            string value = version.Trim();
+            return value.StartsWith("v", StringComparison.OrdinalIgnoreCase) ? value.Substring(1) : value;
+        }
         public static bool Valid(string version)
-        { return version != null && Regex.IsMatch(version, @"^\d+(\.\d+){0,3}$") && version.Split('.').All(p => { int n; return Int32.TryParse(p, out n); }); }
+        {
+            string value = Numeric(version);
+            return value != null && Regex.IsMatch(value, @"^\d+(\.\d+){0,3}$") && value.Split('.').All(p => { int n; return Int32.TryParse(p, out n); });
+        }
         public static int Compare(string a, string b)
         {
             if (!Valid(a) || !Valid(b)) throw new InvalidDataException("Numero di versione non riconosciuto.");
-            var left = a.Split('.').Select(Int32.Parse).ToArray();
-            var right = b.Split('.').Select(Int32.Parse).ToArray();
+            var left = Numeric(a).Split('.').Select(Int32.Parse).ToArray();
+            var right = Numeric(b).Split('.').Select(Int32.Parse).ToArray();
             for (int i = 0; i < Math.Max(left.Length, right.Length); i++)
             {
                 int result = (i < left.Length ? left[i] : 0).CompareTo(i < right.Length ? right[i] : 0);
@@ -97,13 +106,16 @@ namespace KhuzoeUpdater
         }
         public static bool Compatible(string actual, Dictionary<string, object> rules)
         {
-            if (!Valid(actual)) return false;
             string minimum = Json.Str(rules, "minimum"), maximum = Json.Str(rules, "maximum");
+            if (String.IsNullOrWhiteSpace(actual)) return false;
+            // A dependency with no version bounds only requires an installed module.
+            if (minimum == null && maximum == null) return true;
+            if (!Valid(actual)) return false;
             if (minimum != null && Compare(actual, minimum) < 0) return false;
             // Foundry's generation-only maximum 14 includes all builds 14.x.
             if (maximum != null)
             {
-                string truncated = String.Join(".", actual.Split('.').Take(maximum.Split('.').Length));
+                string truncated = String.Join(".", Numeric(actual).Split('.').Take(Numeric(maximum).Split('.').Length));
                 if (Compare(truncated, maximum) > 0) return false;
             }
             return true;
@@ -391,7 +403,14 @@ namespace KhuzoeUpdater
                     if (!File.Exists(path)) return "Dipendenza mancante: " + id + ".";
                     version = Json.Str(Json.FileRead<Dictionary<string, object>>(path), "version");
                 }
-                if (!Versioning.Compatible(version, Json.Map(requirement, "compatibility"))) return "Aggiorna prima la dipendenza " + id + ".";
+                var bounds = Json.Map(requirement, "compatibility");
+                if (!Versioning.Compatible(version, bounds))
+                {
+                    var limits = new List<string>();
+                    if (Json.Str(bounds, "minimum") != null) limits.Add("minimo " + Json.Str(bounds, "minimum"));
+                    if (Json.Str(bounds, "maximum") != null) limits.Add("massimo " + Json.Str(bounds, "maximum"));
+                    return "La dipendenza " + id + " (versione " + (version ?? "non indicata") + ") non soddisfa i requisiti" + (limits.Count > 0 ? ": " + String.Join(", ", limits) : "") + ".";
+                }
             }
             return null;
         }
