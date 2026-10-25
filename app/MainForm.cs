@@ -86,6 +86,31 @@ namespace KhuzoeUpdater
             if (Focused && ShowFocusCues) ControlPaint.DrawFocusRectangle(e.Graphics, Rectangle.Inflate(ClientRectangle, -5, -5), ink, fill);
         }
     }
+    internal sealed class BrandHeader : Control
+    {
+        public BrandHeader()
+        {
+            SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true);
+            BackColor = Theme.Background; AccessibleName = "Khuzoe Updater"; AccessibleDescription = "Versione " + BuildConfig.Version; AccessibleRole = AccessibleRole.StaticText;
+        }
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            var mark = new Rectangle(0, 5, 48, 48);
+            using (var shape = Theme.Rounded(mark, 12))
+            using (var brush = new SolidBrush(Theme.Surface))
+            using (var pen = new Pen(Theme.Border))
+            { e.Graphics.FillPath(brush, shape); e.Graphics.DrawPath(pen, shape); }
+            using (var initial = new Font("Georgia", 23F))
+            using (var title = new Font("Segoe UI", 23F, FontStyle.Bold))
+            using (var version = new Font("Segoe UI", 9F))
+            {
+                TextRenderer.DrawText(e.Graphics, "K", initial, mark, Theme.Gold, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                TextRenderer.DrawText(e.Graphics, "Khuzoe Updater", title, new Rectangle(72, 0, Width - 160, 58), Theme.Text, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                TextRenderer.DrawText(e.Graphics, "v" + BuildConfig.Version, version, new Rectangle(Width - 80, 5, 80, 48), Theme.Muted, TextFormatFlags.Right | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+            }
+        }
+    }
     public sealed class MainForm : Form
     {
         readonly Label folder = new Label();
@@ -122,16 +147,7 @@ namespace KhuzoeUpdater
             layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 46));
             layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 4));
             layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 64));
-            var header = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 1, Margin = Padding.Empty };
-            header.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            header.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 64));
-            header.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            header.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 80));
-            var monogram = new SurfacePanel { Size = new Size(48, 48), Anchor = AnchorStyles.Top | AnchorStyles.Left, Margin = new Padding(0, 5, 0, 0) };
-            monogram.Controls.Add(new Label { Text = "K", ForeColor = Theme.Gold, Font = new Font("Georgia", 23F), Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter, BackColor = Color.Transparent });
-            header.Controls.Add(monogram, 0, 0);
-            header.Controls.Add(new Label { Text = "Khuzoe Updater", Font = new Font("Segoe UI", 23F, FontStyle.Bold), Dock = DockStyle.Fill, TextAlign = ContentAlignment.TopLeft, Padding = new Padding(0, 3, 0, 0) }, 1, 0);
-            header.Controls.Add(new Label { Text = "v" + BuildConfig.Version, Font = new Font("Segoe UI", 9F), ForeColor = Theme.Muted, Dock = DockStyle.Fill, TextAlign = ContentAlignment.TopRight, Padding = new Padding(0, 16, 0, 0) }, 2, 0);
+            var header = new BrandHeader { Dock = DockStyle.Fill, Margin = Padding.Empty };
             layout.Controls.Add(header, 0, 0);
             var folderCard = new SurfacePanel { Dock = DockStyle.Fill, Padding = new Padding(22, 14, 22, 14), Margin = Padding.Empty };
             var folderRow = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 2, BackColor = Theme.Surface };
