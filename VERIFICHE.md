@@ -8,10 +8,10 @@
 - Compendi Automations estratti e letti con lo strumento ufficiale Foundry, esclusivamente su copie temporanee: 100 incantesimi 2014, 1 incantesimo 2024, 51 capacità di classe, 1 evocazione, 16 capacità NPC. Identificatori univoci.
 - Confronto SHA-256 di 1.140 file delle cartelle originali: nessuna modifica o cancellazione rilevata. Escluse cartelle preesistenti node_modules, .maintenance e .git; nessuna installazione di prova effettuata nei moduli reali.
 
-## Da verificare dopo la configurazione GitHub
+## Verifica online dopo la configurazione GitHub
 
-Il repository `Khuzoe/khuzoe-modules` non era disponibile nel collegamento GitHub al momento della consegna. I workflow sono preparati localmente ma non sono stati eseguiti sui runner GitHub. Il catalogo remoto non è stato attivato.
+Il repository `Khuzoe/khuzoe-modules` è stato collegato e popolato. Il workflow Windows ha compilato, verificato e pubblicato l'app `updater-v0.1.0`. Il workflow moduli ha pubblicato undici Releases indipendenti. Dopo l'attivazione Pages da parte dell'utente, la seconda esecuzione ha completato con successo anche la pubblicazione del catalogo.
 
-Il primo test completo online sarà: caricamento progetto → esecuzione Actions → catalogo Pages disponibile → controllo dell'app. Il test con una versione più alta di un modulo andrà eseguito inizialmente su una copia Foundry di prova. I trasferimenti HTTPS reali e la prima pubblicazione remota restano subordinati alla configurazione descritta in CONFIGURAZIONE-GITHUB.md.
+Il catalogo HTTPS è stato letto e validato con lo stesso codice dell'app. Per ciascuno degli undici moduli sono stati scaricati lo ZIP e il manifest online, controllati dimensione, SHA-256, identificatore e versione, ed estratto il pacchetto in una cartella di prova separata. Tutti i controlli sono riusciti. Nessun aggiornamento di prova è stato effettuato sui moduli installati. L'installazione di un modulo più recente e la conservazione dei moduli estranei sono state verificate con fixture locali; la prima futura nuova versione andrà provata inizialmente su un Foundry di test.
 
 I cinque compendi sono quelli già compilati presenti nella versione attuale del modulo; questa verifica ne controlla leggibilità e identificatori, non la corrispondenza integrale con packData né il funzionamento delle singole automazioni in una sessione di gioco.

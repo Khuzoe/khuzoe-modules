@@ -1,6 +1,6 @@
 # Configurazione GitHub — una volta sola
 
-Progetto preparato per **Khuzoe/khuzoe-modules**. Non è stato pubblicato online e nessun modulo già installato è stato cancellato o sostituito.
+Progetto pubblicato in **Khuzoe/khuzoe-modules**. GitHub Actions e Pages sono attivi; catalogo e download verificati il 25 ottobre 2026. Nessun modulo già installato è stato cancellato o sostituito. I passaggi seguenti restano come riferimento per la configurazione iniziale.
 
 ## Cosa devi fare tu
 
@@ -15,7 +15,7 @@ I workflow dichiarano già i permessi necessari: `contents: write` per le Releas
 
 Nel repository va caricata **la radice di questo progetto**, con `.github`, `app`, `modules`, `tests`, `tools`, `publisher.config.json`, README e guide. Non va caricata la cartella dati di Foundry. Non includere `build`, `dist`, `.work` o `node_modules`.
 
-Se il caricamento viene eseguito con Git, `.gitignore` esclude già queste cartelle. Il progetto è pronto per una prima importazione su `main`. L'invio effettivo su GitHub non è stato fatto in questa consegna.
+Se il caricamento viene eseguito con Git, `.gitignore` esclude già queste cartelle. La prima importazione su `main` è stata completata; le modifiche successive si inviano allo stesso repository.
 
 Dopo il primo caricamento, in **Actions** devono comparire:
 
