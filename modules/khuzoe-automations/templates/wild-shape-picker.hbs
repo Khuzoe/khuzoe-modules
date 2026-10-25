@@ -1,0 +1,41 @@
+<div class="khz-wild-shape-window">
+  <header class="khz-wild-shape-hero">
+    <div class="khz-wild-shape-hero__icon"><i class="fa-solid fa-paw"></i></div>
+    <div>
+      <span class="khz-eyebrow">Forma selvatica</span>
+      <h2>Scegli la forma di {{actorName}}</h2>
+      <p>Sono mostrate solo le creature consentite. CR massimo: <strong>{{maxCr}}</strong>.</p>
+    </div>
+  </header>
+
+  <label class="khz-wild-shape-search">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" data-wild-shape-search placeholder="Cerca per nome, sorgente o movimento…" autocomplete="off">
+  </label>
+
+  <section class="khz-wild-shape-grid">
+    {{#each forms}}
+      <label class="khz-wild-shape-card" data-form-card data-search="{{name}} {{sourceLabel}} {{movementLabel}}">
+        <input type="radio" name="formUuid" value="{{uuid}}" {{#unless @index}}checked{{/unless}}>
+        <img src="{{img}}" alt="">
+        <span class="khz-wild-shape-card__body">
+          <strong>{{name}}</strong>
+          <small>{{sourceLabel}}</small>
+          <span class="khz-wild-shape-tags">
+            <span>CR {{cr}}</span>
+            <span>{{size}}</span>
+            {{#if elemental}}<span class="is-elemental">2 usi</span>{{/if}}
+            {{#if known}}<span class="is-known"><i class="fa-solid fa-star"></i> Conosciuta</span>{{/if}}
+          </span>
+          <small class="khz-wild-shape-movement">{{movementLabel}}</small>
+        </span>
+      </label>
+    {{/each}}
+  </section>
+
+  <footer class="khz-wild-shape-footer">
+    <button type="submit" class="khz-primary">
+      <i class="fa-solid fa-wand-magic-sparkles"></i> Trasformati
+    </button>
+  </footer>
+</div>

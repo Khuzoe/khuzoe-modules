@@ -1,0 +1,177 @@
+{
+    "KHZ_AURAS":  {
+                      "Settings":  {
+                                       "ShowVisuals":  {
+                                                           "Name":  "Show auras on the canvas",
+                                                           "Hint":  "Draw active aura ranges. This is a per-client preference."
+                                                       },
+                                       "Debug":  {
+                                                     "Name":  "Performance diagnostics",
+                                                     "Hint":  "Logs timing, distance comparisons, and processed results to the console."
+                                                 }
+                                   },
+                      "HUD":  {
+                                  "Configure":  "Configure auras"
+                              },
+                      "Config":  {
+                                     "Title":  "{token}\u0027s Auras",
+                                     "Eyebrow":  "Aura configuration",
+                                     "Heading":  "Token auras",
+                                     "Intro":  "Combine area, targets, triggers, and actions. Only the active GM applies effects.",
+                                     "StatusEnabled":  "Aura enabled",
+                                     "StatusDisabled":  "Aura disabled",
+                                     "Summary":  "Aura summary",
+                                     "RadiusBadge":  "Radius {distance}",
+                                     "TriggerBadge":  "{count} triggers",
+                                     "ActionBadge":  "{count} actions",
+                                     "AddAura":  "Add aura",
+                                     "NewAura":  "New aura",
+                                     "Enabled":  "Enabled",
+                                     "Name":  "Name",
+                                     "Radius":  "Radius (scene units)",
+                                     "Targets":  "Targets",
+                                     "Color":  "Color",
+                                     "AreaHeading":  "Area and targets",
+                                     "AreaHint":  "Define who the aura reaches and how its range is measured on the scene.",
+                                     "IncludeSource":  "Include source",
+                                     "RequiresConscious":  "Requires conscious source",
+                                     "Walls":  "Blocked by walls",
+                                     "Elevation":  "Consider elevation",
+                                     "Visible":  "Show on canvas",
+                                     "VisualOnly":  "Visual only",
+                                     "VisualOnlyHint":  "This aura is only drawn on the canvas: it does not calculate targets, execute actions, or create chat messages.",
+                                     "Triggers":  "Triggers",
+                                     "TriggersHint":  "Choose the moments when the aura should activate.",
+                                     "Frequency":  "Repeat protection",
+                                     "Actions":  "Actions",
+                                     "ActionsHint":  "Configure what happens to each target reached by the aura.",
+                                     "ActionNumber":  "Action {number}",
+                                     "ActionType":  "Type",
+                                     "Formula":  "Formula",
+                                     "RollMode":  "Roll",
+                                     "DamageType":  "Damage type",
+                                     "SavingThrow":  "Saving throw",
+                                     "SavingThrowHint":  "The target rolls before damage or effects are applied.",
+                                     "SaveAbility":  "Ability",
+                                     "DC":  "DC",
+                                     "OnSuccess":  "On success",
+                                     "ImmunityOnSuccess":  "A successful save grants immunity to this aura",
+                                     "ImmunityOnSuccessHint":  "Immunity applies only to this aura and lasts until it is disabled or removed.",
+                                     "FailureEffects":  "Effects on a failed save",
+                                     "FailureEffectsHint":  "Select every condition or effect to apply when the saving throw fails.",
+                                     "EffectDurationRounds":  "Duration (rounds)",
+                                     "EffectDurationHint":  "Use 0 for an indefinite duration.",
+                                     "ShowFailureEffectIcon":  "Show the effect icon on the token",
+                                     "ConditionChoice":  "Condition — {name}",
+                                     "ActorEffectChoice":  "Source effect — {name}",
+                                     "ItemEffectChoice":  "{item} — {name}",
+                                     "AddAction":  "Add action",
+                                     "RemoveAction":  "Remove action",
+                                     "ActivateManual":  "Activate manually",
+                                     "DeleteAura":  "Delete aura",
+                                     "DeleteConfirm":  "Permanently delete “{name}”?",
+                                     "Advanced":  "Advanced settings",
+                                     "AdvancedHint":  "Visual appearance and overlapping-aura management.",
+                                     "AppearanceHeading":  "Aura appearance",
+                                     "AppearanceHint":  "Adjust fill and outline without changing how the aura works.",
+                                     "StackingHeading":  "Overlapping auras",
+                                     "StackingHint":  "Decide how auras in the same group interact.",
+                                     "StackGroup":  "Stacking group",
+                                     "StackMode":  "Stacking mode",
+                                     "Priority":  "Priority",
+                                     "Opacity":  "Opacity",
+                                     "LineOpacity":  "Outline opacity",
+                                     "LineWidth":  "Outline width",
+                                     "Save":  "Save auras",
+                                     "SaveHint":  "Changes take effect after saving.",
+                                     "Saved":  "Aura configuration saved."
+                                 },
+                      "Triggers":  {
+                                       "sourceTurnStart":  "Start of source\u0027s turn",
+                                       "sourceTurnEnd":  "End of source\u0027s turn",
+                                       "affectedTurnStart":  "Start of affected target\u0027s turn",
+                                       "affectedTurnEnd":  "End of affected target\u0027s turn",
+                                       "roundStart":  "Start of round",
+                                       "roundEnd":  "End of round",
+                                       "enter":  "Entering the aura",
+                                       "exit":  "Leaving the aura",
+                                       "manual":  "Manual activation"
+                                   },
+                      "Targets":  {
+                                      "ally":  "Allies",
+                                      "enemy":  "Enemies",
+                                      "neutral":  "Neutral tokens",
+                                      "all":  "Everyone"
+                                  },
+                      "Frequencies":  {
+                                          "oncePerPhase":  "Once per phase",
+                                          "oncePerTurn":  "Once per turn",
+                                          "oncePerRound":  "Once per round",
+                                          "always":  "Always"
+                                      },
+                      "Stacking":  {
+                                       "stack":  "Apply all",
+                                       "highest":  "Highest priority only",
+                                       "first":  "First only"
+                                   },
+                      "Actions":  {
+                                      "healing":  "Healing",
+                                      "damage":  "Damage",
+                                      "temphp":  "Temporary HP",
+                                      "effect":  "Effect"
+                                  },
+                      "RollModes":  {
+                                        "perTarget":  "One per target",
+                                        "shared":  "One shared roll"
+                                    },
+                      "SaveResults":  {
+                                          "none":  "No effect",
+                                          "half":  "Half damage"
+                                      },
+                      "Events":  {
+                                     "turnStart":  "Turn start",
+                                     "turnEnd":  "Turn end",
+                                     "roundStart":  "Round start",
+                                     "roundEnd":  "Round end",
+                                     "enter":  "Entered",
+                                     "exit":  "Exited",
+                                     "manual":  "Manual"
+                                 },
+                      "Chat":  {
+                                   "Title":  "Aura effects",
+                                   "Source":  "Source",
+                                   "Healed":  "Recovers {amount} HP",
+                                   "NoHealing":  "No HP recovered",
+                                   "Damaged":  "Takes {amount} damage",
+                                   "DamagedTyped":  "Takes {amount} {type} damage",
+                                   "NoDamage":  "No damage taken",
+                                   "TemporarySet":  "Temporary HP: {value}",
+                                   "TemporaryKept":  "Keeps {value} temporary HP",
+                                   "Rolled":  "Roll: {total}",
+                                   "SavingThrow":  "{ability} save: {total} · DC {dc}",
+                                   "NoEffectsApplied":  "No new effect applied",
+                                   "EffectsFailed":  "One or more effects could not be applied. See the details below.",
+                                   "EffectApplied":  "applied",
+                                   "EffectRefreshed":  "duration refreshed",
+                                   "EffectImmune":  "target immune",
+                                   "EffectExisting":  "already active",
+                                   "EffectMissing":  "effect not found",
+                                   "EffectFailed":  "application failed",
+                                   "NoHitPoints":  "The target has no hit points.",
+                                   "FullHitPoints":  "The target is already at full hit points.",
+                                   "SaveSuccess":  "success",
+                                   "SaveFailure":  "failure",
+                                   "SaveRequired":  "The Effect action requires a configured saving throw.",
+                                   "NoFailureEffects":  "No applicable failed-save effect is configured.",
+                                   "EffectsApplied":  "Applied effects",
+                                   "AuraImmunityGranted":  "The target is now immune to this aura.",
+                                   "Error":  "Error"
+                               },
+                      "Errors":  {
+                                     "Execution":  "An aura failed to execute: {message}",
+                                     "GMOnly":  "Only the active GM can manually execute an aura.",
+                                     "NoManualTrigger":  "This aura does not have a manual activation trigger.",
+                                     "WrongSystem":  "Khuzoe Auras requires the D\u0026D 5e system."
+                                 }
+                  }
+}

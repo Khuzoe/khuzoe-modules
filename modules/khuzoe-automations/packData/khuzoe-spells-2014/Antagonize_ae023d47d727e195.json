@@ -1,0 +1,252 @@
+{
+  "type": "spell",
+  "system": {
+    "description": {
+      "value": "",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Khuzoe Automations",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "activation": {
+      "type": "action",
+      "condition": "",
+      "value": 1
+    },
+    "duration": {
+      "value": "",
+      "units": "inst"
+    },
+    "target": {
+      "affects": {
+        "type": "creature",
+        "count": "1",
+        "choice": false,
+        "special": ""
+      },
+      "template": {
+        "units": "",
+        "contiguous": false,
+        "type": ""
+      }
+    },
+    "range": {
+      "value": "30",
+      "units": "ft",
+      "special": ""
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "ability": "",
+    "level": 3,
+    "school": "enc",
+    "materials": {
+      "value": "",
+      "consumed": false,
+      "cost": 0,
+      "supply": 0
+    },
+    "preparation": {
+      "mode": "prepared",
+      "prepared": false
+    },
+    "properties": [
+      "vocal",
+      "somatic",
+      "material"
+    ],
+    "activities": {
+      "dnd5eactivity000": {
+        "_id": "dnd5eactivity000",
+        "type": "save",
+        "activation": {
+          "type": "action",
+          "value": null,
+          "override": false
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": true
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": false
+        },
+        "effects": [],
+        "range": {
+          "override": false
+        },
+        "target": {
+          "prompt": true,
+          "template": {
+            "contiguous": false,
+            "units": "ft"
+          },
+          "affects": {
+            "choice": false
+          },
+          "override": false
+        },
+        "uses": {
+          "spent": 0,
+          "max": "",
+          "recovery": []
+        },
+        "damage": {
+          "onSave": "half",
+          "parts": [
+            {
+              "custom": {
+                "enabled": false,
+                "formula": ""
+              },
+              "number": 4,
+              "denomination": 4,
+              "bonus": "",
+              "types": [
+                "psychic"
+              ],
+              "scaling": {
+                "mode": "whole",
+                "number": 1,
+                "formula": ""
+              }
+            }
+          ],
+          "critical": {
+            "allow": false
+          }
+        },
+        "save": {
+          "ability": [
+            "wis"
+          ],
+          "dc": {
+            "calculation": "spellcasting",
+            "formula": "8 + @mod + @prof"
+          }
+        },
+        "sort": 0,
+        "useConditionText": "",
+        "forceDialog": false,
+        "effectConditionText": "",
+        "name": "Antagonize",
+        "img": "icons/magic/control/debuff-energy-hold-levitate-teal-blue.webp",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "magicDamage": true,
+          "magicEffect": true
+        },
+        "flags": {}
+      }
+    },
+    "identifier": "antagonize",
+    "sourceClass": ""
+  },
+  "name": "Antagonize",
+  "flags": {
+    "midiProperties": {
+      "magicdam": true,
+      "magiceffect": true,
+      "nodam": false,
+      "fulldam": false,
+      "halfdam": false,
+      "autoFailFriendly": false,
+      "autoSaveFriendly": false,
+      "rollOther": false,
+      "critOther": false,
+      "offHandWeapon": false,
+      "concentration": false,
+      "toggleEffect": false,
+      "ignoreTotalCover": false,
+      "confirmTargets": "default",
+      "saveDamage": "default",
+      "bonusSaveDamage": "default",
+      "noConcentrationCheck": false,
+      "idr": false,
+      "idi": false,
+      "idv": false,
+      "ida": false
+    },
+    "core": {},
+    "midi-qol": {
+      "effectActivation": false,
+      "onUseMacroName": "",
+      "rollAttackPerTarget": "default",
+      "removeAttackDamageButtons": "default",
+      "itemCondition": "",
+      "effectCondition": "",
+      "AoETargetType": "any",
+      "AoETargetTypeIncludeSelf": true,
+      "autoTarget": "default",
+      "reactionCondition": "",
+      "otherCondition": ""
+    },
+    "dnd5e": {
+      "persistSourceMigration": true,
+      "riders": {
+        "activity": [],
+        "effect": []
+      },
+      "last": {
+        "dnd5eactivity000": {
+          "damageType": {
+            "0": "psychic"
+          }
+        }
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "antagonize"
+          }
+        ]
+      }
+    },
+    "khuzoe-automations": {
+      "importedFrom": "Cauldron 1.2.39 (document schema only; runtime-independent)",
+      "sourceIdentifier": "antagonize",
+      "activityIdentifiers": {}
+    }
+  },
+  "effects": [],
+  "img": "icons/magic/control/debuff-energy-hold-levitate-teal-blue.webp",
+  "folder": null,
+  "_id": "ae023d47d727e195",
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!ae023d47d727e195"
+}

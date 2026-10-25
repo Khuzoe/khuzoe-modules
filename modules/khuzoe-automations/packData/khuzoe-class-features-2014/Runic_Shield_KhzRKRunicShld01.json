@@ -1,0 +1,164 @@
+{
+  "_id": "KhzRKRunicShld01",
+  "name": "Runic Shield",
+  "type": "feat",
+  "img": "icons/magic/defensive/shield-barrier-glowing-triangle-blue.webp",
+  "system": {
+    "description": {
+      "value": "<p>Quando una creatura diversa da te che puoi vedere entro 60 ft viene colpita da un attacco, puoi usare la reazione per costringere l'attaccante a ripetere il d20 e a usare il nuovo risultato.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Tasha's Cauldron of Everything",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "uses": {
+      "max": "@prof",
+      "spent": 0,
+      "recovery": [
+        {
+          "period": "lr",
+          "type": "recoverAll"
+        }
+      ]
+    },
+    "type": {
+      "value": "class",
+      "subtype": ""
+    },
+    "properties": [],
+    "requirements": "Rune Knight 7",
+    "prerequisites": {
+      "level": 7
+    },
+    "activities": {
+      "KhzRKShieldUse01": {
+        "_id": "KhzRKShieldUse01",
+        "type": "utility",
+        "activation": {
+          "type": "reaction",
+          "value": 1,
+          "condition": "",
+          "override": true
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": false
+        },
+        "description": {
+          "chatFlavor": "Runic Shield"
+        },
+        "duration": {
+          "value": "",
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "value": "60",
+          "units": "ft",
+          "special": "",
+          "override": true
+        },
+        "target": {
+          "prompt": false,
+          "template": {
+            "count": "",
+            "contiguous": false,
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "units": "ft"
+          },
+          "affects": {
+            "count": "1",
+            "type": "creature",
+            "choice": false,
+            "special": ""
+          },
+          "override": true
+        },
+        "roll": {
+          "formula": "",
+          "name": "",
+          "prompt": false,
+          "visible": false
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 0,
+        "name": "Runic Shield",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "flags": {
+          "cat": {
+            "hidden": true
+          }
+        },
+        "midiProperties": {
+          "automationOnly": true
+        }
+      }
+    },
+    "identifier": "runic-shield",
+    "enchant": {}
+  },
+  "effects": [],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": false,
+      "magiceffect": false
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [
+          "KhzRKShieldUse01"
+        ],
+        "effect": []
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "runic-shield"
+          }
+        ]
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzRKRunicShld01"
+}

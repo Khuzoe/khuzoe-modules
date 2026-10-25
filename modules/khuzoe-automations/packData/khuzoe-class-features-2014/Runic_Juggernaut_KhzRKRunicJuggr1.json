@@ -1,0 +1,66 @@
+{
+  "_id": "KhzRKRunicJuggr1",
+  "name": "Runic Juggernaut",
+  "type": "feat",
+  "img": "icons/creatures/abilities/giant-boulder-hurl-orange.webp",
+  "system": {
+    "description": {
+      "value": "<p>Giant's Might può renderti Huge, il danno extra diventa 1d10 e la portata degli attacchi in mischia aumenta di 5 ft.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Tasha's Cauldron of Everything",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "type": {
+      "value": "class",
+      "subtype": ""
+    },
+    "properties": [],
+    "requirements": "Rune Knight 18",
+    "prerequisites": {
+      "level": 18
+    },
+    "activities": {},
+    "identifier": "runic-juggernaut",
+    "enchant": {}
+  },
+  "effects": [],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": false,
+      "magiceffect": false
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [],
+        "effect": []
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzRKRunicJuggr1"
+}

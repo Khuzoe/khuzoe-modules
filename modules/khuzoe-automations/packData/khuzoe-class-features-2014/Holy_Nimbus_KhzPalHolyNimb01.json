@@ -1,0 +1,269 @@
+{
+  "_id": "KhzPalHolyNimb01",
+  "name": "Holy Nimbus",
+  "type": "feat",
+  "img": "icons/magic/light/explosion-star-large-blue-yellow.webp",
+  "system": {
+    "description": {
+      "value": "<p>Come azione emani un'aura di luce solare per 1 minuto. Da te si propaga luce intensa entro 30 ft e luce fioca per altri 30 ft.</p><p>Ogni creatura nemica che inizia il proprio turno nella luce intensa subisce 10 danni radianti. Per la durata hai vantaggio ai tiri salvezza contro gli incantesimi lanciati da immondi o non morti.</p><p>Dopo l'uso devi completare un riposo lungo prima di poter usare nuovamente questa capacità.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Player's Handbook 2014",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "uses": {
+      "max": "1",
+      "spent": 0,
+      "recovery": [
+        {
+          "period": "lr",
+          "type": "recoverAll"
+        }
+      ]
+    },
+    "type": {
+      "value": "class",
+      "subtype": ""
+    },
+    "properties": [],
+    "requirements": "Paladin 20",
+    "prerequisites": {
+      "level": 20
+    },
+    "activities": {
+      "KhzHolyNimbus001": {
+        "_id": "KhzHolyNimbus001",
+        "type": "utility",
+        "activation": {
+          "type": "action",
+          "value": 1,
+          "condition": "",
+          "override": true
+        },
+        "consumption": {
+          "targets": [
+            {
+              "type": "itemUses",
+              "value": "1",
+              "target": "",
+              "scaling": {}
+            }
+          ],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": false
+        },
+        "description": {
+          "chatFlavor": "Holy Nimbus"
+        },
+        "duration": {
+          "value": "1",
+          "units": "minute",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "value": null,
+          "units": "self",
+          "special": "",
+          "override": true
+        },
+        "target": {
+          "prompt": false,
+          "template": {
+            "count": "",
+            "contiguous": false,
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "units": "ft"
+          },
+          "affects": {
+            "count": "",
+            "type": "self",
+            "choice": false,
+            "special": ""
+          },
+          "override": true
+        },
+        "roll": {
+          "formula": "",
+          "name": "",
+          "prompt": false,
+          "visible": false
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 0,
+        "name": "Holy Nimbus",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "flags": {},
+        "midiProperties": {}
+      },
+      "KhzHolyDamage001": {
+        "_id": "KhzHolyDamage001",
+        "type": "damage",
+        "activation": {
+          "type": "special",
+          "value": null,
+          "condition": "Nemico che inizia il turno nella luce intensa.",
+          "override": true
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": false
+        },
+        "description": {
+          "chatFlavor": "Holy Nimbus: danno"
+        },
+        "duration": {
+          "value": "",
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "value": null,
+          "units": "any",
+          "special": "",
+          "override": true
+        },
+        "target": {
+          "prompt": false,
+          "template": {
+            "count": "",
+            "contiguous": false,
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "units": "ft"
+          },
+          "affects": {
+            "count": "1",
+            "type": "creature",
+            "choice": false,
+            "special": ""
+          },
+          "override": true
+        },
+        "damage": {
+          "critical": {
+            "allow": false
+          },
+          "parts": [
+            {
+              "custom": {
+                "enabled": true,
+                "formula": "10"
+              },
+              "number": null,
+              "denomination": 0,
+              "bonus": "",
+              "types": [
+                "radiant"
+              ],
+              "scaling": {
+                "mode": "",
+                "number": null,
+                "formula": ""
+              }
+            }
+          ]
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 100000,
+        "name": "Holy Nimbus: danno",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "confirmTargets": "never",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "automationOnly": true,
+          "magicEffect": true,
+          "magicDamage": true
+        },
+        "flags": {
+          "cat": {
+            "hidden": true
+          }
+        }
+      }
+    },
+    "identifier": "holy-nimbus",
+    "enchant": {}
+  },
+  "effects": [],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": false,
+      "magiceffect": false
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [
+          "KhzHolyDamage001"
+        ],
+        "effect": []
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "holy-nimbus"
+          }
+        ]
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzPalHolyNimb01"
+}

@@ -1,0 +1,350 @@
+{
+  "type": "spell",
+  "system": {
+    "description": {
+      "value": "",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Khuzoe Automations",
+      "book": "Strixhaven: A Curriculum of Chaos",
+      "page": "38",
+      "license": "",
+      "rules": "2014"
+    },
+    "activation": {
+      "type": "action",
+      "condition": "",
+      "value": 1
+    },
+    "duration": {
+      "value": "",
+      "units": "inst"
+    },
+    "target": {
+      "affects": {
+        "choice": false,
+        "count": "",
+        "type": "creature",
+        "special": ""
+      },
+      "template": {
+        "units": "ft",
+        "type": "sphere",
+        "size": "10",
+        "contiguous": false,
+        "count": ""
+      }
+    },
+    "range": {
+      "value": "60",
+      "units": "ft",
+      "special": ""
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "ability": "",
+    "level": 2,
+    "school": "nec",
+    "properties": [
+      "vocal",
+      "somatic",
+      "material"
+    ],
+    "materials": {
+      "value": "",
+      "consumed": false,
+      "cost": 0,
+      "supply": 0
+    },
+    "preparation": {
+      "mode": "prepared",
+      "prepared": false
+    },
+    "activities": {
+      "dnd5eactivity000": {
+        "_id": "dnd5eactivity000",
+        "type": "save",
+        "activation": {
+          "type": "action",
+          "value": null,
+          "override": false
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": true
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": false
+        },
+        "effects": [],
+        "range": {
+          "override": false
+        },
+        "target": {
+          "prompt": true,
+          "template": {
+            "contiguous": false,
+            "units": "ft"
+          },
+          "affects": {
+            "choice": false
+          },
+          "override": false
+        },
+        "uses": {
+          "spent": 0,
+          "max": "",
+          "recovery": []
+        },
+        "damage": {
+          "onSave": "half",
+          "parts": [
+            {
+              "custom": {
+                "enabled": false,
+                "formula": ""
+              },
+              "number": 2,
+              "denomination": 6,
+              "bonus": "",
+              "types": [
+                "necrotic"
+              ],
+              "scaling": {
+                "mode": "whole",
+                "number": 1,
+                "formula": ""
+              }
+            }
+          ],
+          "critical": {
+            "allow": false
+          }
+        },
+        "save": {
+          "ability": [
+            "con"
+          ],
+          "dc": {
+            "calculation": "spellcasting",
+            "formula": ""
+          }
+        },
+        "sort": 0,
+        "useConditionText": "",
+        "forceDialog": false,
+        "effectConditionText": "",
+        "name": "Wither and Bloom",
+        "img": "icons/magic/nature/plant-vines-skull-green.webp",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "magicDamage": true,
+          "magicEffect": true,
+          "identifier": "witherAndBloom"
+        },
+        "flags": {}
+      },
+      "ljrUFOW18FJW6Rud": {
+        "type": "heal",
+        "_id": "ljrUFOW18FJW6Rud",
+        "sort": 0,
+        "activation": {
+          "type": "special",
+          "value": null,
+          "override": true,
+          "condition": ""
+        },
+        "consumption": {
+          "scaling": {
+            "allowed": false
+          },
+          "spellSlot": false,
+          "targets": []
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": false
+        },
+        "effects": [],
+        "range": {
+          "override": true,
+          "units": "any",
+          "special": ""
+        },
+        "target": {
+          "template": {
+            "contiguous": false,
+            "units": "ft",
+            "type": ""
+          },
+          "affects": {
+            "choice": false,
+            "count": "1",
+            "type": "creature",
+            "special": ""
+          },
+          "override": true,
+          "prompt": true
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "healing": {
+          "number": null,
+          "denomination": 0,
+          "types": [
+            "healing"
+          ],
+          "custom": {
+            "enabled": true,
+            "formula": "0"
+          },
+          "scaling": {
+            "number": 1,
+            "mode": ""
+          },
+          "bonus": ""
+        },
+        "useConditionText": "",
+        "forceDialog": false,
+        "effectConditionText": "",
+        "name": "Wither and Bloom: Heal",
+        "img": "icons/magic/nature/plant-vines-skull-green.webp",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "magicDamage": true,
+          "magicEffect": true,
+          "automationOnly": true,
+          "identifier": "witherAndBloomHeal"
+        },
+        "flags": {
+          "cat": {
+            "hidden": true
+          }
+        }
+      }
+    },
+    "identifier": "wither-and-bloom",
+    "sourceClass": ""
+  },
+  "name": "Wither and Bloom",
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "AoETargetType": "any",
+      "AoETargetTypeIncludeSelf": true,
+      "autoTarget": "default",
+      "rollAttackPerTarget": "default",
+      "itemCondition": "",
+      "effectCondition": "",
+      "reactionCondition": "",
+      "otherCondition": ""
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": true,
+      "magiceffect": true,
+      "saveDamage": "halfdam",
+      "bonusSaveDamage": "default",
+      "autoFailFriendly": false,
+      "autoSaveFriendly": true,
+      "critOther": false,
+      "offHandWeapon": false,
+      "noConcentrationCheck": false,
+      "toggleEffect": false,
+      "ignoreTotalCover": false,
+      "idr": false,
+      "idi": false,
+      "idv": false,
+      "ida": false
+    },
+    "dnd5e": {
+      "persistSourceMigration": true,
+      "riders": {
+        "activity": [
+          "ljrUFOW18FJW6Rud"
+        ],
+        "effect": []
+      },
+      "last": {
+        "dnd5eactivity000": {
+          "damageType": {
+            "0": "necrotic"
+          }
+        },
+        "ljrUFOW18FJW6Rud": {
+          "damageType": {
+            "0": "healing"
+          }
+        }
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "wither-and-bloom"
+          }
+        ]
+      }
+    },
+    "khuzoe-automations": {
+      "importedFrom": "Cauldron 1.2.39 (document schema only; runtime-independent)",
+      "sourceIdentifier": "witherAndBloom",
+      "activityIdentifiers": {
+        "witherAndBloomHeal": "ljrUFOW18FJW6Rud",
+        "witherAndBloom": "dnd5eactivity000"
+      }
+    }
+  },
+  "effects": [],
+  "img": "icons/magic/nature/plant-vines-skull-green.webp",
+  "folder": null,
+  "_id": "006e9a08d5f0e540",
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!006e9a08d5f0e540"
+}

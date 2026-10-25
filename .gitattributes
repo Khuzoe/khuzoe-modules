@@ -1,0 +1,7 @@
+* text=auto eol=lf
+# LevelDB packages must retain their exact bytes, including CURRENT and logs.
+modules/**/packs/** -text
+*.zip -text
+*.ico -text
+*.png -text
+*.webp -text

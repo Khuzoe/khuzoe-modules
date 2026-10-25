@@ -1,0 +1,69 @@
+{
+  "_id": "KhzPalAuraProt01",
+  "name": "Aura of Protection",
+  "type": "feat",
+  "img": "icons/magic/defensive/shield-barrier-glowing-blue.webp",
+  "system": {
+    "description": {
+      "value": "<p>Finché sei cosciente, tu e le creature amiche entro 10 ft ottenete ai tiri salvezza un bonus pari al tuo modificatore di Carisma, con un minimo di +1. Al 18° livello da Paladino il raggio aumenta a 30 ft.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Player's Handbook 2014",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "type": {
+      "value": "class",
+      "subtype": ""
+    },
+    "properties": [],
+    "requirements": "Paladin 6",
+    "prerequisites": {
+      "level": 6
+    },
+    "activities": {},
+    "identifier": "aura-of-protection",
+    "enchant": {}
+  },
+  "effects": [],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": false,
+      "magiceffect": false
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [],
+        "effect": []
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "config": {
+        "khuzoePaladinAuraDistance": 10
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzPalAuraProt01"
+}

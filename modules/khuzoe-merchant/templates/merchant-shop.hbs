@@ -1,0 +1,63 @@
+<div class="km-shop-shell km-ui-v2 is-view-{{viewMode}} {{#unless inRange}}has-range-warning{{/unless}}">
+  <header class="km-shop-hero km-ui-shop-hero">
+    <div class="km-shop-portrait-wrap">
+      <img class="km-shop-portrait" src="{{merchant.img}}" alt="{{merchant.name}}">
+      <span class="km-shop-open-badge"><i class="fas fa-store"></i></span>
+    </div>
+    <div class="km-shop-heading">
+      <span class="km-eyebrow">{{localize "KM.Shop.Eyebrow"}}</span>
+      <h2>{{merchant.name}}</h2>
+      <p>{{merchant.subtitle}}</p>
+    </div>
+    <div class="km-wallet" title="{{localize 'KM.Shop.WalletHint' buyer=buyer.name}}">
+      <img src="{{buyer.img}}" alt="{{buyer.name}}">
+      <span><small>{{localize "KM.Shop.YourFunds"}}</small><strong><i class="fas fa-coins"></i> {{buyer.balance}}</strong><em>{{buyer.name}}</em></span>
+    </div>
+  </header>
+
+  <div class="km-shop-toolbar km-ui-toolbar">
+    <label class="km-search-field"><i class="fas fa-magnifying-glass"></i><input class="km-shop-search" type="search" value="{{query}}" placeholder="{{localize 'KM.Shop.Search'}}" aria-label="{{localize 'KM.Shop.Search'}}"></label>
+    <span class="km-toolbar-count"><i class="fas fa-boxes-stacked"></i> {{localize "KM.Shop.ArticleCount" count=inventoryCount}}</span>
+    <div class="km-shop-toolbar-actions">
+      <label class="km-toolbar-select"><i class="fas fa-filter"></i><span class="sr-only">{{localize "KM.Shop.Filter"}}</span><select class="km-shop-filter" aria-label="{{localize 'KM.Shop.Filter'}}"><option value="all" {{#if filterAll}}selected{{/if}}>{{localize "KM.Shop.FilterAll"}}</option><option value="affordable" {{#if filterAffordable}}selected{{/if}}>{{localize "KM.Shop.FilterAffordable"}}</option><option value="available" {{#if filterAvailable}}selected{{/if}}>{{localize "KM.Shop.FilterAvailable"}}</option></select></label>
+      <label class="km-toolbar-select"><i class="fas fa-arrow-down-a-z"></i><span class="sr-only">{{localize "KM.Shop.Sort"}}</span><select class="km-shop-sort" aria-label="{{localize 'KM.Shop.Sort'}}"><option value="name" {{#if sortName}}selected{{/if}}>{{localize "KM.Shop.SortName"}}</option><option value="price" {{#if sortPrice}}selected{{/if}}>{{localize "KM.Shop.SortPrice"}}</option><option value="stock" {{#if sortStock}}selected{{/if}}>{{localize "KM.Shop.SortStock"}}</option></select></label>
+      <div class="km-view-toggle" role="group" aria-label="{{localize 'KM.Shop.ViewMode'}}">
+        <button type="button" class="km-view-button {{#if listMode}}is-active{{/if}}" data-action="viewMode" data-view-mode="list" aria-pressed="{{listMode}}" title="{{localize 'KM.Shop.ViewListHint'}}"><i class="fas fa-list"></i><span>{{localize "KM.Shop.ViewList"}}</span></button>
+        <button type="button" class="km-view-button {{#if fullMode}}is-active{{/if}}" data-action="viewMode" data-view-mode="full" aria-pressed="{{fullMode}}" title="{{localize 'KM.Shop.ViewFullHint'}}"><i class="fas fa-table-cells-large"></i><span>{{localize "KM.Shop.ViewFull"}}</span></button>
+      </div>
+    </div>
+  </div>
+
+  {{#unless inRange}}<div class="km-range-warning"><i class="fas fa-person-walking-arrow-right"></i><div><strong>{{localize "KM.Shop.TooFarTitle"}}</strong><span>{{localize "KM.Shop.TooFarHint" distance=maxDistance unit=unit}}</span></div></div>{{/unless}}
+
+  <main class="km-shop-inventory km-ui-shop-list">
+    {{#each inventory}}
+    <article class="km-shop-card {{#if soldOut}}is-sold-out{{/if}} {{#unless canAfford}}is-unaffordable{{/unless}}" data-item-id="{{id}}" data-name="{{name}}" data-price="{{priceSort}}" data-stock="{{stockSort}}" data-affordable="{{canAfford}}" data-sold-out="{{soldOut}}" data-search="{{name}} {{type}}">
+      <div class="km-card-image-wrap">
+        <button type="button" class="km-card-image-button" data-action="openImage" data-image-src="{{img}}" data-image-title="{{name}}" aria-label="{{localize 'KM.Shop.ExpandImage' item=name}}" title="{{localize 'KM.Shop.ExpandImage' item=name}}"><img src="{{img}}" alt="{{name}}" loading="lazy"><span class="km-image-expand-cue"><i class="fas fa-magnifying-glass-plus"></i><span class="km-expand-label">{{localize "KM.Shop.Expand"}}</span></span></button>
+        <span class="km-card-type">{{type}}</span>
+        {{#if soldOut}}<span class="km-sold-out-ribbon">{{localize "KM.Shop.SoldOut"}}</span>{{/if}}
+      </div>
+      <div class="km-card-body">
+        <div class="km-card-title-row"><h3>{{name}}</h3><span class="km-list-type">{{type}}</span></div>
+        {{#if description}}<p class="km-card-description">{{description}}</p>{{else}}<p class="km-card-description is-empty">{{localize "KM.Shop.NoDescription"}}</p>{{/if}}
+        <div class="km-card-meta">
+          <span class="km-card-price"><small>{{localize "KM.Shop.UnitPrice"}}</small><strong><i class="fas fa-coins"></i> {{priceLabel}}</strong></span>
+          <span class="km-card-stock"><small>{{localize "KM.Shop.Availability"}}</small><strong><i class="fas fa-boxes-stacked"></i> {{#if unlimited}}{{localize "KM.Shop.Unlimited"}}{{else}}{{localize "KM.Shop.Stock" value=stock}}{{/if}}</strong></span>
+        </div>
+      </div>
+      <footer class="km-card-actions">
+        <div class="km-order-summary">
+          <label class="km-quantity-wrap"><span class="km-field-label">{{localize "KM.Shop.Quantity"}}</span><span class="km-quantity-stepper"><button type="button" data-action="quantityStep" data-step="-1" aria-label="{{localize 'KM.Shop.QuantityDecrease'}}" {{#if soldOut}}disabled{{/if}}><i class="fas fa-minus"></i></button><input class="km-quantity" type="number" min="1" max="{{maxQuantity}}" value="1" {{#if soldOut}}disabled{{/if}}><button type="button" data-action="quantityStep" data-step="1" aria-label="{{localize 'KM.Shop.QuantityIncrease'}}" {{#if soldOut}}disabled{{/if}}><i class="fas fa-plus"></i></button></span></label>
+          <div class="km-total-wrap"><span class="km-field-label">{{localize "KM.Shop.Total"}}</span><strong class="km-card-total">{{priceLabel}}</strong></div>
+        </div>
+        <div class="km-order-buttons">
+          <button type="button" class="km-item-details-button" data-action="toggleDetails" aria-expanded="false" data-open-label="{{localize 'KM.Shop.Details'}}" data-close-label="{{localize 'KM.Shop.CloseDetails'}}" data-open-hint="{{localize 'KM.Shop.DetailsHint' item=name}}" data-close-hint="{{localize 'KM.Shop.CloseDetailsHint' item=name}}" title="{{localize 'KM.Shop.DetailsHint' item=name}}"><i class="fas fa-book-open km-details-icon"></i><span class="km-details-label">{{localize "KM.Shop.Details"}}</span></button>
+          <button type="button" class="km-buy-button" data-action="purchase" {{#if disabled}}disabled{{/if}} data-buy-label="{{localize 'KM.Shop.Buy'}}" data-funds-label="{{localize 'KM.Shop.InsufficientFundsShort'}}" data-range-label="{{localize 'KM.Shop.OutOfRangeShort'}}"><span class="km-buy-default"><i class="fas {{buttonIcon}} km-buy-icon"></i><span class="km-buy-label">{{buttonLabel}}</span></span><span class="km-buy-loading"><i class="fas fa-circle-notch fa-spin"></i> {{localize "KM.Shop.Buying"}}</span></button>
+        </div>
+      </footer>
+    </article>
+    {{else}}<div class="km-shop-empty"><i class="fas fa-store-slash"></i><h3>{{localize "KM.Shop.EmptyTitle"}}</h3><p>{{localize "KM.Shop.EmptyHint"}}</p></div>{{/each}}
+    {{#unless empty}}<div class="km-shop-search-empty" hidden><i class="fas fa-magnifying-glass"></i><h3>{{localize "KM.Shop.SearchEmptyTitle"}}</h3><p>{{localize "KM.Shop.SearchEmptyHint"}}</p></div>{{/unless}}
+  </main>
+</div>

@@ -1,0 +1,280 @@
+{
+  "_id": "KhzAgathysAuto01",
+  "name": "Armor of Agathys",
+  "type": "spell",
+  "img": "icons/magic/defensive/shield-barrier-flaming-diamond-blue.webp",
+  "system": {
+    "description": {
+      "value": "<p>Una barriera di gelo concede 5 punti ferita temporanei per un'ora. Finché ne rimane almeno uno, chi ti colpisce con un attacco in mischia subisce 5 danni da freddo.</p><p><strong>Ai livelli superiori.</strong> I punti ferita temporanei e i danni aumentano entrambi di 5 per ogni livello dello slot oltre il primo.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Player's Handbook",
+      "book": "",
+      "page": "215",
+      "license": "",
+      "rules": "2014"
+    },
+    "activation": {
+      "type": "action",
+      "condition": "",
+      "value": 1
+    },
+    "duration": {
+      "value": "1",
+      "units": "hour"
+    },
+    "target": {
+      "affects": {
+        "type": "self",
+        "count": "",
+        "choice": false,
+        "special": ""
+      },
+      "template": {
+        "units": "",
+        "contiguous": false,
+        "type": ""
+      }
+    },
+    "range": {
+      "value": null,
+      "units": "self",
+      "special": ""
+    },
+    "uses": {
+      "max": "",
+      "recovery": [],
+      "spent": 0
+    },
+    "level": 1,
+    "school": "abj",
+    "materials": {
+      "value": "A cup of water",
+      "consumed": false,
+      "cost": 0,
+      "supply": 0
+    },
+    "preparation": {
+      "mode": "prepared",
+      "prepared": false
+    },
+    "properties": [
+      "vocal",
+      "somatic",
+      "material"
+    ],
+    "activities": {
+      "KhzAgathysCast01": {
+        "_id": "KhzAgathysCast01",
+        "type": "heal",
+        "activation": {
+          "type": "action",
+          "value": null,
+          "override": false
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": true
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": false
+        },
+        "effects": [],
+        "range": {
+          "override": false
+        },
+        "target": {
+          "prompt": false,
+          "template": {
+            "contiguous": false,
+            "units": "ft",
+            "type": ""
+          },
+          "affects": {
+            "choice": false,
+            "type": "self",
+            "count": "",
+            "special": ""
+          },
+          "override": false
+        },
+        "healing": {
+          "number": null,
+          "denomination": 0,
+          "types": [
+            "temphp"
+          ],
+          "custom": {
+            "enabled": true,
+            "formula": "5"
+          },
+          "scaling": {
+            "number": null,
+            "mode": "whole",
+            "formula": "5"
+          },
+          "bonus": ""
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 0,
+        "name": "Cast",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "flags": {},
+        "midiProperties": {}
+      },
+      "KhzAgathysRefl01": {
+        "_id": "KhzAgathysRefl01",
+        "type": "damage",
+        "activation": {
+          "type": "special",
+          "value": null,
+          "override": true,
+          "condition": "A creature hits you with a melee attack while the temporary hit points remain."
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": false
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "override": false
+        },
+        "target": {
+          "prompt": false,
+          "template": {
+            "contiguous": false,
+            "units": "ft",
+            "type": ""
+          },
+          "affects": {
+            "choice": false,
+            "type": "creature",
+            "count": "1",
+            "special": ""
+          },
+          "override": true
+        },
+        "damage": {
+          "critical": {
+            "allow": false
+          },
+          "parts": [
+            {
+              "custom": {
+                "enabled": true,
+                "formula": "5"
+              },
+              "number": null,
+              "denomination": 0,
+              "bonus": "",
+              "types": [
+                "cold"
+              ],
+              "scaling": {
+                "mode": "whole",
+                "number": null,
+                "formula": "5"
+              }
+            }
+          ]
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 10,
+        "name": "Armor of Agathys: Reflect",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "flags": {
+          "cat": {
+            "hidden": true
+          }
+        },
+        "midiProperties": {
+          "automationOnly": true
+        }
+      }
+    },
+    "identifier": "armor-of-agathys"
+  },
+  "effects": [],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "never",
+      "magicdam": false,
+      "magiceffect": true
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [
+          "KhzAgathysRefl01"
+        ],
+        "effect": []
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "armor-of-agathys"
+          }
+        ]
+      }
+    }
+  },
+  "folder": null,
+  "sort": 10,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzAgathysAuto01"
+}

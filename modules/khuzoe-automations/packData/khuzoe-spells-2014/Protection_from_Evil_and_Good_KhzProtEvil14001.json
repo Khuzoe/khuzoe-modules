@@ -1,0 +1,262 @@
+{
+  "_id": "KhzProtEvil14001",
+  "name": "Protection from Evil and Good",
+  "type": "spell",
+  "img": "icons/magic/defensive/shield-barrier-flaming-diamond-blue-yellow.webp",
+  "system": {
+    "description": {
+      "value": "<p>Una creatura è protetta da aberrazioni, celestiali, elementali, folletti, immondi e non morti. Queste creature hanno svantaggio agli attacchi contro il bersaglio, che non può essere affascinato, spaventato o posseduto da esse e dispone di vantaggio ai relativi tiri salvezza.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Khuzoe Automations",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "activation": {
+      "type": "action",
+      "condition": "",
+      "value": 1
+    },
+    "duration": {
+      "value": "10",
+      "units": "minute"
+    },
+    "target": {
+      "affects": {
+        "type": "creature",
+        "count": "1",
+        "choice": false,
+        "special": ""
+      },
+      "template": {
+        "units": "",
+        "contiguous": false,
+        "type": "",
+        "size": "",
+        "width": "",
+        "height": "",
+        "count": ""
+      }
+    },
+    "range": {
+      "value": null,
+      "units": "touch",
+      "special": ""
+    },
+    "uses": {
+      "max": "",
+      "recovery": [],
+      "spent": 0
+    },
+    "level": 1,
+    "school": "abj",
+    "materials": {
+      "value": "",
+      "consumed": false,
+      "cost": 0,
+      "supply": 0
+    },
+    "preparation": {
+      "mode": "prepared",
+      "prepared": false
+    },
+    "properties": [
+      "vocal",
+      "somatic",
+      "material",
+      "concentration"
+    ],
+    "activities": {
+      "KhzProtCast00001": {
+        "_id": "KhzProtCast00001",
+        "type": "utility",
+        "activation": {
+          "type": "action",
+          "value": null,
+          "override": false,
+          "condition": ""
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": true
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": false
+        },
+        "effects": [
+          {
+            "_id": "KhzProtEffect001",
+            "level": {
+              "min": null,
+              "max": null
+            }
+          }
+        ],
+        "range": {
+          "override": false
+        },
+        "target": {
+          "prompt": true,
+          "template": {
+            "contiguous": false,
+            "stationary": false,
+            "units": "ft",
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "count": ""
+          },
+          "affects": {
+            "choice": false,
+            "count": "1",
+            "type": "creature",
+            "special": ""
+          },
+          "override": false
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 0,
+        "name": "Cast",
+        "img": "",
+        "useConditionText": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "automationOnly": false,
+          "magicEffect": true,
+          "magicDamage": false
+        },
+        "flags": {},
+        "roll": {
+          "formula": "",
+          "name": "",
+          "prompt": false,
+          "visible": false
+        }
+      }
+    },
+    "identifier": "protection-from-evil-and-good"
+  },
+  "effects": [
+    {
+      "_id": "KhzProtEffect001",
+      "name": "Protection from Evil and Good",
+      "img": "icons/magic/defensive/shield-barrier-flaming-diamond-blue-yellow.webp",
+      "type": "base",
+      "system": {
+        "changes": [
+          {
+            "key": "flags.midi-qol.grants.disadvantage.attack.all",
+            "value": "['aberration', 'celestial', 'elemental', 'fey', 'fiend', 'undead'].includes(raceOrType)",
+            "priority": 20,
+            "type": "override"
+          }
+        ]
+      },
+      "disabled": false,
+      "duration": {
+        "value": 600,
+        "units": "seconds",
+        "expiry": "turnStart",
+        "expired": false
+      },
+      "origin": null,
+      "tint": "#ffffff",
+      "transfer": false,
+      "statuses": [],
+      "description": "",
+      "showIcon": 1,
+      "flags": {
+        "core": {
+          "overlay": false
+        },
+        "dae": {
+          "transfer": false,
+          "stackable": "noneNameOnly",
+          "expiryMode": "delete",
+          "specialDuration": []
+        },
+        "dnd5e": {
+          "riders": {
+            "statuses": []
+          }
+        },
+        "midi-qol": {
+          "forceCEOff": true
+        },
+        "cat": {
+          "identifier": "khuzoe-protection-evil-good",
+          "macros": {
+            "save": [
+              {
+                "source": "khuzoe-automations",
+                "rules": "2014",
+                "identifier": "khuzoe-protection-evil-good"
+              }
+            ]
+          }
+        }
+      },
+      "start": null,
+      "folder": null,
+      "sort": 0,
+      "_key": "!items.effects!KhzProtEvil14001.KhzProtEffect001"
+    }
+  ],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true,
+      "reactionCondition": ""
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": false,
+      "magiceffect": true
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [],
+        "effect": [
+          "KhzProtEffect001"
+        ]
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzProtEvil14001"
+}

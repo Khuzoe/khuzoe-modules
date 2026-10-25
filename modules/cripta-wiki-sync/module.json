@@ -1,0 +1,42 @@
+{
+    "id":  "cripta-wiki-sync",
+    "title":  "Khuzoe Wiki Sync",
+    "description":  "Sincronizzazione bidirezionale tra wiki e Foundry per Actor gestiti, Tokenizer e catalogo oggetti di campagna.",
+  "version": "0.11.11",
+    "authors":  [
+                    {
+                        "name":  "Delia + Codex"
+                    }
+                ],
+    "compatibility":  {
+                          "minimum":  "14",
+                          "verified":  "14"
+                      },
+    "esmodules":  [
+                      "scripts/main.js"
+                  ],
+    "styles":  [
+                   "styles/module.css"
+               ],
+    "languages":  [
+
+                  ],
+    "packs":  [
+
+              ],
+    "relationships":  {
+                          "systems":  [
+                                        {
+                                          "id": "dnd5e",
+                                          "type": "system",
+                                          "compatibility": {
+                                            "minimum": "5.3.0",
+                                            "verified": "5.3.3"
+                                          }
+                                        }
+                                      ]
+                      },
+    "manifest":  "https://khuzoe.github.io/sigillo-del-male/dist/module.json",
+    "download":  "https://khuzoe.github.io/sigillo-del-male/dist/cripta-wiki-sync.zip",
+    "url":  "https://khuzoe.github.io/sigillo-del-male/"
+}

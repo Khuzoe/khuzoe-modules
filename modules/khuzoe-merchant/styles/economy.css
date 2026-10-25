@@ -1,0 +1,388 @@
+.khuzoe-economy-config .window-content {
+  display: flex;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.km-economy-form {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.km-economy-hero {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 22px 24px;
+  border-bottom: 1px solid var(--km-line);
+  background: linear-gradient(110deg, rgba(216, 169, 77, 0.13), transparent 58%);
+}
+
+.km-economy-hero h2,
+.km-economy-group h3 {
+  margin: 0;
+  color: var(--km-ink);
+}
+
+.km-economy-hero p {
+  margin: 5px 0 0;
+  color: var(--km-muted);
+}
+
+.km-economy-hero-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 1px solid rgba(244, 203, 117, 0.35);
+  border-radius: 14px;
+  color: var(--km-gold-bright);
+  font-size: 21px;
+  background: rgba(216, 169, 77, 0.12);
+}
+
+.km-economy-revision {
+  padding: 5px 9px;
+  border: 1px solid var(--km-line);
+  border-radius: 999px;
+  color: var(--km-muted);
+  font-size: 11px;
+}
+.km-economy-statuses {
+  display: grid;
+  justify-items: end;
+  gap: 5px;
+}
+
+.km-economy-sync {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 5px 9px;
+  border: 1px solid rgba(204, 91, 82, .35);
+  border-radius: 999px;
+  color: #e4a29d;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(112, 31, 26, .16);
+}
+
+.km-economy-sync.is-synced {
+  border-color: rgba(66, 201, 132, .38);
+  color: #82d7ac;
+  background: rgba(25, 104, 67, .16);
+}
+
+.km-economy-sync-detail {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 9px 20px;
+  border-bottom: 1px solid rgba(204, 91, 82, .2);
+  color: #e4a29d;
+  font-size: 11px;
+  line-height: 1.4;
+  background: rgba(112, 31, 26, .1);
+}
+
+.km-economy-groups {
+  display: grid;
+  flex: 1;
+  min-height: 0;
+  align-content: start;
+  gap: 16px;
+  padding: 18px 20px 24px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.km-economy-form .km-config-footer {
+  flex: 0 0 auto;
+}
+
+.km-economy-group {
+  padding: 16px;
+  border: 1px solid var(--km-line);
+  border-radius: 14px;
+  background: rgba(8, 8, 7, 0.34);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.025);
+}
+
+.km-economy-group-head {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 0.8fr) minmax(180px, 0.8fr);
+  gap: 12px;
+  margin-bottom: 13px;
+}
+
+.km-economy-currencies {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.km-economy-currency {
+  display: grid;
+  grid-template-columns: 120px minmax(130px, 1fr) 90px 90px 70px minmax(235px, 1.35fr) 34px;
+  gap: 8px;
+  align-items: end;
+  padding: 10px;
+  border: 1px solid rgba(219, 183, 111, 0.13);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.km-economy-currency.is-archived {
+  opacity: 0.58;
+}
+
+.km-economy-currency-title {
+  align-self: center;
+}
+
+.km-economy-currency-title code {
+  display: block;
+  overflow: hidden;
+  color: var(--km-gold-bright);
+  font-size: 11px;
+  text-overflow: ellipsis;
+}
+
+.km-economy-currency-title span {
+  color: var(--km-red);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.km-economy-form .km-field {
+  display: grid;
+  gap: 4px;
+}
+
+.km-economy-form .km-field > span {
+  color: var(--km-muted);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.km-secondary-button {
+  width: auto;
+  padding: 7px 12px;
+  border: 1px solid var(--km-line);
+  border-radius: 8px;
+  color: var(--km-ink);
+  background: rgba(216, 169, 77, 0.08);
+  cursor: pointer;
+}
+
+.km-secondary-button:hover {
+  border-color: rgba(244, 203, 117, 0.55);
+  background: rgba(216, 169, 77, 0.15);
+}
+
+.km-economy-empty {
+  padding: 18px;
+  border: 1px dashed var(--km-line);
+  border-radius: 10px;
+  color: var(--km-muted);
+  text-align: center;
+}
+
+@media (max-width: 820px) {
+  .km-economy-group-head,
+  .km-economy-currency {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .km-economy-currency-title,
+  .km-economy-path {
+    grid-column: 1 / -1;
+  }
+}
+.khuzoe-actor-wallet.is-native-wallet {
+  display: contents;
+}
+
+.khuzoe-actor-wallet.is-native-wallet .khuzoe-wallet-native {
+  position: relative;
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.khuzoe-wallet-native-icon {
+  position: absolute;
+  z-index: 1;
+  inset: -2px auto auto -2px;
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 50%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 1px #000);
+  pointer-events: none;
+}
+
+.khuzoe-wallet-native-icon.is-symbol {
+  display: grid;
+  place-items: center;
+  color: var(--km-wallet-accent);
+  background: color-mix(in srgb, var(--km-wallet-accent) 24%, #19161a);
+  font-size: 7px;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.khuzoe-actor-wallet.is-native-wallet input:disabled {
+  opacity: .72;
+  cursor: default;
+}
+
+.khuzoe-actor-wallet.is-native-wallet.is-legacy {
+  align-items: center;
+}
+
+.khuzoe-wallet-legacy-label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--km-wallet-accent);
+}
+
+.khuzoe-wallet-legacy-icon {
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 50%;
+  object-fit: contain;
+}
+
+.khuzoe-wallet-legacy-icon.is-symbol {
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--km-wallet-accent) 22%, transparent);
+  font-size: 7px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.khuzoe-wallet-legacy-input {
+  min-width: 38px;
+}
+
+.khuzoe-actor-wallet.is-fallback-wallet {
+  margin: 10px 12px;
+  padding: 10px 12px 12px;
+  border: 1px solid rgba(216, 169, 77, 0.28);
+  border-radius: 8px;
+  background: linear-gradient(115deg, rgba(216, 169, 77, 0.1), rgba(15, 13, 17, 0.16));
+}
+
+.khuzoe-wallet-heading {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  margin-bottom: 8px;
+  color: #d8a94d;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.khuzoe-wallet-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.khuzoe-wallet-coin {
+  display: grid;
+  min-width: 72px;
+  flex: 1 1 72px;
+  gap: 3px;
+  padding: 5px 7px 7px;
+  border: 1px solid color-mix(in srgb, var(--km-wallet-accent) 48%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--km-wallet-accent) 11%, rgba(12, 11, 14, .82));
+  box-shadow: inset 0 1px rgba(255, 255, 255, .045);
+}
+
+.khuzoe-wallet-coin label {
+  display: flex;
+  min-width: 0;
+  gap: 5px;
+  align-items: baseline;
+  margin: 0;
+  line-height: 1;
+}
+
+.khuzoe-wallet-fallback-icon {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 50%;
+  object-fit: contain;
+}
+
+.khuzoe-wallet-fallback-icon.is-symbol {
+  display: none;
+}
+
+.khuzoe-wallet-symbol {
+  color: var(--km-wallet-accent);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.khuzoe-wallet-name {
+  overflow: hidden;
+  color: rgba(224, 216, 202, .68);
+  font-size: 8px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.khuzoe-wallet-coin input[type="number"] {
+  width: 100%;
+  min-width: 0;
+  height: 24px;
+  margin: 0;
+  padding: 2px 5px;
+  border: 1px solid rgba(216, 169, 77, .22);
+  border-radius: 4px;
+  color: var(--color-text-light-primary, #eee8dc);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  background: rgba(0, 0, 0, .25);
+}
+
+.khuzoe-wallet-coin input[type="number"]:focus {
+  border-color: var(--km-wallet-accent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--km-wallet-accent) 35%, transparent);
+}
+
+.khuzoe-wallet-coin input:disabled {
+  opacity: .72;
+  cursor: default;
+}
+
+.khuzoe-currency-archived {
+  display: none !important;
+}

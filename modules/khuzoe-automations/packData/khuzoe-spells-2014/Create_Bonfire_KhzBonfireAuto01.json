@@ -1,0 +1,473 @@
+{
+  "_id": "KhzBonfireAuto01",
+  "name": "Create Bonfire",
+  "type": "spell",
+  "img": "icons/magic/fire/flame-burning-campfire-orange.webp",
+  "system": {
+    "description": {
+      "value": "<p>Crei un falò magico sul terreno entro gittata. Ogni creatura nello spazio del falò al lancio, che vi entra per la prima volta in un turno o che termina lì il proprio turno deve superare un tiro salvezza su Destrezza o subire 1d8 danni da fuoco.</p><p>Il falò occupa un cubo di 1,5 metri, richiede concentrazione fino a 1 minuto e incendia gli oggetti infiammabili incustoditi nella sua area. Il danno aumenta di 1d8 ai livelli 5, 11 e 17.</p><p><strong>Automazione.</strong> Posiziona una Regione persistente; il tiro iniziale, l'ingresso e la fine turno vengono gestiti automaticamente. L'accensione degli oggetti resta descrittiva e viene risolta dal GM.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Xanathar's Guide to Everything",
+      "book": "",
+      "page": "152",
+      "license": "",
+      "rules": "2014"
+    },
+    "activation": {
+      "type": "action",
+      "condition": "",
+      "value": 1
+    },
+    "duration": {
+      "value": "1",
+      "units": "minute"
+    },
+    "target": {
+      "affects": {
+        "type": "creature",
+        "count": "",
+        "choice": false,
+        "special": ""
+      },
+      "template": {
+        "units": "ft",
+        "type": "cube",
+        "size": "5",
+        "width": "",
+        "height": "",
+        "count": "",
+        "contiguous": false,
+        "stationary": true
+      }
+    },
+    "range": {
+      "value": "60",
+      "units": "ft",
+      "special": ""
+    },
+    "uses": {
+      "max": "",
+      "recovery": [],
+      "spent": 0
+    },
+    "level": 0,
+    "school": "con",
+    "materials": {
+      "value": "",
+      "consumed": false,
+      "cost": 0,
+      "supply": 0
+    },
+    "preparation": {
+      "mode": "prepared",
+      "prepared": false
+    },
+    "properties": [
+      "vocal",
+      "somatic",
+      "concentration"
+    ],
+    "activities": {
+      "KhzBonfireCast01": {
+        "_id": "KhzBonfireCast01",
+        "type": "save",
+        "activation": {
+          "type": "action",
+          "value": null,
+          "override": false
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": true
+        },
+        "description": {
+          "chatFlavor": "Crea il falò e risolve il tiro salvezza delle creature già nella sua area."
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": false
+        },
+        "effects": [],
+        "range": {
+          "override": false
+        },
+        "target": {
+          "prompt": true,
+          "template": {
+            "contiguous": false,
+            "stationary": true,
+            "units": "ft",
+            "type": "cube",
+            "size": "5",
+            "width": "",
+            "height": "",
+            "count": ""
+          },
+          "affects": {
+            "choice": false,
+            "count": "",
+            "type": "creature",
+            "special": ""
+          },
+          "override": true
+        },
+        "damage": {
+          "onSave": "none",
+          "parts": [
+            {
+              "number": 1,
+              "denomination": 8,
+              "bonus": "",
+              "types": [
+                "fire"
+              ],
+              "custom": {
+                "enabled": false,
+                "formula": ""
+              },
+              "scaling": {
+                "mode": "whole",
+                "number": 1,
+                "formula": ""
+              }
+            }
+          ],
+          "critical": {
+            "allow": false
+          }
+        },
+        "save": {
+          "ability": [
+            "dex"
+          ],
+          "dc": {
+            "calculation": "spellcasting",
+            "formula": ""
+          }
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 0,
+        "name": "Cast",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "identifier": "khuzoe-create-bonfire-cast",
+          "confirmTargets": "never",
+          "autoTargetType": "any",
+          "autoTargetAction": "always",
+          "automationOnly": false,
+          "magicEffect": true,
+          "magicDamage": true
+        },
+        "regionBehavior": {
+          "enabled": true,
+          "dispositionFilter": 0,
+          "excludeSource": false,
+          "oncePerTurn": true,
+          "wallRestriction": "none",
+          "regionVisibility": 2,
+          "attachToken": "default",
+          "rules": [
+            {
+              "trigger": "entry",
+              "action": "useActivity",
+              "targetId": "khuzoe-create-bonfire-damage"
+            },
+            {
+              "trigger": "turnEnd",
+              "action": "useActivity",
+              "targetId": "khuzoe-create-bonfire-end"
+            }
+          ]
+        },
+        "flags": {}
+      },
+      "KhzBonfireDmg001": {
+        "_id": "KhzBonfireDmg001",
+        "type": "save",
+        "activation": {
+          "type": "special",
+          "value": null,
+          "override": true,
+          "condition": "Una creatura entra nel falò per la prima volta nel turno o vi termina il proprio turno."
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": false
+        },
+        "description": {
+          "chatFlavor": "Danno automatico della Regione di Create Bonfire."
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "override": true,
+          "value": null,
+          "units": "any",
+          "special": "Nella Regione del falò"
+        },
+        "target": {
+          "prompt": false,
+          "template": {
+            "contiguous": false,
+            "stationary": true,
+            "units": "ft",
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "count": ""
+          },
+          "affects": {
+            "choice": false,
+            "count": "1",
+            "type": "creature",
+            "special": ""
+          },
+          "override": true
+        },
+        "damage": {
+          "onSave": "none",
+          "parts": [
+            {
+              "number": 1,
+              "denomination": 8,
+              "bonus": "",
+              "types": [
+                "fire"
+              ],
+              "custom": {
+                "enabled": false,
+                "formula": ""
+              },
+              "scaling": {
+                "mode": "whole",
+                "number": 1,
+                "formula": ""
+              }
+            }
+          ],
+          "critical": {
+            "allow": false
+          }
+        },
+        "save": {
+          "ability": [
+            "dex"
+          ],
+          "dc": {
+            "calculation": "spellcasting",
+            "formula": ""
+          }
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 10,
+        "name": "Create Bonfire: Region Damage",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "identifier": "khuzoe-create-bonfire-damage",
+          "confirmTargets": "never",
+          "autoTargetType": "any",
+          "autoTargetAction": "none",
+          "automationOnly": true,
+          "magicEffect": true,
+          "magicDamage": true
+        },
+        "flags": {
+          "cat": {
+            "hidden": true
+          }
+        }
+      },
+      "KhzBonfireEnd001": {
+        "_id": "KhzBonfireEnd001",
+        "type": "save",
+        "activation": {
+          "type": "special",
+          "value": null,
+          "override": true,
+          "condition": "Una creatura entra nel falò per la prima volta nel turno o vi termina il proprio turno."
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": false
+        },
+        "description": {
+          "chatFlavor": "Danno automatico della Regione di Create Bonfire."
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "override": true,
+          "value": null,
+          "units": "any",
+          "special": "Nella Regione del falò"
+        },
+        "target": {
+          "prompt": false,
+          "template": {
+            "contiguous": false,
+            "stationary": true,
+            "units": "ft",
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "count": ""
+          },
+          "affects": {
+            "choice": false,
+            "count": "1",
+            "type": "creature",
+            "special": ""
+          },
+          "override": true
+        },
+        "damage": {
+          "onSave": "none",
+          "parts": [
+            {
+              "number": 1,
+              "denomination": 8,
+              "bonus": "",
+              "types": [
+                "fire"
+              ],
+              "custom": {
+                "enabled": false,
+                "formula": ""
+              },
+              "scaling": {
+                "mode": "whole",
+                "number": 1,
+                "formula": ""
+              }
+            }
+          ],
+          "critical": {
+            "allow": false
+          }
+        },
+        "save": {
+          "ability": [
+            "dex"
+          ],
+          "dc": {
+            "calculation": "spellcasting",
+            "formula": ""
+          }
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 10,
+        "name": "Create Bonfire: Region Damage",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "identifier": "khuzoe-create-bonfire-end",
+          "confirmTargets": "never",
+          "autoTargetType": "any",
+          "autoTargetAction": "none",
+          "automationOnly": true,
+          "magicEffect": true,
+          "magicDamage": true
+        },
+        "flags": {
+          "cat": {
+            "hidden": true
+          }
+        }
+      }
+    },
+    "identifier": "create-bonfire"
+  },
+  "effects": [],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "never",
+      "magicdam": true,
+      "magiceffect": true
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [],
+        "effect": []
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "create-bonfire"
+          }
+        ]
+      }
+    }
+  },
+  "folder": null,
+  "sort": 20,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzBonfireAuto01"
+}

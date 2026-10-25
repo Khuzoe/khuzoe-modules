@@ -1,0 +1,55 @@
+{
+  "_id": "KhzPoweredSteps1",
+  "_key": "!items!KhzPoweredSteps1",
+  "name": "Powered Steps",
+  "type": "feat",
+  "img": "icons/equipment/feet/boots-armored-steel.webp",
+  "system": {
+    "identifier": "powered-steps",
+    "source": {
+      "rules": "2014",
+      "custom": "Khuzoe Automations — regole 2014"
+    },
+    "description": {
+      "value": "<p>+5 piedi alla velocità sul terreno soltanto con Infiltrator indossato.</p>",
+      "chat": ""
+    },
+    "type": {
+      "value": "class"
+    },
+    "activities": {},
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "properties": [],
+    "requirements": "Armorer 3"
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {}
+    },
+    "khuzoe-automations": {
+      "armorerFeature": "steps"
+    },
+    "midi-qol": {
+      "forceCEOff": true
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": []
+      }
+    }
+  }
+}

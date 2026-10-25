@@ -1,0 +1,9 @@
+/*
+ * Stable Foundry entry point.
+ *
+ * Existing Foundry v12 installations can retain the original module style
+ * list while updating templates. Keeping this historic path as the loader
+ * guarantees that both layers arrive in the correct cascade order.
+ */
+@import url("./merchant-legacy.css?v=1.20.3");
+@import url("./interface-v2.css?v=1.20.3");

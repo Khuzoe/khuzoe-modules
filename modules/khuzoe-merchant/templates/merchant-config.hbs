@@ -1,0 +1,134 @@
+<div class="km-config-form km-ui-v2 km-merchant-config-form">
+  <header class="km-config-hero km-ui-config-hero">
+    <img class="km-config-portrait" src="{{actor.img}}" alt="{{actor.name}}">
+    <div class="km-config-heading">
+      <span class="km-eyebrow">{{localize "KM.Config.Eyebrow"}}</span>
+      <h2>{{actor.name}}</h2>
+      <p>{{localize "KM.Config.Intro"}}</p>
+    </div>
+    <label class="km-switch km-ui-master-switch" title="{{localize 'KM.Config.EnabledHint'}}">
+      <input type="checkbox" name="enabled" {{checked merchant.enabled}}>
+      <span class="km-switch-track"><span class="km-switch-thumb"></span></span>
+      <span>{{localize "KM.Config.Enabled"}}</span>
+    </label>
+  </header>
+
+  <nav class="km-config-tabs" role="tablist" aria-label="{{localize 'KM.Config.Sections'}}">
+    <button type="button" role="tab" data-km-tab="general" class="{{#if tabGeneral}}is-active{{/if}}" aria-selected="{{tabGeneral}}">
+      <i class="fas fa-sliders"></i><span>{{localize "KM.Config.TabGeneral"}}</span>
+    </button>
+    <button type="button" role="tab" data-km-tab="catalog" class="{{#if tabCatalog}}is-active{{/if}}" aria-selected="{{tabCatalog}}">
+      <i class="fas fa-basket-shopping"></i><span>{{localize "KM.Config.TabCatalog"}}</span><small>{{inventoryCount}}</small>
+    </button>
+    <button type="button" role="tab" data-km-tab="production" class="{{#if tabProduction}}is-active{{/if}}" aria-selected="{{tabProduction}}">
+      <i class="fas fa-gears"></i><span>{{localize "KM.Config.TabProduction"}}</span><small>{{productionRuleCount}}</small>
+    </button>
+  </nav>
+
+  <div class="km-config-workspace km-merchant-config-scroll">
+    <section class="km-config-panel km-general-panel {{#if tabGeneral}}is-active{{/if}}" data-km-panel="general" {{#unless tabGeneral}}hidden{{/unless}} role="tabpanel">
+      <div class="km-panel-heading">
+        <div><span class="km-eyebrow">{{localize "KM.Config.GeneralEyebrow"}}</span><h3>{{localize "KM.Config.GeneralTitle"}}</h3></div>
+        <p>{{localize "KM.Config.GeneralHint"}}</p>
+      </div>
+      <div class="km-config-settings km-ui-settings-grid">
+        <label class="km-field km-field-wide">
+          <span>{{localize "KM.Config.Subtitle"}}</span>
+          <input type="text" name="subtitle" value="{{merchant.subtitle}}" maxlength="160" placeholder="{{localize 'KM.Config.SubtitlePlaceholder'}}">
+          <small>{{localize "KM.Config.SubtitleHint"}}</small>
+        </label>
+        <label class="km-field">
+          <span>{{localize "KM.Config.Distance"}}</span>
+          <div class="km-input-suffix"><input type="number" name="distance" value="{{merchant.distance}}" min="0" step="0.5"><span>{{unit}}</span></div>
+          <small>{{localize "KM.Config.DistanceHint"}}</small>
+        </label>
+      </div>
+      <div class="km-config-summary" aria-label="{{localize 'KM.Config.Summary'}}">
+        <article><i class="fas fa-boxes-stacked"></i><span>{{localize "KM.Config.SummaryArticles"}}</span><strong>{{inventoryCount}}</strong></article>
+        <article><i class="fas fa-layer-group"></i><span>{{localize "KM.Config.SummaryFinite"}}</span><strong>{{finiteStockCount}}</strong></article>
+        <article class="{{#if soldOutCount}}is-warning{{/if}}"><i class="fas fa-box-open"></i><span>{{localize "KM.Config.SummarySoldOut"}}</span><strong>{{soldOutCount}}</strong></article>
+        <article class="{{#if production.enabled}}is-success{{/if}}"><i class="fas fa-gears"></i><span>{{localize "KM.Config.SummaryProduction"}}</span><strong>{{productionRuleCount}}</strong></article>
+      </div>
+      <div class="km-panel-note"><i class="fas fa-circle-info"></i><span>{{localize "KM.Config.GeneralNote"}}</span></div>
+    </section>
+
+    <section class="km-config-panel km-catalog-panel {{#if tabCatalog}}is-active{{/if}}" data-km-panel="catalog" {{#unless tabCatalog}}hidden{{/unless}} role="tabpanel">
+      <div class="km-panel-heading km-panel-heading-actions">
+        <div><span class="km-eyebrow">{{localize "KM.Config.InventoryEyebrow"}}</span><h3>{{localize "KM.Config.Inventory"}}</h3></div>
+        <span class="km-denomination-hint"><i class="fas fa-coins"></i> {{localize "KM.Config.Denominations" values=denominations}}</span>
+      </div>
+      <div class="km-drop-zone">
+        <i class="fas fa-arrow-down-to-bracket"></i>
+        <div><strong>{{localize "KM.Config.DropTitle"}}</strong><span>{{localize "KM.Config.DropHint"}}</span></div>
+      </div>
+      {{#if inventoryCount}}
+      <div class="km-bulk-toolbar">
+        <button type="button" class="km-secondary-button" data-action="selectAllItems"><i class="fas fa-list-check"></i> {{localize "KM.Config.SelectAll"}}</button>
+        <span class="km-bulk-selection"><strong class="km-bulk-selected-count">{{selectedItemCount}}</strong> {{localize "KM.Config.Selected"}}</span>
+        <label><span>{{localize "KM.Config.PriceMultiplier"}}</span><input type="number" name="bulkPriceMultiplier" min="0" step="0.05" value="1"></label>
+        <button type="button" class="km-secondary-button" data-action="applyBulkPrice">{{localize "KM.Config.ApplyPrice"}}</button>
+        <label><span>{{localize "KM.Config.BulkStock"}}</span><input type="number" name="bulkStock" min="0" step="1" placeholder="∞"></label>
+        <button type="button" class="km-secondary-button" data-action="applyBulkStock">{{localize "KM.Config.ApplyStock"}}</button>
+      </div>
+      {{/if}}
+      <div class="km-config-inventory km-ui-config-list">
+        {{#each inventory}}
+        <article class="km-config-item" data-entry-id="{{id}}">
+          <label class="km-config-item-select"><input type="checkbox" data-bulk-select="{{id}}" {{checked selected}}><span class="sr-only">{{name}}</span></label><div class="km-config-item-thumb"><img src="{{img}}" alt="{{name}}"><span>{{type}}</span></div>
+          <div class="km-config-item-main">
+            <div class="km-config-item-title"><strong>{{name}}</strong></div>
+            {{#if description}}<p title="{{description}}">{{description}}</p>{{else}}<p class="is-empty">{{localize "KM.Config.NoDescription"}}</p>{{/if}}
+          </div>
+          <div class="km-config-item-fields">
+            <label><span>{{localize "KM.Config.Price"}}</span><input type="number" min="0" step="any" value="{{priceValue}}" data-item-id="{{id}}" data-field="price"></label>
+            <label><span>{{localize "KM.Config.Denomination"}}</span><select data-item-id="{{id}}" data-field="denomination" aria-label="{{localize 'KM.Config.Denomination'}}">{{#each denominationOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
+            <label><span>{{localize "KM.Config.Stock"}}</span><input type="number" min="0" step="1" value="{{stockValue}}" placeholder="∞" data-item-id="{{id}}" data-field="stock"><small>{{#if unlimited}}{{localize "KM.Config.UnlimitedStock"}}{{else}}{{localize "KM.Config.FiniteStock"}}{{/if}}</small></label>
+          </div>
+          <div class="km-config-item-actions">
+            {{#if sourceUuid}}<button type="button" class="km-icon-button km-edit-source-item" data-action="openSourceItem" data-source-uuid="{{sourceUuid}}" title="{{localize 'KM.Config.EditSource'}}" aria-label="{{localize 'KM.Config.EditSource'}}"><i class="fas fa-pen-to-square"></i></button>{{/if}}
+            <button type="button" class="km-icon-button km-remove-item" data-action="removeItem" data-item-id="{{id}}" title="{{localize 'KM.Config.Remove'}}" aria-label="{{localize 'KM.Config.Remove'}}"><i class="fas fa-trash"></i></button>
+          </div>
+        </article>
+        {{else}}
+        <div class="km-config-empty"><i class="fas fa-basket-shopping"></i><strong>{{localize "KM.Config.EmptyTitle"}}</strong><span>{{localize "KM.Config.EmptyHint"}}</span></div>
+        {{/each}}
+      </div>
+    </section>
+
+    <section class="km-config-panel km-production-section km-production-panel {{#if tabProduction}}is-active{{/if}}" data-km-panel="production" {{#unless tabProduction}}hidden{{/unless}} role="tabpanel">
+      <div class="km-panel-heading km-production-heading">
+        <div><span class="km-eyebrow">{{localize "KM.Production.Eyebrow"}}</span><h3>{{localize "KM.Production.Title"}}</h3></div>
+        <label class="km-switch" title="{{localize 'KM.Production.EnabledHint'}}"><input type="checkbox" name="production.enabled" {{checked production.enabled}}><span class="km-switch-track"><span class="km-switch-thumb"></span></span><span>{{localize "KM.Production.Enabled"}}</span></label>
+      </div>
+      {{#if production.enabled}}
+      <p class="km-production-intro">{{localize "KM.Production.MerchantIntro"}}</p>
+      <div class="km-production-settings">
+        <label class="km-field"><span>{{localize "KM.Production.Mode"}}</span><select name="production.mode"><option value="weighted" {{#if productionWeighted}}selected{{/if}}>{{localize "KM.Production.Weighted"}}</option><option value="independent" {{#if productionIndependent}}selected{{/if}}>{{localize "KM.Production.Independent"}}</option></select><small>{{#if productionWeighted}}{{localize "KM.Production.WeightedHint" total=productionChanceTotal}}{{else}}{{localize "KM.Production.IndependentHint"}}{{/if}}</small></label>
+        <label class="km-field"><span>{{localize "KM.Production.TimeBasis"}}</span><select name="production.timeBasis"><option value="world" {{#if productionWorldTime}}selected{{/if}}>{{localize "KM.Production.WorldClock"}}</option><option value="real" {{#if productionRealTime}}selected{{/if}}>{{localize "KM.Production.RealClock"}}</option></select></label>
+        <label class="km-field"><span>{{localize "KM.Production.Interval"}}</span><div class="km-input-suffix"><input type="number" name="production.intervalDays" value="{{production.intervalDays}}" min="0.01" max="3650" step="0.01"><span>{{localize "KM.Production.Days"}}</span></div></label>
+        <label class="km-field"><span>{{localize "KM.Production.MaxCatchUp"}}</span><input type="number" name="production.maxCatchUp" value="{{production.maxCatchUp}}" min="1" max="100" step="1"><small>{{localize "KM.Production.MaxCatchUpHint"}}</small></label>
+      </div>
+      <div class="km-production-status"><span><i class="fas fa-clock"></i> {{productionNext}}</span><button type="button" class="km-production-run-now" data-action="runProduction" {{#unless hasProductionRules}}disabled{{/unless}}><i class="fas fa-gears"></i> {{localize "KM.Production.RunNow"}}</button></div>
+      <div class="km-production-table-head"><span>{{localize "KM.Production.Item"}}</span><span>{{localize "KM.Production.Formula"}}</span><span>{{localize "KM.Production.Chance"}}</span><span>{{localize "KM.Production.Maximum"}}</span></div>
+      <div class="km-production-rules">
+        {{#each productionRules}}
+        <article class="km-production-rule {{#if missing}}is-missing{{/if}} {{#unless finiteStock}}is-unlimited{{/unless}}" data-rule-id="{{id}}" data-entry-id="{{targetEntryId}}">
+          <label class="km-production-rule-toggle"><input type="checkbox" data-production-field="enabled" {{checked selected}}><img src="{{img}}" alt="{{name}}"><span><strong>{{name}}</strong><small>{{localize "KM.Production.CurrentStock" value=currentValue}}</small></span></label>
+          <label><span>{{localize "KM.Production.Formula"}}</span><input type="text" value="{{quantityFormula}}" maxlength="40" data-production-field="formula" placeholder="1d2"></label>
+          <label><span>{{localize "KM.Production.Chance"}}</span><div class="km-input-suffix"><input type="number" value="{{chance}}" min="0" max="100" step="0.01" data-production-field="chance"><span>%</span></div></label>
+          <label><span>{{localize "KM.Production.Maximum"}}</span><input type="number" value="{{maximumValue}}" min="0" step="1" data-production-field="maximum" placeholder="∞"></label>
+          {{#unless finiteStock}}<p class="km-production-rule-warning"><i class="fas fa-triangle-exclamation"></i> {{localize "KM.Production.UnlimitedHint"}}</p>{{/unless}}
+        </article>
+        {{else}}<div class="km-config-empty km-production-empty"><i class="fas fa-seedling"></i><strong>{{localize "KM.Production.EmptyTitle"}}</strong><span>{{localize "KM.Production.EmptyMerchantHint"}}</span></div>{{/each}}
+      </div>
+      {{#if hasProductionLog}}<details class="km-production-log"><summary>{{localize "KM.Production.RecentLog"}}</summary>{{#each productionLog}}<div><span>{{when}}</span><strong>{{produced}}</strong>{{#if manual}}<small>{{localize "KM.Production.Manual"}}</small>{{/if}}</div>{{/each}}</details>{{/if}}
+      {{else}}<div class="km-production-disabled-note"><i class="fas fa-pause"></i><div><strong>{{localize "KM.Production.Disabled"}}</strong><span>{{localize "KM.Production.DisabledHint"}}</span></div></div>{{/if}}
+    </section>
+  </div>
+
+  <footer class="km-config-footer km-ui-footer">
+    <span class="km-footer-security"><i class="fas fa-shield-halved"></i> {{localize "KM.Config.SecurityNote"}}</span>
+    <span class="km-save-state {{#if dirty}}is-dirty{{/if}}" role="status"><i class="fas {{#if dirty}}fa-circle{{else}}fa-circle-check{{/if}}"></i><span>{{#if dirty}}{{localize "KM.Config.Unsaved"}}{{else}}{{localize "KM.Config.UpToDate"}}{{/if}}</span></span>
+    <button type="submit" class="km-primary-button"><i class="fas fa-floppy-disk"></i> {{localize "KM.Config.Save"}}</button>
+  </footer>
+</div>

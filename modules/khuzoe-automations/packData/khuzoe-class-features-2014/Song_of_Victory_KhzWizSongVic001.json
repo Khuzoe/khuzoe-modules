@@ -1,0 +1,75 @@
+{
+  "_id": "KhzWizSongVic001",
+  "name": "Song of Victory",
+  "type": "feat",
+  "img": "icons/skills/melee/sword-stuck-glowing-pink.webp",
+  "system": {
+    "description": {
+      "value": "<p>Durante Bladesong aggiungi il tuo modificatore di Intelligenza ai danni degli attacchi con arma da mischia.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Tasha's Cauldron of Everything 2014",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "type": {
+      "value": "class",
+      "subtype": ""
+    },
+    "properties": [],
+    "requirements": "Wizard 14",
+    "prerequisites": {
+      "level": 14
+    },
+    "activities": {},
+    "identifier": "song-of-victory",
+    "enchant": {}
+  },
+  "effects": [],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": false,
+      "magiceffect": false
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [],
+        "effect": []
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "song-of-victory"
+          }
+        ]
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzWizSongVic001"
+}

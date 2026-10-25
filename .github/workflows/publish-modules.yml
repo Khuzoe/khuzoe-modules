@@ -1,0 +1,45 @@
+name: Pubblica moduli Khuzoe
+on:
+  push:
+    branches: [main]
+    paths: ['modules/**', 'publisher.config.json', 'tools/publisher.mjs', '.github/workflows/publish-modules.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: khuzoe-publication
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verifica preparazione pacchetti
+        run: node --test tests/publisher.test.mjs
+      - name: Installa lo strumento ufficiale per leggere i compendi
+        working-directory: modules/khuzoe-automations
+        run: npm ci
+      - name: Verifica i compendi pronti per la distribuzione
+        run: node tools/verify-packs.mjs
+      - name: Prepara i singoli moduli
+        run: node tools/publisher.mjs prepare
+      - name: Pubblica ZIP e manifest nelle Releases
+        run: node tools/publisher.mjs publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: build/publication/site
+      - name: Aggiorna il catalogo solo dopo i pacchetti
+        id: pages
+        uses: actions/deploy-pages@v4

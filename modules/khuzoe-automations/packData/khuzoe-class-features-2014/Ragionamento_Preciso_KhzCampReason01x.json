@@ -1,0 +1,96 @@
+{
+  "_id": "KhzCampReason01x",
+  "_key": "!items!KhzCampReason01x",
+  "name": "Ragionamento Preciso",
+  "type": "feat",
+  "img": "icons/magic/perception/eye-tendrils-web-purple.webp",
+  "system": {
+    "identifier": "ragionamento-preciso",
+    "source": {
+      "rules": "2024",
+      "custom": "Cripta di Sangue"
+    },
+    "description": {
+      "value": "<p>Quando effettui una prova di caratteristica, un tiro salvezza o un tiro per colpire, puoi scegliere di applicare Ragionamento Preciso prima di conoscere l'esito. Tira 1d6 e aggiungi il risultato al tiro.</p><p>Usi pari al modificatore di Intelligenza (minimo 1), recuperati al riposo lungo. Ogni 20 naturale su un tiro salvezza o un tiro per colpire recupera un uso.</p>",
+      "chat": ""
+    },
+    "type": {
+      "value": "class"
+    },
+    "activities": {},
+    "uses": {
+      "max": "max(1, @abilities.int.mod)",
+      "spent": 0,
+      "recovery": [
+        {
+          "period": "lr",
+          "type": "recoverAll"
+        }
+      ]
+    },
+    "properties": [],
+    "requirements": ""
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2024",
+            "identifier": "ragionamento-preciso"
+          }
+        ],
+        "save": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2024",
+            "identifier": "ragionamento-preciso"
+          }
+        ],
+        "check": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2024",
+            "identifier": "ragionamento-preciso"
+          }
+        ],
+        "skill": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2024",
+            "identifier": "ragionamento-preciso"
+          }
+        ],
+        "tool": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2024",
+            "identifier": "ragionamento-preciso"
+          }
+        ]
+      }
+    },
+    "khuzoe-automations": {
+      "campaignFeature": "reasoning"
+    },
+    "midi-qol": {
+      "forceCEOff": true
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": []
+      }
+    }
+  }
+}

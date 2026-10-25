@@ -1,0 +1,280 @@
+{
+  "type": "spell",
+  "system": {
+    "description": {
+      "value": "",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Khuzoe Automations",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "activation": {
+      "type": "action",
+      "condition": "",
+      "value": 1
+    },
+    "duration": {
+      "value": "1",
+      "units": "hour"
+    },
+    "target": {
+      "affects": {
+        "type": "creature",
+        "count": "",
+        "choice": false,
+        "special": ""
+      },
+      "template": {
+        "units": "",
+        "contiguous": false,
+        "type": ""
+      }
+    },
+    "range": {
+      "value": "30",
+      "units": "ft",
+      "special": ""
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "ability": "",
+    "level": 1,
+    "school": "enc",
+    "materials": {
+      "value": "",
+      "consumed": false,
+      "cost": 0,
+      "supply": 0
+    },
+    "preparation": {
+      "mode": "prepared",
+      "prepared": false
+    },
+    "properties": [
+      "vocal",
+      "somatic"
+    ],
+    "activities": {
+      "dnd5eactivity000": {
+        "_id": "dnd5eactivity000",
+        "type": "save",
+        "activation": {
+          "type": "action",
+          "value": null,
+          "override": false
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": true
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": false
+        },
+        "effects": [
+          {
+            "_id": "caa29663a397338d",
+            "level": {
+              "min": null,
+              "max": null
+            }
+          }
+        ],
+        "range": {
+          "override": false
+        },
+        "target": {
+          "prompt": true,
+          "template": {
+            "contiguous": false,
+            "units": "ft"
+          },
+          "affects": {
+            "choice": false
+          },
+          "override": false
+        },
+        "uses": {
+          "spent": 0,
+          "max": "",
+          "recovery": []
+        },
+        "damage": {
+          "onSave": "half",
+          "parts": [],
+          "critical": {
+            "allow": false
+          }
+        },
+        "save": {
+          "ability": [
+            "wis"
+          ],
+          "dc": {
+            "calculation": "spellcasting",
+            "formula": ""
+          }
+        },
+        "sort": 0,
+        "useConditionText": "",
+        "forceDialog": false,
+        "effectConditionText": "",
+        "name": "Charm Person",
+        "img": "icons/magic/life/heart-shadow-red.webp",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "magicDamage": false,
+          "magicEffect": false
+        },
+        "flags": {}
+      }
+    },
+    "identifier": "charm-person",
+    "sourceClass": ""
+  },
+  "name": "Charm Person",
+  "flags": {
+    "midi-qol": {
+      "forceCEOff": true,
+      "effectActivation": false,
+      "forceCEOn": false,
+      "rollAttackPerTarget": "default",
+      "itemCondition": "",
+      "effectCondition": "",
+      "AoETargetType": "any",
+      "AoETargetTypeIncludeSelf": true,
+      "autoTarget": "default",
+      "removeAttackDamageButtons": "default",
+      "reactionCondition": "",
+      "otherCondition": ""
+    },
+    "midiProperties": {
+      "nodam": false,
+      "fulldam": false,
+      "halfdam": false,
+      "autoFailFriendly": false,
+      "autoSaveFriendly": false,
+      "rollOther": false,
+      "critOther": false,
+      "offHandWeapon": false,
+      "magicdam": false,
+      "magiceffect": false,
+      "concentration": false,
+      "toggleEffect": false,
+      "ignoreTotalCover": false,
+      "confirmTargets": "default",
+      "noConcentrationCheck": false,
+      "idr": false,
+      "idi": false,
+      "idv": false,
+      "ida": false
+    },
+    "core": {},
+    "dnd5e": {
+      "persistSourceMigration": true,
+      "riders": {
+        "activity": [],
+        "effect": [
+          "caa29663a397338d"
+        ]
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "charm-person"
+          }
+        ]
+      }
+    },
+    "khuzoe-automations": {
+      "importedFrom": "Cauldron 1.2.39 (document schema only; runtime-independent)",
+      "sourceIdentifier": "charmPerson",
+      "activityIdentifiers": {}
+    }
+  },
+  "effects": [
+    {
+      "name": "Charm Person",
+      "origin": null,
+      "duration": {
+        "value": 3600,
+        "units": "seconds",
+        "expiry": "turnStart",
+        "expired": false
+      },
+      "disabled": false,
+      "flags": {
+        "dnd5e": {},
+        "dae": {
+          "transfer": false,
+          "stackable": "noneName",
+          "expiryMode": "delete",
+          "specialDuration": []
+        },
+        "core": {
+          "overlay": false
+        },
+        "khuzoe-automations": {
+          "expandedSpell": {
+            "identifier": "charm-person",
+            "kind": "native"
+          }
+        }
+      },
+      "img": "icons/magic/life/heart-shadow-red.webp",
+      "_id": "caa29663a397338d",
+      "type": "base",
+      "system": {
+        "changes": []
+      },
+      "description": "",
+      "tint": "#ffffff",
+      "transfer": false,
+      "statuses": [
+        "charmed"
+      ],
+      "sort": 0,
+      "_key": "!items.effects!c1d9c96ab6d19f16.caa29663a397338d",
+      "showIcon": 1
+    }
+  ],
+  "img": "icons/magic/life/heart-shadow-red.webp",
+  "folder": null,
+  "_id": "c1d9c96ab6d19f16",
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!c1d9c96ab6d19f16"
+}

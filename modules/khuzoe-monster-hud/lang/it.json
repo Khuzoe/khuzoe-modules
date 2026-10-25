@@ -1,0 +1,77 @@
+{
+  "KHMH": {
+    "Config": {
+      "Title": "Monster HUD — {name}",
+      "Intro": "Scegli le abilità rapide e configura i gruppi Multiattack mostrati nell'overlay.",
+      "QuickActions": "Abilità rapide",
+      "QuickActionsHint": "Ogni abilità compare una sola volta e usa direttamente l'icona della sua scheda.",
+      "AutoQuick": "Suggerisci automaticamente se la selezione è vuota",
+      "NoActions": "Questo NPC non possiede abilità utilizzabili.",
+      "Multiattack": "Gruppi Multiattack",
+      "MultiattackHint": "Seleziona le abilità che lo compongono e indica chiaramente quante volte può essere usata ciascuna. La riserva condivisa resta disponibile per combinazioni libere.",
+      "AddGroup": "Aggiungi gruppo",
+      "NewGroup": "Multiattack",
+      "GroupName": "Nome del gruppo",
+      "Capacity": "Attacchi totali",
+      "Times": "Volte",
+      "TimesHint": "Numero di utilizzi di questa abilità nel Multiattack",
+      "DeleteGroup": "Elimina gruppo",
+      "Save": "Salva configurazione",
+      "Saved": "Configurazione Monster HUD salvata.",
+      "GroupModes": {
+        "fixed": "Quantità per abilità",
+        "shared": "Scelta libera (riserva totale)"
+      }
+    },
+    "HUD": {
+      "NPC": "NPC",
+      "Quick": "Azioni rapide",
+      "Configure": "Configura Monster HUD",
+      "Pin": "Fissa o libera questo mostro",
+      "Collapse": "Comprimi o espandi",
+      "ResetTurn": "Azzera il conteggio del turno",
+      "Spells": "Spell",
+      "LegendaryActions": "Azioni leggendarie rimanenti",
+      "LegendaryResistances": "Resistenze leggendarie rimanenti",
+      "ResistSave": "Trasforma l'ultimo TS fallito in un successo",
+      "Drag": "Trascina l'HUD; doppio clic sulla testata per ripristinare la posizione",
+      "RevealName": "Rivela nome",
+      "HideName": "Limita nome"
+    },
+    "Warnings": {
+      "MultiattackSpent": "Il Multiattack risulta già completato. L'uso resta consentito.",
+      "ActionSpent": "Questa abilità risulta esaurita. L'uso resta consentito."
+    },
+    "Errors": {
+      "WrongSystem": "Khuzoe Monster HUD richiede il sistema D&D 5e.",
+      "ActorUnavailable": "L'Actor da configurare non è disponibile.",
+      "OwnerRequired": "Devi essere proprietario dell'Actor per configurare il suo Monster HUD.",
+      "ActionFailed": "L'azione non è stata completata: {message}"
+    },
+    "Settings": {
+      "Enabled": {
+        "Name": "Abilita Monster HUD",
+        "Hint": "Mostra l'overlay quando controlli un token NPC o un personaggio."
+      },
+      "FollowCombat": {
+        "Name": "Segui il combattente corrente",
+        "Hint": "Se non controlli un token, mostra automaticamente l'NPC di turno."
+      },
+      "AllowOwners": {
+        "Name": "Consenti l'HUD ai proprietari degli NPC",
+        "Hint": "Permette ai giocatori proprietari di un NPC di usare il suo overlay. I personaggi dei player sono sempre disponibili ai rispettivi proprietari."
+      },
+      "Anchor": {
+        "Name": "Posizione orizzontale",
+        "Hint": "Scegli il punto di ancoraggio dell'overlay.",
+        "Left": "Sinistra",
+        "Center": "Centro",
+        "Right": "Destra"
+      },
+      "Scale": {
+        "Name": "Scala dell'overlay",
+        "Hint": "Ridimensiona Monster HUD sul tuo client."
+      }
+    }
+  }
+}

@@ -1,0 +1,83 @@
+<div class="khmh-config-body">
+  <header class="khmh-config-header">
+    <img src="{{actor.img}}" alt="">
+    <div>
+      <h2>{{actor.name}}</h2>
+      <p>{{localize "KHMH.Config.Intro"}}</p>
+    </div>
+  </header>
+
+  <section class="khmh-config-section">
+    <div class="khmh-config-section-title">
+      <div>
+        <h3>{{localize "KHMH.Config.QuickActions"}}</h3>
+        <p>{{localize "KHMH.Config.QuickActionsHint"}}</p>
+      </div>
+      <label class="khmh-config-auto">
+        <input type="checkbox" name="autoQuick" {{checked autoQuick}}>
+        {{localize "KHMH.Config.AutoQuick"}}
+      </label>
+    </div>
+
+    {{#if hasActions}}
+      <div class="khmh-config-action-grid">
+        {{#each quick as |action|}}
+          <label class="khmh-config-quick-row" data-action-key="{{action.key}}">
+            <input type="checkbox" data-field="enabled" {{checked action.selected}}>
+            <img src="{{action.img}}" alt="">
+            <span><strong>{{action.label}}</strong>{{#if action.subtitle}}<small>{{action.subtitle}}</small>{{/if}}</span>
+          </label>
+        {{/each}}
+      </div>
+    {{else}}
+      <p class="notification warning">{{localize "KHMH.Config.NoActions"}}</p>
+    {{/if}}
+  </section>
+
+  <section class="khmh-config-section khmh-config-groups">
+    <div class="khmh-config-section-title">
+      <div>
+        <h3>{{localize "KHMH.Config.Multiattack"}}</h3>
+        <p>{{localize "KHMH.Config.MultiattackHint"}}</p>
+      </div>
+      <button type="button" data-action="addGroup">
+        <i class="fa-solid fa-plus"></i> {{localize "KHMH.Config.AddGroup"}}
+      </button>
+    </div>
+
+    {{#each groups as |group|}}
+      <article class="khmh-config-group" data-group-id="{{group.id}}" data-group-mode="{{group.mode}}">
+        <header>
+          <input type="text" data-field="name" value="{{group.name}}" aria-label="{{localize 'KHMH.Config.GroupName'}}">
+          <select data-field="mode">{{selectOptions group.groupModes selected=group.mode}}</select>
+          <label class="khmh-capacity">
+            <span>{{localize "KHMH.Config.Capacity"}}</span>
+            <input type="number" data-field="capacity" min="1" max="99" value="{{group.capacity}}">
+          </label>
+          <button type="button" class="icon danger" data-action="deleteGroup" data-tooltip="KHMH.Config.DeleteGroup">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </header>
+        <div class="khmh-config-group-actions">
+          {{#each group.actions as |action|}}
+            <div class="khmh-config-group-action" data-action-key="{{action.key}}">
+              <label class="khmh-ability-choice">
+                <input type="checkbox" data-field="included" {{checked action.included}}>
+                <img src="{{action.img}}" alt="">
+                <span>{{action.label}}</span>
+              </label>
+              <label class="khmh-entry-limit">
+                <span>{{localize "KHMH.Config.Times"}}</span>
+                <span class="khmh-limit-control"><b>×</b><input type="number" data-field="limit" min="1" max="99" value="{{action.limit}}" aria-label="{{localize 'KHMH.Config.TimesHint'}}"></span>
+              </label>
+            </div>
+          {{/each}}
+        </div>
+      </article>
+    {{/each}}
+  </section>
+
+  <footer class="sheet-footer flexrow">
+    <button type="submit"><i class="fa-solid fa-floppy-disk"></i> {{localize "KHMH.Config.Save"}}</button>
+  </footer>
+</div>

@@ -1,0 +1,230 @@
+<form class="khuzoe-tokenizer-app" autocomplete="off">
+  <header class="ktz-header">
+    <div class="ktz-actor">
+      <img src="{{actorImage}}" alt="{{actor.name}}">
+      <div>
+        <h2>{{actor.name}}</h2>
+        <p>{{actorType}}</p>
+      </div>
+    </div>
+
+    <div class="ktz-header-options">
+      {{#if canUpdatePlacedTokens}}
+      <label class="ktz-checkbox ktz-scene-update-toggle">
+        <input type="checkbox" name="updatePlacedTokens" {{checked updatePlacedTokens}}>
+        <span class="ktz-toggle-track" aria-hidden="true"></span>
+        <span class="ktz-toggle-label">{{localize "khuzoe-tokenizer.labels.updatePlacedTokens"}}</span>
+      </label>
+      {{/if}}
+    </div>
+  </header>
+
+  <main class="ktz-workspace">
+    <section class="ktz-panel" data-target="avatar">
+      <header class="ktz-panel-header">
+        <h3><i class="fas fa-user"></i><span>{{localize "khuzoe-tokenizer.labels.avatar"}}</span></h3>
+        <div class="ktz-source" data-readout="source" data-target="avatar">{{localize "khuzoe-tokenizer.labels.noImage"}}</div>
+      </header>
+
+      <div class="ktz-dropzone" data-target="avatar" tabindex="0">
+        <canvas data-target="avatar"></canvas>
+        <div class="ktz-empty">
+          <i class="fas fa-image"></i>
+          <span>{{localize "khuzoe-tokenizer.labels.dropAvatar"}}</span>
+        </div>
+      </div>
+
+      <div class="ktz-panel-toolbar">
+      <div class="ktz-actions">
+        <button type="button" data-action="choose" data-target="avatar">
+          <i class="fas fa-folder-open"></i>
+          <span>{{localize "khuzoe-tokenizer.buttons.choose"}}</span>
+        </button>
+        <button type="button" data-action="copy" data-from="token" data-target="avatar">
+          <i class="fas fa-copy"></i>
+          <span>{{localize "khuzoe-tokenizer.buttons.copyFromToken"}}</span>
+        </button>
+      </div>
+
+      <div class="ktz-presets">
+        <button type="button" data-action="preset" data-preset="fit" data-target="avatar">{{localize "khuzoe-tokenizer.presets.fit"}}</button>
+      </div>
+      </div>
+
+      <details class="ktz-layer-controls" data-target="avatar">
+        <summary class="ktz-collapsible-summary"><i class="fas fa-layer-group"></i><span>{{localize "khuzoe-tokenizer.labels.layers"}}</span></summary>
+
+        <div class="ktz-layer-actions">
+          <button type="button" data-action="layer-add" data-target="avatar">
+            <i class="fas fa-layer-group"></i>
+            <span>{{localize "khuzoe-tokenizer.buttons.addLayers"}}</span>
+          </button>
+        </div>
+
+        <div class="ktz-layer-list" data-layer-list="avatar"></div>
+
+        <div class="ktz-background-controls ktz-background-inline" data-target="avatar">
+          <label class="ktz-checkbox ktz-background-toggle">
+            <input type="checkbox" data-background-control="enabled" data-target="avatar">
+            <span class="ktz-background-title"><i class="fas fa-fill-drip"></i>{{localize "khuzoe-tokenizer.labels.backgroundEnabled"}}</span>
+          </label>
+
+          <label class="ktz-background-color">
+            <span>{{localize "khuzoe-tokenizer.labels.backgroundColor"}}</span>
+            <input type="color" data-background-control="color" data-target="avatar" value="#000000">
+          </label>
+        </div>
+      </details>
+
+    </section>
+
+    <section class="ktz-panel" data-target="token">
+      <header class="ktz-panel-header">
+        <h3><i class="fas fa-chess-rook"></i><span>{{localize "khuzoe-tokenizer.labels.token"}}</span></h3>
+        <div class="ktz-source" data-readout="source" data-target="token">{{localize "khuzoe-tokenizer.labels.noImage"}}</div>
+      </header>
+
+      <div class="ktz-dropzone" data-target="token" tabindex="0">
+        <canvas data-target="token"></canvas>
+        <div class="ktz-empty">
+          <i class="fas fa-chess-rook"></i>
+          <span>{{localize "khuzoe-tokenizer.labels.dropToken"}}</span>
+        </div>
+      </div>
+
+      <div class="ktz-panel-toolbar">
+      <div class="ktz-actions">
+        <button type="button" data-action="choose" data-target="token">
+          <i class="fas fa-folder-open"></i>
+          <span>{{localize "khuzoe-tokenizer.buttons.choose"}}</span>
+        </button>
+        <button type="button" data-action="copy" data-from="avatar" data-target="token">
+          <i class="fas fa-copy"></i>
+          <span>{{localize "khuzoe-tokenizer.buttons.copyFromAvatar"}}</span>
+        </button>
+      </div>
+
+      <div class="ktz-presets">
+        <button type="button" data-action="preset" data-preset="fit" data-target="token">{{localize "khuzoe-tokenizer.presets.fit"}}</button>
+      </div>
+      </div>
+
+      <details class="ktz-layer-controls" data-target="token">
+        <summary class="ktz-collapsible-summary"><i class="fas fa-layer-group"></i><span>{{localize "khuzoe-tokenizer.labels.layers"}}</span></summary>
+
+        <div class="ktz-layer-actions">
+          <button type="button" data-action="layer-add" data-target="token">
+            <i class="fas fa-layer-group"></i>
+            <span>{{localize "khuzoe-tokenizer.buttons.addLayers"}}</span>
+          </button>
+        </div>
+
+        <div class="ktz-layer-list" data-layer-list="token"></div>
+
+        <div class="ktz-background-controls ktz-background-inline" data-target="token">
+          <label class="ktz-checkbox ktz-background-toggle">
+            <input type="checkbox" data-background-control="enabled" data-target="token">
+            <span class="ktz-background-title"><i class="fas fa-fill-drip"></i>{{localize "khuzoe-tokenizer.labels.backgroundEnabled"}}</span>
+          </label>
+
+          <label class="ktz-background-color">
+            <span>{{localize "khuzoe-tokenizer.labels.backgroundColor"}}</span>
+            <input type="color" data-background-control="color" data-target="token" value="#000000">
+          </label>
+        </div>
+      </details>
+
+      <fieldset class="ktz-frame-controls {{#unless frameEnabled}}is-disabled{{/unless}}">
+        <legend><i class="fas fa-circle-notch"></i><span>{{localize "khuzoe-tokenizer.labels.frame"}}</span></legend>
+
+        <label class="ktz-checkbox ktz-frame-toggle">
+          <input type="checkbox" data-frame-control="enabled" data-target="token">
+          <span>{{localize "khuzoe-tokenizer.labels.frameEnabled"}}</span>
+        </label>
+
+        <div class="ktz-frame-menu">
+          <div class="ktz-frame-directory">
+            <span>{{localize "khuzoe-tokenizer.labels.frameDirectory"}}</span>
+            <strong>{{frameDirectory}}</strong>
+          </div>
+
+          <div class="ktz-frame-gallery">
+            {{#each frameChoices}}
+            <button type="button" class="ktz-frame-choice {{#if selected}}is-selected{{/if}}" data-action="frame-select" data-frame-choice data-src="{{src}}" data-name="{{name}}" title="{{name}}">
+              <img src="{{src}}" alt="{{name}}">
+            </button>
+            {{else}}
+            <div class="ktz-frame-empty">{{localize "khuzoe-tokenizer.labels.frameDirectoryEmpty"}}</div>
+            {{/each}}
+          </div>
+
+          <div class="ktz-frame-actions">
+            <button type="button" data-action="frame-upload">
+              <i class="fas fa-upload"></i>
+              <span>{{localize "khuzoe-tokenizer.buttons.uploadFrame"}}</span>
+            </button>
+          </div>
+
+          <div class="ktz-frame-source" data-frame-readout="src" data-target="token">{{localize "khuzoe-tokenizer.labels.frameNoImage"}}</div>
+
+          <label class="ktz-frame-field">
+            <span>{{localize "khuzoe-tokenizer.labels.frameClipMode"}}</span>
+            <select data-frame-control="clipMode" data-target="token">
+              <option value="outer">{{localize "khuzoe-tokenizer.frameClip.outer"}}</option>
+              <option value="free">{{localize "khuzoe-tokenizer.frameClip.free"}}</option>
+            </select>
+          </label>
+        </div>
+      </fieldset>
+
+      <details class="ktz-variant-controls">
+        <summary class="ktz-collapsible-summary"><i class="fas fa-images"></i><span>{{localize "khuzoe-tokenizer.labels.tokenVariants"}}</span></summary>
+
+        <div class="ktz-variant-status">
+          <span>{{localize "khuzoe-tokenizer.labels.variantEditing"}}</span>
+          <strong data-variant-readout="editing">{{localize "khuzoe-tokenizer.labels.baseToken"}}</strong>
+        </div>
+
+        <div class="ktz-variant-editor">
+          <label class="ktz-variant-field ktz-variant-name">
+            <span>{{localize "khuzoe-tokenizer.labels.variantName"}}</span>
+            <input type="text" data-variant-control="name" value="{{actor.name}}">
+          </label>
+
+          <label class="ktz-variant-field">
+            <span>{{localize "khuzoe-tokenizer.labels.variantSize"}}</span>
+            <input type="text" inputmode="decimal" data-variant-control="size" value="1" title="{{localize 'khuzoe-tokenizer.labels.variantSizeHint'}}">
+          </label>
+
+          <label class="ktz-variant-field">
+            <span>{{localize "khuzoe-tokenizer.labels.variantScale"}}</span>
+            <input type="text" inputmode="decimal" data-variant-control="scale" placeholder="{{localize 'khuzoe-tokenizer.labels.inheritScale'}}" title="{{localize 'khuzoe-tokenizer.labels.variantScaleHint'}}">
+          </label>
+
+          <button type="button" data-action="variant-save" data-target="token">
+            <i class="fas fa-plus" data-variant-save-icon></i>
+            <span data-variant-save-label>{{localize "khuzoe-tokenizer.buttons.saveVariant"}}</span>
+          </button>
+        </div>
+
+        <p class="ktz-variant-hint">{{localize "khuzoe-tokenizer.labels.variantScaleHint"}}</p>
+        <div class="ktz-variant-list" data-variant-list="token"></div>
+      </details>
+
+    </section>
+  </main>
+
+  <footer class="ktz-footer">
+    <button type="button" class="ktz-cancel-button" data-action="cancel">
+      <i class="fas fa-times"></i>
+      <span>{{localize "Cancel"}}</span>
+    </button>
+    <button type="button" class="ktz-save-button" data-action="save">
+      <i class="fas fa-save"></i>
+      <span>{{localize "Save"}}</span>
+    </button>
+  </footer>
+</form>
+
+
+

@@ -1,0 +1,242 @@
+{
+  "_id": "KhzNpcNanDance01",
+  "name": "Danza Incoraggiante",
+  "type": "feat",
+  "img": "icons/magic/control/buff-flight-wings-runes-purple.webp",
+  "system": {
+    "description": {
+      "value": "<p>Quando una creatura alleata all'interno dell'Aura Rinvigorente effettua un tiro per colpire, un tiro salvezza o una prova di caratteristica, Na'Niss può usare la sua reazione per concederle un bonus di <strong>1d10 + 5</strong> al tiro.</p><p>Può decidere di usare questa capacità dopo aver visto il tiro, ma prima che ne venga determinato l'esito.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Homebrew",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014",
+      "revision": 1
+    },
+    "uses": {
+      "max": "",
+      "recovery": [],
+      "spent": 0
+    },
+    "type": {
+      "value": "",
+      "subtype": ""
+    },
+    "requirements": "Na'Niss",
+    "properties": [],
+    "activities": {
+      "0vZcoh3FnVZWJQlq": {
+        "_id": "0vZcoh3FnVZWJQlq",
+        "type": "utility",
+        "activation": {
+          "type": "special",
+          "value": null,
+          "condition": "",
+          "override": true
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false
+          },
+          "spellSlot": true
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "concentration": false,
+          "value": "",
+          "units": "inst",
+          "special": "",
+          "override": false
+        },
+        "effects": [],
+        "range": {
+          "units": "self",
+          "special": "",
+          "override": false
+        },
+        "target": {
+          "template": {
+            "count": "",
+            "contiguous": false,
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "units": "ft",
+            "stationary": false
+          },
+          "affects": {
+            "count": "",
+            "type": "",
+            "choice": false,
+            "special": ""
+          },
+          "prompt": true,
+          "override": false
+        },
+        "uses": {
+          "spent": 0,
+          "max": "",
+          "recovery": []
+        },
+        "roll": {
+          "formula": "1d10 + 5",
+          "name": "Bonus al tiro",
+          "prompt": true,
+          "visible": true
+        },
+        "sort": 0,
+        "name": "Bonus al tiro",
+        "useConditionText": "",
+        "useConditionReason": "",
+        "effectConditionText": "",
+        "macroData": {
+          "name": "",
+          "command": ""
+        },
+        "ignoreTraits": {
+          "idi": false,
+          "idr": false,
+          "idv": false,
+          "ida": false,
+          "idm": false
+        },
+        "midiProperties": {
+          "ignoreTraits": [],
+          "triggeredActivityId": "none",
+          "triggeredActivityConditionText": "",
+          "triggeredActivityTargets": "targets",
+          "triggeredActivityRollAs": "self",
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "automationOnly": false,
+          "otherActivityCompatible": true,
+          "identifier": "",
+          "displayActivityName": false,
+          "rollMode": "default",
+          "chooseEffects": false,
+          "toggleEffect": false,
+          "ignoreFullCover": false,
+          "triggeredActivityConsume": true,
+          "triggeredActivityConfigure": true,
+          "autoConsume": false,
+          "forceConsumeDialog": "default",
+          "forceRollDialog": "default",
+          "forceDamageDialog": "default",
+          "otherActivityAsParentType": true,
+          "removeChatButtons": "default",
+          "magicEffect": false,
+          "magicDamage": false,
+          "noConcentrationCheck": false,
+          "skipConcentrationCheck": false,
+          "autoCEEffects": "default"
+        },
+        "isOverTimeFlag": false,
+        "overTimeProperties": {
+          "saveRemoves": true,
+          "preRemoveConditionText": "",
+          "postRemoveConditionText": "",
+          "rollAs": "target"
+        },
+        "otherActivityId": "none",
+        "img": null,
+        "flags": {},
+        "visibility": {
+          "level": {},
+          "requireAttunement": false,
+          "requireIdentification": false,
+          "requireMagic": false
+        },
+        "regionBehavior": {
+          "enabled": false,
+          "dispositionFilter": -1,
+          "excludeSource": true,
+          "oncePerTurn": true,
+          "wallRestriction": "none",
+          "regionVisibility": 2,
+          "attachToken": "default",
+          "rules": []
+        },
+        "regionLight": {
+          "enabled": false,
+          "dim": 0,
+          "bright": 0,
+          "color": null,
+          "alpha": 0.5,
+          "luminosity": 0.5,
+          "animationType": "",
+          "animationSpeed": 5,
+          "animationIntensity": 5
+        },
+        "otherActivityAsParentType": true
+      }
+    },
+    "enchant": {},
+    "prerequisites": {
+      "level": null,
+      "repeatable": false,
+      "items": []
+    },
+    "identifier": "naniss-p-quando-una-creatura-a",
+    "advancement": {},
+    "cover": null,
+    "crewed": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "naniss-p-quando-una-creatura-a"
+          }
+        ],
+        "save": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "naniss-p-quando-una-creatura-a"
+          }
+        ],
+        "check": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "naniss-p-quando-una-creatura-a"
+          }
+        ],
+        "skill": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "naniss-p-quando-una-creatura-a"
+          }
+        ]
+      }
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": []
+      }
+    }
+  },
+  "_key": "!items!KhzNpcNanDance01"
+}

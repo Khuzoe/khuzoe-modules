@@ -1,0 +1,477 @@
+{
+  "type": "spell",
+  "system": {
+    "description": {
+      "value": "<p>Bersaglia le creature in contatto con lo stesso oggetto metallico scelto dal tavolo. Applica il danno iniziale e rende disponibile Riscalda di nuovo. Chi tiene o indossa l'oggetto sceglie se lasciarlo, tentare il TS o dichiararlo non rimovibile. Chi lo lascia non subisce altri impulsi finché non confermi un nuovo contatto.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Khuzoe Automations",
+      "revision": 1,
+      "rules": "2014"
+    },
+    "activation": {
+      "type": "action",
+      "condition": "",
+      "value": 1
+    },
+    "duration": {
+      "value": "1",
+      "units": "minute"
+    },
+    "target": {
+      "affects": {
+        "type": "creature",
+        "count": "1",
+        "choice": false,
+        "special": ""
+      },
+      "template": {
+        "units": "",
+        "contiguous": false,
+        "type": ""
+      }
+    },
+    "range": {
+      "value": "60",
+      "units": "ft",
+      "special": ""
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "ability": "",
+    "level": 2,
+    "school": "trs",
+    "materials": {
+      "value": "",
+      "consumed": false,
+      "cost": 0,
+      "supply": 0
+    },
+    "preparation": {
+      "mode": "prepared",
+      "prepared": false
+    },
+    "properties": [
+      "vocal",
+      "somatic",
+      "material",
+      "concentration"
+    ],
+    "activities": {
+      "2b17825393d29535": {
+        "_id": "2b17825393d29535",
+        "type": "utility",
+        "name": "Heat Metal",
+        "img": "icons/magic/fire/flame-burning-chain.webp",
+        "activation": {
+          "type": "action",
+          "value": 1,
+          "override": true,
+          "condition": ""
+        },
+        "consumption": {
+          "spellSlot": true,
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          }
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "minute",
+          "value": "1",
+          "concentration": true,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "units": "ft",
+          "value": "60",
+          "override": true,
+          "special": ""
+        },
+        "target": {
+          "override": true,
+          "prompt": true,
+          "affects": {
+            "type": "creature",
+            "count": "",
+            "choice": false,
+            "special": ""
+          },
+          "template": {
+            "type": "",
+            "units": "ft",
+            "contiguous": false,
+            "size": "",
+            "count": ""
+          }
+        },
+        "uses": {
+          "spent": 0,
+          "max": "",
+          "recovery": []
+        },
+        "sort": 0,
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "identifier": "heatMetal",
+          "automationOnly": false,
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "magicEffect": true,
+          "magicDamage": false
+        },
+        "flags": {
+          "cat": {
+            "hidden": false
+          }
+        },
+        "roll": {
+          "formula": "",
+          "name": "",
+          "prompt": false,
+          "visible": false
+        }
+      },
+      "3a3674bcbc6c70e4": {
+        "_id": "3a3674bcbc6c70e4",
+        "type": "utility",
+        "name": "Riscalda di nuovo",
+        "img": "icons/magic/fire/flame-burning-chain.webp",
+        "activation": {
+          "type": "bonus",
+          "value": 1,
+          "override": true,
+          "condition": ""
+        },
+        "consumption": {
+          "targets": [],
+          "spellSlot": false,
+          "scaling": {
+            "allowed": false
+          }
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "units": "any",
+          "override": true,
+          "special": ""
+        },
+        "target": {
+          "override": true,
+          "prompt": true,
+          "affects": {
+            "type": "",
+            "count": "",
+            "choice": false,
+            "special": ""
+          },
+          "template": {
+            "type": "",
+            "units": "ft",
+            "contiguous": false,
+            "size": "",
+            "count": ""
+          }
+        },
+        "uses": {
+          "spent": 0,
+          "max": "",
+          "recovery": []
+        },
+        "sort": 0,
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "identifier": "heatMetalPulse",
+          "automationOnly": false,
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "magicEffect": true,
+          "magicDamage": false
+        },
+        "flags": {
+          "cat": {
+            "hidden": true
+          }
+        },
+        "roll": {
+          "formula": "",
+          "name": "",
+          "prompt": false,
+          "visible": false
+        }
+      },
+      "0c27dba2cd4ececa": {
+        "_id": "0c27dba2cd4ececa",
+        "type": "damage",
+        "name": "Heat Metal — Danno",
+        "img": "icons/magic/fire/flame-burning-chain.webp",
+        "activation": {
+          "type": "special",
+          "value": 1,
+          "override": true,
+          "condition": ""
+        },
+        "consumption": {
+          "spellSlot": false,
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          }
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "units": "any",
+          "override": true,
+          "special": ""
+        },
+        "target": {
+          "override": true,
+          "prompt": true,
+          "affects": {
+            "type": "creature",
+            "count": "",
+            "choice": false,
+            "special": ""
+          },
+          "template": {
+            "type": "",
+            "units": "ft",
+            "contiguous": false,
+            "size": "",
+            "count": ""
+          }
+        },
+        "uses": {
+          "spent": 0,
+          "max": "",
+          "recovery": []
+        },
+        "sort": 0,
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "identifier": "heatMetalDamage",
+          "automationOnly": true,
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "magicEffect": true,
+          "magicDamage": true
+        },
+        "flags": {
+          "cat": {
+            "hidden": true
+          }
+        },
+        "damage": {
+          "parts": [
+            {
+              "number": 2,
+              "denomination": 8,
+              "bonus": "",
+              "types": [
+                "fire"
+              ],
+              "custom": {
+                "enabled": false,
+                "formula": ""
+              },
+              "scaling": {
+                "mode": "whole",
+                "number": 1,
+                "formula": ""
+              }
+            }
+          ],
+          "includeBase": false,
+          "critical": {
+            "allow": false
+          }
+        }
+      },
+      "206497ec8815daa4": {
+        "_id": "206497ec8815daa4",
+        "type": "save",
+        "name": "Heat Metal — Trattenere l'oggetto",
+        "img": "icons/magic/fire/flame-burning-chain.webp",
+        "activation": {
+          "type": "special",
+          "value": 1,
+          "override": true,
+          "condition": ""
+        },
+        "consumption": {
+          "spellSlot": false,
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          }
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "units": "any",
+          "override": true,
+          "special": ""
+        },
+        "target": {
+          "override": true,
+          "prompt": true,
+          "affects": {
+            "type": "creature",
+            "count": "1",
+            "choice": false,
+            "special": ""
+          },
+          "template": {
+            "type": "",
+            "units": "ft",
+            "contiguous": false,
+            "size": "",
+            "count": ""
+          }
+        },
+        "uses": {
+          "spent": 0,
+          "max": "",
+          "recovery": []
+        },
+        "sort": 0,
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "identifier": "heatMetalHeld",
+          "automationOnly": true,
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "magicEffect": true,
+          "magicDamage": false
+        },
+        "flags": {
+          "cat": {
+            "hidden": true
+          }
+        },
+        "damage": {
+          "parts": [],
+          "includeBase": false,
+          "critical": {
+            "allow": false
+          },
+          "onSave": "none"
+        },
+        "save": {
+          "ability": [
+            "con"
+          ],
+          "dc": {
+            "calculation": "spellcasting",
+            "formula": ""
+          }
+        }
+      }
+    },
+    "identifier": "heat-metal",
+    "sourceClass": ""
+  },
+  "name": "Heat Metal",
+  "flags": {
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "heat-metal"
+          }
+        ]
+      }
+    },
+    "khuzoe-automations": {
+      "sourceIdentifier": "heatMetal",
+      "activityIdentifiers": {
+        "heatMetal": "2b17825393d29535",
+        "heatMetalPulse": "3a3674bcbc6c70e4",
+        "heatMetalDamage": "0c27dba2cd4ececa",
+        "heatMetalHeld": "206497ec8815daa4"
+      }
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [
+          "0c27dba2cd4ececa",
+          "206497ec8815daa4"
+        ],
+        "effect": []
+      }
+    }
+  },
+  "effects": [],
+  "img": "icons/magic/fire/flame-burning-chain.webp",
+  "folder": null,
+  "_id": "e891cc4a5cd3a0fa",
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!e891cc4a5cd3a0fa"
+}

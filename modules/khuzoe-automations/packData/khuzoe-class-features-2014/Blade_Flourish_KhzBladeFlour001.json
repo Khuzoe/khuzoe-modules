@@ -1,0 +1,505 @@
+{
+  "_id": "KhzBladeFlour001",
+  "name": "Blade Flourish",
+  "type": "feat",
+  "img": "icons/skills/melee/maneuver-greatsword-yellow.webp",
+  "system": {
+    "description": {
+      "value": "<p>Quando esegui l'azione Attacco nel tuo turno, la velocità aumenta di 10 ft fino alla fine del turno. Una volta per turno, quando colpisci con un attacco con arma, puoi consumare un uso di Bardic Inspiration per infliggere danni extra pari al dado e applicare un flourish.</p><ul><li><strong>Defensive Flourish.</strong> Aggiungi il risultato alla CA fino all'inizio del tuo prossimo turno.</li><li><strong>Mobile Flourish.</strong> Puoi spingere il bersaglio di 5 ft più un numero di piedi pari al risultato, arrotondato per difetto al multiplo di 5.</li><li><strong>Slashing Flourish.</strong> Infliggi lo stesso danno a un'altra creatura a tua scelta entro 5 ft.</li></ul>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Xanathar's Guide to Everything",
+      "book": "",
+      "page": "15",
+      "license": "",
+      "rules": "2014"
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "type": {
+      "value": "class",
+      "subtype": ""
+    },
+    "properties": [],
+    "requirements": "College of Swords 3",
+    "prerequisites": {
+      "level": 3
+    },
+    "activities": {
+      "KhzBladeMove0001": {
+        "_id": "KhzBladeMove0001",
+        "type": "utility",
+        "activation": {
+          "type": "special",
+          "value": null,
+          "condition": "Quando esegui l'azione Attacco nel tuo turno.",
+          "override": true
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": false
+        },
+        "description": {
+          "chatFlavor": "Blade Flourish: Movement"
+        },
+        "duration": {
+          "value": "1",
+          "units": "turn",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [
+          {
+            "_id": "KhzBladeMoveEf01",
+            "level": {
+              "min": null,
+              "max": null
+            }
+          }
+        ],
+        "range": {
+          "units": "self",
+          "special": "",
+          "override": true
+        },
+        "target": {
+          "prompt": false,
+          "template": {
+            "contiguous": false,
+            "units": "ft",
+            "type": ""
+          },
+          "affects": {
+            "choice": false,
+            "count": "",
+            "type": "self",
+            "special": ""
+          },
+          "override": true
+        },
+        "roll": {
+          "formula": "",
+          "name": "",
+          "prompt": false,
+          "visible": false
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 0,
+        "name": "Blade Flourish: Movement",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "flags": {
+          "cat": {
+            "hidden": true
+          }
+        },
+        "midiProperties": {
+          "automationOnly": true
+        }
+      },
+      "KhzBladeDefn0001": {
+        "_id": "KhzBladeDefn0001",
+        "type": "utility",
+        "activation": {
+          "type": "special",
+          "value": null,
+          "condition": "Quando colpisci con un attacco con arma.",
+          "override": true
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": false
+        },
+        "description": {
+          "chatFlavor": "Defensive Flourish"
+        },
+        "duration": {
+          "value": "1",
+          "units": "round",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [
+          {
+            "_id": "KhzBladeDefnEf01",
+            "level": {
+              "min": null,
+              "max": null
+            }
+          }
+        ],
+        "range": {
+          "units": "self",
+          "special": "",
+          "override": true
+        },
+        "target": {
+          "prompt": false,
+          "template": {
+            "contiguous": false,
+            "units": "ft",
+            "type": ""
+          },
+          "affects": {
+            "choice": false,
+            "count": "",
+            "type": "self",
+            "special": ""
+          },
+          "override": true
+        },
+        "roll": {
+          "formula": "",
+          "name": "",
+          "prompt": false,
+          "visible": false
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 10,
+        "name": "Defensive Flourish",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "flags": {
+          "cat": {
+            "hidden": true
+          }
+        },
+        "midiProperties": {
+          "automationOnly": true
+        }
+      },
+      "KhzBladeMobl0001": {
+        "_id": "KhzBladeMobl0001",
+        "type": "utility",
+        "activation": {
+          "type": "special",
+          "value": null,
+          "condition": "Quando colpisci con un attacco con arma.",
+          "override": true
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": false
+        },
+        "description": {
+          "chatFlavor": "Mobile Flourish"
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "units": "self",
+          "special": "",
+          "override": true
+        },
+        "target": {
+          "prompt": false,
+          "template": {
+            "contiguous": false,
+            "units": "ft",
+            "type": ""
+          },
+          "affects": {
+            "choice": false,
+            "count": "1",
+            "type": "creature",
+            "special": ""
+          },
+          "override": true
+        },
+        "roll": {
+          "formula": "",
+          "name": "",
+          "prompt": false,
+          "visible": false
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 20,
+        "name": "Mobile Flourish",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "flags": {
+          "cat": {
+            "hidden": true
+          }
+        },
+        "midiProperties": {
+          "automationOnly": true
+        }
+      },
+      "KhzBladeSlsh0001": {
+        "_id": "KhzBladeSlsh0001",
+        "type": "damage",
+        "activation": {
+          "type": "special",
+          "value": null,
+          "condition": "Quando colpisci con un attacco con arma.",
+          "override": true
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": false
+        },
+        "description": {
+          "chatFlavor": "Slashing Flourish"
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "value": "5",
+          "units": "ft",
+          "special": "",
+          "override": true
+        },
+        "target": {
+          "prompt": false,
+          "template": {
+            "contiguous": false,
+            "units": "ft",
+            "type": ""
+          },
+          "affects": {
+            "choice": false,
+            "count": "1",
+            "type": "creature",
+            "special": "Un'altra creatura entro 5 ft"
+          },
+          "override": true
+        },
+        "damage": {
+          "critical": {
+            "allow": false
+          },
+          "parts": [
+            {
+              "custom": {
+                "enabled": true,
+                "formula": "0"
+              },
+              "number": null,
+              "denomination": 0,
+              "bonus": "",
+              "types": [
+                "slashing"
+              ],
+              "scaling": {
+                "mode": "whole",
+                "number": null,
+                "formula": ""
+              }
+            }
+          ]
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 30,
+        "name": "Slashing Flourish",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "flags": {
+          "cat": {
+            "hidden": true
+          }
+        },
+        "midiProperties": {
+          "automationOnly": true
+        }
+      }
+    },
+    "identifier": "blade-flourish",
+    "enchant": {}
+  },
+  "effects": [
+    {
+      "_id": "KhzBladeMoveEf01",
+      "name": "Blade Flourish: Movement",
+      "img": "icons/skills/melee/maneuver-greatsword-yellow.webp",
+      "type": "base",
+      "system": {
+        "changes": [
+          {
+            "key": "system.attributes.movement.walk",
+            "value": "10",
+            "priority": 20,
+            "type": "add"
+          }
+        ]
+      },
+      "disabled": false,
+      "duration": {
+        "value": null,
+        "units": "seconds",
+        "expiry": "sourceEnd",
+        "expired": false
+      },
+      "origin": null,
+      "tint": "#ffffff",
+      "transfer": false,
+      "statuses": [],
+      "description": "<p>La velocità aumenta di 10 ft fino alla fine del turno.</p>",
+      "showIcon": 0,
+      "flags": {
+        "core": {
+          "overlay": false
+        },
+        "dae": {
+          "transfer": false,
+          "stackable": "noneNameOnly",
+          "specialDuration": [],
+          "expiryMode": "delete"
+        }
+      },
+      "folder": null,
+      "sort": 0,
+      "_key": "!items.effects!KhzBladeFlour001.KhzBladeMoveEf01"
+    },
+    {
+      "_id": "KhzBladeDefnEf01",
+      "name": "Defensive Flourish",
+      "img": "icons/skills/melee/swords-parry-block-blue.webp",
+      "type": "base",
+      "system": {
+        "changes": [
+          {
+            "key": "system.attributes.ac.bonus",
+            "value": "0",
+            "priority": 20,
+            "type": "add"
+          }
+        ]
+      },
+      "disabled": false,
+      "duration": {
+        "value": null,
+        "units": "seconds",
+        "expiry": "sourceStart",
+        "expired": false
+      },
+      "origin": null,
+      "tint": "#ffffff",
+      "transfer": false,
+      "statuses": [],
+      "description": "<p>La CA aumenta del risultato del dado di Blade Flourish fino all'inizio del prossimo turno.</p>",
+      "showIcon": 1,
+      "flags": {
+        "core": {
+          "overlay": false
+        },
+        "dae": {
+          "transfer": false,
+          "stackable": "noneNameOnly",
+          "specialDuration": [],
+          "expiryMode": "delete"
+        }
+      },
+      "folder": null,
+      "sort": 10,
+      "_key": "!items.effects!KhzBladeFlour001.KhzBladeDefnEf01"
+    }
+  ],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": false,
+      "magiceffect": false
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [
+          "KhzBladeMove0001",
+          "KhzBladeDefn0001",
+          "KhzBladeMobl0001",
+          "KhzBladeSlsh0001"
+        ],
+        "effect": []
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "blade-flourish"
+          }
+        ]
+      }
+    }
+  },
+  "folder": null,
+  "sort": 10,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzBladeFlour001"
+}

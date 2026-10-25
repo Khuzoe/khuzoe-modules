@@ -1,0 +1,71 @@
+<form class="khuzoe-item-image-app" autocomplete="off">
+  <header class="ktz-item-header">
+    <img src="{{itemImage}}" alt="{{item.name}}">
+    <div>
+      <p>{{localize imageLabel}}</p>
+      <h2>{{item.name}}</h2>
+      <span>{{itemType}}</span>
+    </div>
+  </header>
+
+  <main class="ktz-item-workspace">
+    <div class="ktz-item-dropzone" data-item-image-dropzone tabindex="0">
+      <canvas data-item-image-canvas></canvas>
+      <div class="ktz-item-empty">
+        <i class="fas fa-gem"></i>
+        <strong>{{localize "khuzoe-tokenizer.labels.dropItemImage"}}</strong>
+        <span>{{localize "khuzoe-tokenizer.labels.itemImagePasteHint"}}</span>
+      </div>
+    </div>
+
+    <section class="ktz-item-controls">
+      <div class="ktz-item-source">
+        <span>{{localize "khuzoe-tokenizer.labels.source"}}</span>
+        <strong data-item-image-source>{{localize "khuzoe-tokenizer.labels.noImage"}}</strong>
+      </div>
+
+      <div class="ktz-item-toolbar">
+        <button type="button" data-item-image-action="choose">
+          <i class="fas fa-folder-open"></i>
+          <span>{{localize "khuzoe-tokenizer.buttons.choose"}}</span>
+        </button>
+        <div class="ktz-item-presets">
+          <button type="button" data-item-image-action="fit">{{localize "khuzoe-tokenizer.presets.fit"}}</button>
+          <button type="button" data-item-image-action="cover">{{localize "khuzoe-tokenizer.presets.cover"}}</button>
+        </div>
+      </div>
+
+      <label class="ktz-item-slider">
+        <span>{{localize "khuzoe-tokenizer.labels.zoom"}}</span>
+        <input type="range" min="0.1" max="5" step="0.01" data-item-image-control="zoom">
+        <output data-item-image-output="zoom">100%</output>
+      </label>
+      <label class="ktz-item-slider">
+        <span>X</span>
+        <input type="range" min="-1.5" max="1.5" step="0.01" data-item-image-control="offsetX">
+        <output data-item-image-output="offsetX">0</output>
+      </label>
+      <label class="ktz-item-slider">
+        <span>Y</span>
+        <input type="range" min="-1.5" max="1.5" step="0.01" data-item-image-control="offsetY">
+        <output data-item-image-output="offsetY">0</output>
+      </label>
+
+      <div class="ktz-item-background">
+        <label>
+          <input type="checkbox" data-item-image-control="backgroundEnabled">
+          <span>{{localize "khuzoe-tokenizer.labels.backgroundEnabled"}}</span>
+        </label>
+        <input type="color" value="#000000" data-item-image-control="backgroundColor" aria-label="{{localize "khuzoe-tokenizer.labels.backgroundColor"}}">
+      </div>
+    </section>
+  </main>
+
+  <footer class="ktz-item-footer">
+    <button type="button" data-item-image-action="cancel">{{localize "Cancel"}}</button>
+    <button type="button" class="ktz-item-save" data-item-image-action="save">
+      <i class="fas fa-save"></i>
+      <span>{{localize "Save"}}</span>
+    </button>
+  </footer>
+</form>

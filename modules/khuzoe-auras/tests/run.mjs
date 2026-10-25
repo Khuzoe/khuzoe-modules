@@ -1,0 +1,13 @@
+import "./distance.test.mjs";
+import "./ledger.test.mjs";
+import "./model.test.mjs";
+import "./store.test.mjs";
+import "./movement.test.mjs";
+import "./permissions.test.mjs";
+import "./targeting.test.mjs";
+import "./foundry-smoke.test.mjs";
+import "./actions.test.mjs";
+import "./engine.test.mjs";
+import "./logical-events.test.mjs";
+import "./audit.test.mjs";
+import "./chat-summary.test.mjs";

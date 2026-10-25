@@ -1,0 +1,164 @@
+{
+  "_id": "KhzStoneEndur001",
+  "name": "Stone's Endurance",
+  "type": "feat",
+  "img": "icons/magic/defensive/armor-stone-skin.webp",
+  "system": {
+    "description": {
+      "value": "<p>Quando subisci danni, puoi usare la tua reazione per tirare 1d12 e aggiungere il tuo modificatore di Costituzione. Riduci i danni di quel totale.</p><p>Dopo aver usato questa capacità, devi completare un riposo breve o lungo prima di poterla usare di nuovo.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Volo's Guide to Monsters",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "uses": {
+      "max": "1",
+      "spent": 0,
+      "recovery": [
+        {
+          "period": "sr",
+          "type": "recoverAll"
+        }
+      ]
+    },
+    "type": {
+      "value": "race",
+      "subtype": ""
+    },
+    "properties": [],
+    "requirements": "Goliath",
+    "prerequisites": {
+      "level": null
+    },
+    "activities": {
+      "KhzStoneEndAct01": {
+        "_id": "KhzStoneEndAct01",
+        "type": "utility",
+        "activation": {
+          "type": "reaction",
+          "value": 1,
+          "condition": "Quando subisci danni",
+          "override": true
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": false
+        },
+        "description": {
+          "chatFlavor": "Stone's Endurance"
+        },
+        "duration": {
+          "value": "",
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "value": null,
+          "units": "self",
+          "special": "",
+          "override": true
+        },
+        "target": {
+          "prompt": false,
+          "template": {
+            "count": "",
+            "contiguous": false,
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "units": "ft"
+          },
+          "affects": {
+            "count": "",
+            "type": "self",
+            "choice": false,
+            "special": ""
+          },
+          "override": true
+        },
+        "roll": {
+          "formula": "",
+          "name": "",
+          "prompt": false,
+          "visible": false
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 0,
+        "name": "Stone's Endurance",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "flags": {
+          "cat": {
+            "hidden": true
+          }
+        },
+        "midiProperties": {
+          "automationOnly": true
+        }
+      }
+    },
+    "identifier": "stones-endurance",
+    "enchant": {}
+  },
+  "effects": [],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": false,
+      "magiceffect": false
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [
+          "KhzStoneEndAct01"
+        ],
+        "effect": []
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "stones-endurance"
+          }
+        ]
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzStoneEndur001"
+}

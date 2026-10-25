@@ -1,0 +1,34 @@
+<div class="cripta-auto-device-login-config">
+  <p class="notes">Inserisci il codice accesso per ogni utente Foundry. Lascia vuoto per non fare login automatico.</p>
+
+  <div class="form-group">
+    <table>
+      <thead>
+        <tr>
+          <th>Utente Foundry</th>
+          <th>Codice accesso</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each users}}
+          <tr>
+            <td>
+              <strong>{{this.name}}</strong>
+              <div class="hint">{{this.id}}</div>
+            </td>
+            <td>
+              <input type="text" name="code.{{this.id}}" value="{{this.code}}" placeholder="GARUN-LNHU-JS9D" autocomplete="off">
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+
+  <footer class="sheet-footer flexrow">
+    <button type="submit">
+      <i class="fas fa-save"></i>
+      Salva
+    </button>
+  </footer>
+</div>

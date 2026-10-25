@@ -1,0 +1,262 @@
+{
+  "_id": "KhzShieldSpell01",
+  "name": "Shield",
+  "type": "spell",
+  "img": "icons/magic/defensive/shield-barrier-glowing-triangle-magenta.webp",
+  "system": {
+    "description": {
+      "value": "<p>Come reazione quando vieni colpito da un attacco o bersagliato da Magic Missile, ottieni +5 alla CA fino all'inizio del tuo turno successivo e non subisci danni da Magic Missile.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Khuzoe Automations",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "activation": {
+      "type": "reaction",
+      "condition": "",
+      "value": 1
+    },
+    "duration": {
+      "value": "1",
+      "units": "round"
+    },
+    "target": {
+      "affects": {
+        "type": "self",
+        "count": "",
+        "choice": false,
+        "special": ""
+      },
+      "template": {
+        "units": "",
+        "contiguous": false,
+        "type": "",
+        "size": "",
+        "width": "",
+        "height": "",
+        "count": ""
+      }
+    },
+    "range": {
+      "value": null,
+      "units": "self",
+      "special": ""
+    },
+    "uses": {
+      "max": "",
+      "recovery": [],
+      "spent": 0
+    },
+    "level": 1,
+    "school": "abj",
+    "materials": {
+      "value": "",
+      "consumed": false,
+      "cost": 0,
+      "supply": 0
+    },
+    "preparation": {
+      "mode": "prepared",
+      "prepared": false
+    },
+    "properties": [
+      "vocal",
+      "somatic"
+    ],
+    "activities": {
+      "KhzShieldCast001": {
+        "_id": "KhzShieldCast001",
+        "type": "utility",
+        "activation": {
+          "type": "reaction",
+          "value": null,
+          "override": false,
+          "condition": ""
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": true
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": false
+        },
+        "effects": [
+          {
+            "_id": "KhzShieldEff0001",
+            "level": {
+              "min": null,
+              "max": null
+            }
+          }
+        ],
+        "range": {
+          "override": false
+        },
+        "target": {
+          "prompt": false,
+          "template": {
+            "contiguous": false,
+            "stationary": false,
+            "units": "ft",
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "count": ""
+          },
+          "affects": {
+            "choice": false,
+            "count": "",
+            "type": "self",
+            "special": ""
+          },
+          "override": false
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 0,
+        "name": "Shield",
+        "img": "",
+        "useConditionText": "reaction === 'isHit' || (reaction === 'isDamaged' && workflow.item.system.identifier === 'magic-missile')",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "automationOnly": false,
+          "magicEffect": true,
+          "magicDamage": false
+        },
+        "flags": {},
+        "roll": {
+          "formula": "",
+          "name": "",
+          "prompt": false,
+          "visible": false
+        }
+      }
+    },
+    "identifier": "shield"
+  },
+  "effects": [
+    {
+      "_id": "KhzShieldEff0001",
+      "name": "Shield",
+      "img": "icons/magic/defensive/shield-barrier-glowing-triangle-magenta.webp",
+      "type": "base",
+      "system": {
+        "changes": [
+          {
+            "key": "system.attributes.ac.bonus",
+            "value": "5",
+            "priority": 20,
+            "type": "add"
+          }
+        ]
+      },
+      "disabled": false,
+      "duration": {
+        "value": 6,
+        "units": "seconds",
+        "expiry": "turnStart",
+        "expired": false
+      },
+      "origin": null,
+      "tint": "#ffffff",
+      "transfer": false,
+      "statuses": [],
+      "description": "",
+      "showIcon": 1,
+      "flags": {
+        "core": {
+          "overlay": false
+        },
+        "dae": {
+          "transfer": false,
+          "stackable": "noneNameOnly",
+          "expiryMode": "delete",
+          "specialDuration": [
+            "turnStartSource"
+          ]
+        },
+        "dnd5e": {
+          "riders": {
+            "statuses": []
+          }
+        },
+        "midi-qol": {
+          "forceCEOff": true
+        },
+        "cat": {
+          "identifier": "khuzoe-shield-active",
+          "macros": {
+            "roll": [
+              {
+                "source": "khuzoe-automations",
+                "rules": "2014",
+                "identifier": "khuzoe-shield-active"
+              }
+            ]
+          }
+        }
+      },
+      "start": null,
+      "folder": null,
+      "sort": 0,
+      "_key": "!items.effects!KhzShieldSpell01.KhzShieldEff0001"
+    }
+  ],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true,
+      "reactionCondition": "reaction === 'isHit'"
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": false,
+      "magiceffect": true
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [],
+        "effect": [
+          "KhzShieldEff0001"
+        ]
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzShieldSpell01"
+}

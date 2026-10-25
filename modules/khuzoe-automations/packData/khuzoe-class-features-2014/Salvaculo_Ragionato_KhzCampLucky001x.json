@@ -1,0 +1,55 @@
+{
+  "_id": "KhzCampLucky001x",
+  "_key": "!items!KhzCampLucky001x",
+  "name": "Salvaculo Ragionato",
+  "type": "feat",
+  "img": "icons/magic/perception/eye-tendrils-web-purple.webp",
+  "system": {
+    "identifier": "salvaculo-ragionato",
+    "source": {
+      "rules": "2024",
+      "custom": "Cripta di Sangue"
+    },
+    "description": {
+      "value": "<p>Quando usi Ragionamento Preciso per migliorare un tiro salvezza, puoi scegliere di ottenere anche vantaggio su quel tiro.</p><p>Se possiedi Eludere (Evasion), si applica anche agli effetti che consentono un tiro salvezza su Intelligenza per dimezzare i danni.</p>",
+      "chat": ""
+    },
+    "type": {
+      "value": "class"
+    },
+    "activities": {},
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "properties": [],
+    "requirements": ""
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {}
+    },
+    "khuzoe-automations": {
+      "campaignFeature": "lucky"
+    },
+    "midi-qol": {
+      "forceCEOff": true
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": []
+      }
+    }
+  }
+}

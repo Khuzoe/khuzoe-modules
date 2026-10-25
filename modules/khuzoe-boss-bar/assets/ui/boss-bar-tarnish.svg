@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="72" viewBox="0 0 180 72">
+  <filter id="tarnish" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency=".9 .22" numOctaves="3" seed="17"/>
+    <feColorMatrix type="matrix" values="
+      0 0 0 0 0.82
+      0 0 0 0 0.70
+      0 0 0 0 0.42
+      0 0 0 .12 0"/>
+  </filter>
+  <rect width="180" height="72" filter="url(#tarnish)" opacity=".32"/>
+  <path d="M0 12 C34 8 52 16 84 11 S140 8 180 14" fill="none" stroke="#d4c08a" stroke-opacity=".055"/>
+  <path d="M0 58 C28 62 54 52 88 59 S148 64 180 56" fill="none" stroke="#000" stroke-opacity=".14"/>
+</svg>

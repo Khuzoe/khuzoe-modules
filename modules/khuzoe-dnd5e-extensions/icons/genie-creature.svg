@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Genie creature">
+  <defs>
+    <linearGradient id="sky" x1="11" y1="56" x2="54" y2="8" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#34194f"/>
+      <stop offset="1" stop-color="#9360c9"/>
+    </linearGradient>
+    <linearGradient id="spirit" x1="25" y1="50" x2="40" y2="15" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#b886e8"/>
+      <stop offset="1" stop-color="#f6ecff"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="30" fill="url(#sky)" stroke="#e8c86f" stroke-width="2"/>
+  <path d="M28 53c9-4 5-9 0-12-7-4-8-11-4-18 4-8 14-10 21-5-5 0-8 2-9 5 7-1 12 3 13 8-3-2-6-2-9-1 4 3 5 7 3 11-2 5-8 7-15 12Z" fill="url(#spirit)" stroke="#251231" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M27 24c4-8 13-11 20-5-3-7-10-11-17-9 0 3-2 5-5 6 3 1 4 4 2 8Z" fill="#e8c86f" stroke="#6d4311" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M29 31c2 1 4 1 6 0M39 30c2 1 4 0 5-1M34 37c3 2 6 1 8-1" fill="none" stroke="#3d2053" stroke-width="2" stroke-linecap="round"/>
+  <path d="M17 39c4 0 7 2 9 5M49 38c-4 0-7 2-9 6" fill="none" stroke="#e7d3fa" stroke-width="4" stroke-linecap="round"/>
+</svg>

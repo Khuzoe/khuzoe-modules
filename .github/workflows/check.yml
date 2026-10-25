@@ -1,0 +1,26 @@
+name: Verifica progetto
+on:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  publisher:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/publisher.test.mjs
+      - working-directory: modules/khuzoe-automations
+        run: npm ci
+      - run: node tools/verify-packs.mjs
+      - run: node tools/publisher.mjs preview
+  app:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - shell: pwsh
+        run: ./tools/build-app.ps1 -Test
+      - shell: pwsh
+        run: ./tools/build-app.ps1

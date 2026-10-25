@@ -1,0 +1,71 @@
+{
+  "_id": "KhzNpcElaEgo0001",
+  "name": "Impenetrable Ego",
+  "type": "feat",
+  "system": {
+    "source": {
+      "custom": "",
+      "book": "ToB3",
+      "page": "405",
+      "license": "",
+      "rules": "2014",
+      "revision": 1
+    },
+    "description": {
+      "value": "<div class=\"rd__b  rd__b--3\"><p>While the psychophant is conscious and wearing no armor and wielding no shield, it adds its Charisma modifier to its AC (included above) and saving throws. In addition, it has advantage on saving throws against being &amp;Reference[condition=charmed] or &amp;Reference[condition=frightened].</p></div>",
+      "chat": ""
+    },
+    "requirements": "",
+    "uses": {
+      "max": "",
+      "recovery": [],
+      "spent": 0
+    },
+    "type": {
+      "value": "monster",
+      "subtype": ""
+    },
+    "properties": [],
+    "advancement": {},
+    "activities": {},
+    "identifier": "impenetrable-ego",
+    "cover": null,
+    "crewed": false,
+    "enchant": {},
+    "prerequisites": {
+      "level": null,
+      "repeatable": false,
+      "items": []
+    }
+  },
+  "ownership": {
+    "default": 0
+  },
+  "img": "icons/magic/control/hypnosis-mesmerism-swirl.webp",
+  "flags": {
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "save": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "impenetrable-ego"
+          }
+        ]
+      }
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": []
+      }
+    }
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "_key": "!items!KhzNpcElaEgo0001"
+}

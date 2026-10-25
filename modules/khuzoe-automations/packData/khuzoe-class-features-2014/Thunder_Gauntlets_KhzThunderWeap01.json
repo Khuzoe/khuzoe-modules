@@ -1,0 +1,161 @@
+{
+  "_id": "KhzThunderWeap01",
+  "_key": "!items!KhzThunderWeap01",
+  "name": "Thunder Gauntlets",
+  "type": "weapon",
+  "img": "icons/equipment/hand/gauntlet-armored-blue.webp",
+  "system": {
+    "identifier": "thunder-gauntlets",
+    "source": {
+      "rules": "2014",
+      "custom": "Khuzoe Automations — regole 2014"
+    },
+    "description": {
+      "value": "<p>1d8 tuono. Chi viene colpito ha svantaggio contro altre creature fino all'inizio del prossimo turno dell'Armorer.</p>",
+      "chat": ""
+    },
+    "type": {
+      "value": "simpleM"
+    },
+    "activities": {
+      "KhzArmorerAtk001": {
+        "_id": "KhzArmorerAtk001",
+        "name": "Thunder Gauntlets",
+        "type": "attack",
+        "activation": {
+          "type": "action",
+          "value": 1,
+          "override": true
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false
+          },
+          "spellSlot": false
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "override": false,
+          "units": "ft",
+          "value": "5"
+        },
+        "target": {
+          "override": true,
+          "prompt": true,
+          "affects": {
+            "type": "creature",
+            "count": "1"
+          },
+          "template": {
+            "units": "ft"
+          }
+        },
+        "midiProperties": {
+          "confirmTargets": "never"
+        },
+        "uses": {
+          "max": "",
+          "spent": 0,
+          "recovery": []
+        },
+        "attack": {
+          "ability": "int",
+          "bonus": "",
+          "flat": false,
+          "critical": {
+            "threshold": null
+          },
+          "type": {
+            "value": "melee",
+            "classification": "weapon"
+          }
+        },
+        "damage": {
+          "critical": {
+            "bonus": ""
+          },
+          "includeBase": true,
+          "parts": []
+        }
+      }
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "properties": [],
+    "requirements": "Armorer 3",
+    "damage": {
+      "base": {
+        "number": 1,
+        "denomination": 8,
+        "bonus": "",
+        "types": [
+          "thunder"
+        ],
+        "custom": {
+          "enabled": false,
+          "formula": ""
+        },
+        "scaling": {
+          "mode": "",
+          "number": 1
+        }
+      }
+    },
+    "range": {
+      "value": 5,
+      "long": null,
+      "units": "ft"
+    },
+    "proficient": 1,
+    "equipped": true,
+    "quantity": 1,
+    "magicalBonus": "",
+    "weight": {
+      "value": 0,
+      "units": "lb"
+    }
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "thunder-gauntlets"
+          }
+        ]
+      }
+    },
+    "khuzoe-automations": {
+      "armorerFeature": "gauntlets"
+    },
+    "midi-qol": {
+      "forceCEOff": true
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": []
+      }
+    }
+  }
+}

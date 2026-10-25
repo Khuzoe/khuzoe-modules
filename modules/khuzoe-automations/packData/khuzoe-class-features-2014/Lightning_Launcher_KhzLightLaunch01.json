@@ -1,0 +1,147 @@
+{
+  "_id": "KhzLightLaunch01",
+  "_key": "!items!KhzLightLaunch01",
+  "name": "Lightning Launcher",
+  "type": "feat",
+  "img": "icons/magic/lightning/bolt-blue.webp",
+  "system": {
+    "identifier": "lightning-launcher",
+    "source": {
+      "rules": "2014",
+      "custom": "Khuzoe Automations — regole 2014"
+    },
+    "description": {
+      "value": "<p>1d6 fulmine, gittata 90/300 piedi; propone 1d6 extra dopo un colpo a segno una volta in ciascun proprio turno.</p>",
+      "chat": ""
+    },
+    "type": {
+      "value": "class"
+    },
+    "activities": {
+      "KhzArmorerAtk001": {
+        "_id": "KhzArmorerAtk001",
+        "name": "Lightning Launcher",
+        "type": "attack",
+        "activation": {
+          "type": "action",
+          "value": 1,
+          "override": true
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false
+          },
+          "spellSlot": false
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "override": true,
+          "units": "ft",
+          "value": "90"
+        },
+        "target": {
+          "override": true,
+          "prompt": true,
+          "affects": {
+            "type": "creature",
+            "count": "1"
+          },
+          "template": {
+            "units": "ft"
+          }
+        },
+        "midiProperties": {
+          "confirmTargets": "never"
+        },
+        "uses": {
+          "max": "",
+          "spent": 0,
+          "recovery": []
+        },
+        "attack": {
+          "ability": "int",
+          "bonus": "",
+          "flat": false,
+          "critical": {
+            "threshold": null
+          },
+          "type": {
+            "value": "ranged",
+            "classification": "weapon"
+          }
+        },
+        "damage": {
+          "critical": {
+            "bonus": ""
+          },
+          "includeBase": false,
+          "parts": [
+            {
+              "number": 1,
+              "denomination": 6,
+              "bonus": "@mod",
+              "types": [
+                "lightning"
+              ],
+              "custom": {
+                "enabled": false,
+                "formula": ""
+              },
+              "scaling": {
+                "mode": "",
+                "number": 1
+              }
+            }
+          ]
+        }
+      }
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "properties": [],
+    "requirements": "Armorer 3"
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "lightning-launcher"
+          }
+        ]
+      }
+    },
+    "khuzoe-automations": {
+      "armorerFeature": "launcher"
+    },
+    "midi-qol": {
+      "forceCEOff": true
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": []
+      }
+    }
+  }
+}

@@ -1,0 +1,44 @@
+<div class="km-shop-shell km-container-shell km-ui-v2 is-view-{{viewMode}}">
+  <header class="km-shop-hero km-container-hero km-ui-shop-hero">
+    <div class="km-shop-portrait-wrap">
+      <button type="button" class="km-container-hero-image" data-action="openImage" data-image-src="{{container.img}}" data-image-title="{{container.name}}" aria-label="{{localize 'KM.Container.ExpandChestImage'}}"><img class="km-shop-portrait" src="{{container.img}}" alt="{{container.name}}"></button>
+      <span class="km-shop-open-badge"><i class="fas fa-box-open"></i></span>
+    </div>
+    <div class="km-shop-heading"><span class="km-eyebrow">{{localize "KM.Container.Eyebrow"}}</span><h2>{{container.name}}</h2><p>{{#if container.description}}{{container.description}}{{else}}{{localize "KM.Container.DefaultDescription"}}{{/if}}</p></div>
+    <div class="km-wallet km-recipient-card" title="{{localize 'KM.Container.RecipientHint' actor=buyer.name}}"><img src="{{buyer.img}}" alt="{{buyer.name}}"><span><small>{{localize "KM.Container.Recipient"}}</small><strong>{{buyer.name}}</strong><em>{{localize "KM.Container.SharedLoot"}}</em></span></div>
+  </header>
+
+  <div class="km-shop-toolbar km-ui-toolbar">
+    <label class="km-search-field"><i class="fas fa-magnifying-glass"></i><input class="km-container-search" type="search" value="{{query}}" placeholder="{{localize 'KM.Container.Search'}}" aria-label="{{localize 'KM.Container.Search'}}"></label>
+    <span class="km-toolbar-count"><i class="fas fa-cubes-stacked"></i> {{localize "KM.Container.ContentCount" items=totalQuantity currencies=currencyCount}}</span>
+    <div class="km-shop-toolbar-actions">
+      <div class="km-view-toggle" role="group" aria-label="{{localize 'KM.Shop.ViewMode'}}"><button type="button" class="km-view-button km-container-view-button {{#if listMode}}is-active{{/if}}" data-action="viewMode" data-view-mode="list" aria-pressed="{{listMode}}" title="{{localize 'KM.Shop.ViewListHint'}}"><i class="fas fa-list"></i><span>{{localize "KM.Shop.ViewList"}}</span></button><button type="button" class="km-view-button km-container-view-button {{#if fullMode}}is-active{{/if}}" data-action="viewMode" data-view-mode="full" aria-pressed="{{fullMode}}" title="{{localize 'KM.Shop.ViewFullHint'}}"><i class="fas fa-table-cells-large"></i><span>{{localize "KM.Shop.ViewFull"}}</span></button></div>
+      <button type="button" class="km-primary-button km-container-take-all" data-action="takeAll" {{#if empty}}disabled{{/if}} {{#unless inRange}}disabled{{/unless}}><i class="fas fa-boxes-packing"></i> {{localize "KM.Container.TakeAll"}}</button>
+    </div>
+  </div>
+
+  <div class="km-container-transfer-tools">
+    {{#if keyInserted}}
+    <section class="km-container-key-slot"><div class="km-container-key-slot-icon"><img src="{{key.img}}" alt="{{key.name}}"></div><div class="km-container-key-slot-copy"><span class="km-eyebrow">{{localize "KM.Container.KeySlotEyebrow"}}</span><strong>{{localize "KM.Container.KeyInLock" key=key.name}}</strong><small>{{localize "KM.Container.KeyInLockHint"}}</small></div><button type="button" class="km-container-take-key" data-action="takeKey" {{#unless inRange}}disabled{{/unless}}><i class="fas fa-key"></i> {{localize "KM.Container.TakeKeyAndClose"}}</button></section>
+    {{/if}}
+    <div class="km-container-player-drop-zone {{#unless inRange}}is-disabled{{/unless}}"><i class="fas fa-arrow-down-to-bracket"></i><div><strong>{{localize "KM.Container.PlayerDepositTitle"}}</strong><span>{{localize "KM.Container.PlayerDepositHint"}}</span></div></div>
+  </div>
+
+  <div class="km-container-content-scroll">
+    {{#unless inRange}}<div class="km-range-warning"><i class="fas fa-person-walking-arrow-right"></i><div><strong>{{localize "KM.Container.TooFarTitle"}}</strong><span>{{localize "KM.Container.TooFarHint" distance=maxDistance unit=unit}}</span></div></div>{{/unless}}
+    {{#if hasCurrency}}
+    <section class="km-container-currency-panel"><div class="km-container-panel-heading"><span><i class="fas fa-coins"></i> {{localize "KM.Container.Currency"}}</span><small>{{localize "KM.Container.CurrencyTakeHint"}}</small></div><div class="km-container-currency-list">{{#each currencies}}<article class="km-container-currency-card" style="--km-currency-accent:{{color}}">{{#if hasIcon}}<img src="{{icon}}" alt="">{{else}}<span class="km-container-currency-symbol">{{symbol}}</span>{{/if}}<span class="km-container-currency-value"><strong>{{amountLabel}}</strong><small>{{name}}</small></span><button type="button" class="km-container-take-currency" data-action="takeCurrency" data-currency-id="{{id}}" data-currency-name="{{name}}" data-precision="{{precision}}" data-amount="{{amount}}" {{#unless ../inRange}}disabled{{/unless}}><i class="fas fa-hand"></i> {{localize "KM.Container.Take"}}</button></article>{{/each}}</div></section>
+    {{/if}}
+
+    <main class="km-shop-inventory km-container-inventory km-ui-shop-list">
+      {{#each inventory}}
+      <article class="km-shop-card" data-item-id="{{id}}" data-item-name="{{name}}" data-quantity="{{quantity}}" data-search="{{name}} {{type}}">
+        <div class="km-card-image-wrap"><button type="button" class="km-card-image-button" data-action="openImage" data-image-src="{{img}}" data-image-title="{{name}}" aria-label="{{localize 'KM.Shop.ExpandImage' item=name}}" title="{{localize 'KM.Shop.ExpandImage' item=name}}"><img src="{{img}}" alt="{{name}}" loading="lazy"><span class="km-image-expand-cue"><i class="fas fa-magnifying-glass-plus"></i><span>{{localize "KM.Shop.Expand"}}</span></span></button><span class="km-card-type">{{type}}</span></div>
+        <div class="km-card-body"><div class="km-card-title-row"><h3>{{name}}</h3><span class="km-list-type">{{type}}</span></div>{{#if description}}<p class="km-card-description">{{description}}</p>{{else}}<p class="km-card-description is-empty">{{localize "KM.Shop.NoDescription"}}</p>{{/if}}<div class="km-card-meta"><span class="km-card-stock"><small>{{localize "KM.Shop.Availability"}}</small><strong><i class="fas fa-boxes-stacked"></i> {{localize "KM.Container.Available" value=quantity}}</strong></span></div></div>
+        <footer class="km-card-actions km-container-card-actions"><div class="km-order-buttons"><button type="button" class="km-item-details-button km-container-details-button" data-action="toggleDetails" aria-expanded="false" title="{{localize 'KM.Shop.DetailsHint' item=name}}"><i class="fas fa-book-open"></i><span>{{localize "KM.Shop.Details"}}</span></button><button type="button" class="km-buy-button km-container-take-item" data-action="takeItem" {{#unless ../inRange}}disabled{{/unless}}><i class="fas fa-hand"></i><span>{{localize "KM.Container.Take"}}</span></button></div></footer>
+      </article>
+      {{else}}{{#unless hasCurrency}}<div class="km-shop-empty"><i class="fas fa-box-open"></i><h3>{{localize "KM.Container.EmptyTitle"}}</h3><p>{{localize "KM.Container.EmptyHint"}}</p></div>{{/unless}}{{/each}}
+      {{#if hasItems}}<div class="km-shop-search-empty km-container-search-empty" hidden><i class="fas fa-magnifying-glass"></i><h3>{{localize "KM.Shop.SearchEmptyTitle"}}</h3><p>{{localize "KM.Shop.SearchEmptyHint"}}</p></div>{{/if}}
+    </main>
+  </div>
+</div>

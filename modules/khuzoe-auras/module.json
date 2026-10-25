@@ -1,0 +1,45 @@
+{
+  "id": "khuzoe-auras",
+  "title": "Khuzoe Auras",
+  "description": "Motore leggero e configurabile per aure visive, cure, danni, punti ferita temporanei ed effetti in D&D 5e.",
+  "version": "0.5.4",
+  "authors": [
+    {
+      "name": "Khuzoe Auras Contributors"
+    }
+  ],
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14.367"
+  },
+  "relationships": {
+    "systems": [
+      {
+        "id": "dnd5e",
+        "type": "system",
+        "compatibility": {
+          "minimum": "5.3.0",
+          "verified": "5.3.3"
+        }
+      }
+    ]
+  },
+  "esmodules": [
+    "scripts/main.js"
+  ],
+  "styles": [
+    "styles/khuzoe-auras.css"
+  ],
+  "languages": [
+    {
+      "lang": "it",
+      "name": "Italiano",
+      "path": "lang/it.json"
+    },
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ]
+}

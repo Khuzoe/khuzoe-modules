@@ -1,0 +1,1778 @@
+/* Shared map containers */
+.khuzoe-container textarea {
+  min-height: 62px;
+  padding: 8px 10px;
+  resize: vertical;
+  border: 1px solid var(--km-line);
+  border-radius: 7px;
+  color: var(--km-ink);
+  background: rgba(7, 7, 6, 0.48);
+  box-shadow: inset 0 1px 5px rgba(0, 0, 0, 0.22);
+  font: inherit;
+}
+
+.khuzoe-container textarea:focus {
+  border-color: var(--km-gold);
+  outline: 0;
+  box-shadow: var(--km-focus);
+}
+
+.km-container-config-hero {
+  grid-template-columns: 64px minmax(0, 1fr) 190px;
+}
+
+.km-container-empty-behavior {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--km-muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.km-container-config-settings {
+  display: grid;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--km-line);
+  grid-template-columns: minmax(180px, 0.7fr) minmax(260px, 1.3fr);
+  gap: 12px 18px;
+}
+
+.km-container-description-field {
+  grid-column: 1 / -1;
+}
+
+.km-container-file-input {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 36px;
+  gap: 6px;
+}
+
+.km-container-file-input .km-icon-button {
+  width: 36px;
+  height: 34px;
+  border-color: var(--km-line);
+  color: var(--km-gold-bright);
+  background: rgba(216, 169, 77, 0.08);
+}
+
+.km-container-currency-config {
+  padding: 14px 24px 12px;
+  border-bottom: 1px solid var(--km-line);
+}
+
+.km-container-currency-config .km-section-heading {
+  margin-bottom: 9px;
+}
+
+.km-container-currency-config .km-section-heading h3 {
+  margin: 0;
+  border: 0;
+  color: var(--km-ink);
+  font-size: 18px;
+}
+
+.km-container-currency-grid {
+  display: grid;
+  max-height: 116px;
+  padding: 2px 4px 2px 0;
+  overflow: auto;
+  grid-template-columns: repeat(auto-fill, minmax(205px, 1fr));
+  gap: 7px;
+}
+
+.km-container-currency-input {
+  display: grid;
+  min-width: 0;
+  padding: 7px 8px;
+  border: 1px solid color-mix(in srgb, var(--km-currency-accent, #d8a94d) 32%, transparent);
+  border-radius: 9px;
+  grid-template-columns: 30px minmax(0, 1fr) 76px;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.km-container-currency-input img,
+.km-container-currency-symbol {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  border: 1px solid color-mix(in srgb, var(--km-currency-accent, #d8a94d) 50%, transparent);
+  border-radius: 50%;
+  place-items: center;
+  object-fit: contain;
+  color: var(--km-ink);
+  background: rgba(0, 0, 0, 0.28);
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.km-container-currency-name {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.km-container-currency-name strong {
+  overflow: hidden;
+  color: var(--km-ink);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.km-container-currency-name small {
+  color: var(--km-muted);
+  font-size: 9px;
+}
+
+.km-container-currency-input input {
+  width: 76px;
+  text-align: right;
+}
+
+.km-container-inventory-config {
+  padding-top: 13px;
+}
+
+.km-container-inventory-config .km-section-heading {
+  margin-bottom: 8px;
+}
+
+.km-container-item-fields {
+  max-width: 225px;
+  grid-template-columns: 1fr;
+}
+
+.km-container-item-fields label {
+  grid-template-columns: auto 90px;
+}
+
+.km-container-hero-image {
+  width: 86px;
+  height: 86px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 18px;
+  display: block;
+  background: transparent;
+  box-shadow: none;
+  cursor: zoom-in;
+}
+
+.km-container-hero .km-shop-portrait {
+  border-radius: 18px;
+  object-fit: contain;
+  background: #0d0c0a;
+}
+
+.km-container-take-all {
+  min-width: 132px;
+  height: 34px;
+  padding: 0 13px;
+}
+
+.km-container-currency-panel {
+  margin: 10px 26px 2px;
+  padding: 13px 14px;
+  border: 1px solid var(--km-line);
+  border-radius: 11px;
+  background: linear-gradient(145deg, rgba(216, 169, 77, 0.065), rgba(0, 0, 0, 0.16));
+}
+
+.km-container-panel-heading {
+  display: flex;
+  margin-bottom: 10px;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.km-container-panel-heading > span {
+  color: var(--km-gold-bright);
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.km-container-panel-heading small {
+  color: var(--km-muted);
+}
+
+.km-container-currency-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+  gap: 8px;
+}
+
+.km-container-currency-card {
+  display: grid;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid color-mix(in srgb, var(--km-currency-accent, #d8a94d) 36%, transparent);
+  border-radius: 9px;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  background: rgba(5, 5, 4, 0.28);
+}
+
+.km-container-currency-card > img,
+.km-container-currency-card > .km-container-currency-symbol {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  place-items: center;
+  object-fit: contain;
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.km-container-currency-value {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.km-container-currency-value strong {
+  overflow: hidden;
+  color: var(--km-ink);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.km-container-currency-value small {
+  color: var(--km-muted);
+  font-size: 9px;
+}
+
+.km-container-take-currency {
+  width: auto;
+  height: 31px;
+  margin: 0;
+  padding: 0 10px;
+  border: 1px solid rgba(244, 203, 117, 0.42);
+  border-radius: 7px;
+  color: var(--km-ink);
+  background: rgba(216, 169, 77, 0.12);
+  cursor: pointer;
+}
+
+.km-container-take-currency:hover:not(:disabled) {
+  border-color: var(--km-gold-bright);
+  background: rgba(216, 169, 77, 0.2);
+}
+
+.km-container-take-currency:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.km-container-card-actions {
+  grid-template-columns: 62px minmax(0, 1fr);
+}
+
+.km-container-card-actions .km-order-buttons {
+  width: 100%;
+}
+
+.km-container-take-item {
+  min-width: 116px;
+}
+
+.km-container-shell.is-view-list .km-container-card-actions {
+  grid-template-columns: 62px minmax(220px, 1fr);
+}
+
+.km-container-shell.is-view-list .km-shop-card.is-details-open .km-container-card-actions {
+  grid-template-columns: 62px minmax(220px, 1fr);
+}
+
+.km-container-shell.is-transferring {
+  pointer-events: none;
+}
+
+.km-container-shell.is-transferring::after {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  content: "";
+  background: rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 760px) {
+  .km-container-config-hero {
+    grid-template-columns: 54px minmax(0, 1fr);
+  }
+
+  .km-container-empty-behavior {
+    grid-column: 1 / -1;
+  }
+
+  .km-container-config-settings {
+    padding-inline: 17px;
+    grid-template-columns: 1fr;
+  }
+
+  .km-container-description-field {
+    grid-column: auto;
+  }
+
+  .km-container-currency-config {
+    padding-inline: 17px;
+  }
+
+  .km-container-currency-grid {
+    max-height: 165px;
+    grid-template-columns: 1fr;
+  }
+
+  .km-container-currency-panel {
+    margin-inline: 17px;
+  }
+
+  .km-container-panel-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .km-container-shell.is-view-list .km-container-card-actions {
+    grid-template-columns: 62px minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .km-container-hero-image {
+    margin-inline: auto;
+  }
+
+  .km-container-currency-card {
+    grid-template-columns: 34px minmax(0, 1fr);
+  }
+
+  .km-container-take-currency {
+    grid-column: 1 / -1;
+  }
+
+  .km-container-shell.is-view-list .km-container-card-actions,
+  .km-container-shell.is-view-list .km-shop-card.is-details-open .km-container-card-actions,
+  .km-container-card-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .km-container-card-actions .km-quantity-wrap input {
+    width: 100%;
+  }
+}
+/* Container interface v2: independent, scroll-safe layout */
+.khuzoe-container .window-content {
+  container-name: km-container-window;
+  container-type: inline-size;
+}
+
+.km-container-config-form,
+.km-container-shell,
+.km-container-config-form *,
+.km-container-shell * {
+  box-sizing: border-box;
+}
+
+.km-container-config-form {
+  display: grid;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.km-container-config-hero {
+  display: grid;
+  min-height: 0;
+  padding: 14px 18px;
+  grid-template-columns: 52px minmax(0, 1fr) 178px;
+  align-items: center;
+  gap: 12px;
+}
+
+.km-container-config-portrait {
+  width: 52px;
+  height: 52px;
+  border-radius: 11px;
+  object-fit: contain;
+  background: #0d0c0a;
+}
+
+.km-container-config-hero .km-config-heading h2 {
+  overflow: hidden;
+  font-size: 21px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.km-container-config-hero .km-config-heading p {
+  margin-top: 4px;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.km-container-empty-behavior {
+  width: 100%;
+  gap: 5px;
+}
+
+.km-container-empty-behavior select {
+  width: 100%;
+}
+
+.km-container-config-scroll,
+.km-container-content-scroll {
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: rgba(216, 169, 77, 0.62) rgba(0, 0, 0, 0.2);
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+}
+
+.km-container-config-scroll::-webkit-scrollbar,
+.km-container-content-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+
+.km-container-config-scroll::-webkit-scrollbar-track,
+.km-container-content-scroll::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.km-container-config-scroll::-webkit-scrollbar-thumb,
+.km-container-content-scroll::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: rgba(216, 169, 77, 0.58);
+  background-clip: padding-box;
+}
+
+.km-container-config-settings {
+  display: grid;
+  padding: 14px 18px;
+  grid-template-columns: minmax(180px, 0.8fr) minmax(240px, 1.2fr);
+  gap: 11px 14px;
+}
+
+.km-container-description-field textarea {
+  min-height: 68px;
+  max-height: 160px;
+}
+
+.km-container-file-input {
+  min-width: 0;
+}
+
+.km-container-file-input input {
+  min-width: 0;
+  width: 100%;
+}
+
+.km-container-currency-config {
+  padding: 13px 18px 14px;
+}
+
+.km-container-currency-config .km-section-heading {
+  margin-bottom: 9px;
+  align-items: center;
+}
+
+.km-container-currency-grid {
+  max-height: none;
+  padding: 0;
+  overflow: visible;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 7px;
+}
+
+.km-container-currency-input {
+  min-height: 46px;
+  padding: 7px 8px;
+  grid-template-columns: 30px minmax(0, 1fr) 72px;
+  gap: 7px;
+}
+
+.km-container-currency-name strong {
+  font-size: 11px;
+}
+
+.km-container-currency-input input {
+  min-width: 0;
+  width: 72px;
+}
+
+.km-container-inventory-config {
+  display: block;
+  min-height: 0;
+  padding: 14px 18px 20px;
+  overflow: visible;
+}
+
+.km-container-inventory-config .km-section-heading {
+  margin-bottom: 8px;
+}
+
+.km-container-drop-zone {
+  min-height: 54px;
+  padding: 9px 13px;
+}
+
+.km-container-drop-zone > i {
+  font-size: 20px;
+}
+
+.km-container-config-form .km-config-inventory {
+  min-height: 0;
+  margin-top: 10px;
+  padding: 0;
+  overflow: visible;
+}
+
+.km-container-config-form .km-config-item {
+  margin-bottom: 7px;
+  padding: 9px;
+  grid-template-columns: 52px minmax(0, 1fr) 68px;
+  align-items: start;
+  gap: 10px;
+}
+
+.km-container-config-form .km-config-item > img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  background: #0d0c0a;
+}
+
+.km-container-config-form .km-config-item-title {
+  flex-wrap: wrap;
+  row-gap: 3px;
+}
+
+.km-container-config-form .km-config-item-title strong {
+  max-width: 100%;
+}
+
+.km-container-config-form .km-config-item-main > p {
+  display: -webkit-box;
+  margin: 4px 0 7px;
+  overflow: hidden;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.km-container-config-form .km-container-item-fields {
+  width: min(210px, 100%);
+  max-width: none;
+}
+
+.km-container-config-form .km-container-item-fields label {
+  grid-template-columns: auto minmax(64px, 90px);
+}
+
+.km-container-config-form .km-config-item-actions {
+  display: flex;
+  width: 68px;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.km-container-config-form > .km-config-footer {
+  min-width: 0;
+  padding: 10px 18px;
+  gap: 12px;
+}
+
+.km-container-config-form > .km-config-footer > span {
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.km-container-config-form > .km-config-footer .km-primary-button {
+  min-width: 138px;
+  flex: 0 0 auto;
+}
+
+/* Player-facing container */
+.km-container-shell {
+  position: relative;
+  display: grid;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
+
+.km-container-hero {
+  min-height: 0;
+  padding: 13px 18px;
+  grid-template-columns: 62px minmax(0, 1fr) minmax(145px, auto);
+  gap: 13px;
+}
+
+.km-container-hero-image {
+  width: 62px;
+  height: 62px;
+  border-radius: 12px;
+}
+
+.km-container-hero .km-shop-portrait {
+  width: 62px;
+  height: 62px;
+  border-radius: 12px;
+  object-fit: contain;
+  background: #0d0c0a;
+}
+
+.km-container-hero .km-shop-open-badge {
+  right: -4px;
+  bottom: -3px;
+  width: 23px;
+  height: 23px;
+}
+
+.km-container-hero .km-shop-heading {
+  min-width: 0;
+}
+
+.km-container-hero .km-shop-heading h2 {
+  overflow: hidden;
+  font-size: 23px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.km-container-hero .km-shop-heading p {
+  display: -webkit-box;
+  max-width: none;
+  margin-top: 5px;
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.km-container-hero .km-wallet {
+  min-width: 145px;
+  padding: 8px 10px;
+}
+
+.km-container-hero .km-wallet strong {
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.km-container-shell > .km-shop-toolbar {
+  min-width: 0;
+  padding: 9px 18px;
+  border-bottom: 1px solid var(--km-line);
+  gap: 10px;
+  background: rgba(5, 5, 4, 0.2);
+}
+
+.km-container-shell > .km-shop-toolbar .km-search-field {
+  min-width: 150px;
+  width: auto;
+}
+
+.km-container-shell > .km-shop-toolbar .km-shop-toolbar-actions {
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.km-container-shell .km-view-toggle {
+  flex: 0 0 auto;
+}
+
+.km-container-shell .km-view-button {
+  height: 28px;
+  padding-inline: 8px;
+}
+
+.km-container-take-all {
+  min-width: 118px;
+  height: 34px;
+  padding-inline: 11px;
+}
+
+.km-container-content-scroll {
+  position: relative;
+}
+
+.km-container-content-scroll > .km-range-warning {
+  margin: 11px 18px 0;
+  padding: 9px 12px;
+}
+
+.km-container-currency-panel {
+  margin: 11px 18px 0;
+  padding: 11px 12px;
+  border-color: rgba(216, 169, 77, 0.3);
+  background: linear-gradient(145deg, rgba(65, 48, 23, 0.46), rgba(10, 9, 8, 0.58));
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.025);
+}
+
+.km-container-panel-heading {
+  margin-bottom: 8px;
+}
+
+.km-container-panel-heading > span {
+  font-size: 12px;
+}
+
+.km-container-panel-heading small {
+  color: #c1b397;
+  font-size: 10px;
+}
+
+.km-container-currency-list {
+  grid-template-columns: repeat(auto-fit, minmax(205px, 1fr));
+  gap: 7px;
+}
+
+.km-container-currency-card {
+  min-height: 49px;
+  padding: 7px 8px;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: 8px;
+  background: rgba(5, 5, 4, 0.5);
+}
+
+.km-container-currency-card > img,
+.km-container-currency-card > .km-container-currency-symbol {
+  width: 34px;
+  height: 34px;
+}
+
+.km-container-currency-value strong {
+  font-size: 14px;
+}
+
+.km-container-take-currency {
+  min-width: 76px;
+  height: 31px;
+}
+
+.km-container-inventory {
+  display: grid;
+  min-height: 0;
+  padding: 12px 18px 20px;
+  overflow: visible;
+  grid-template-columns: 1fr;
+  align-items: start;
+  gap: 8px;
+}
+
+.km-container-shell .km-shop-card {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.km-container-shell.is-view-list .km-shop-card {
+  min-height: 82px;
+  overflow: hidden;
+  grid-template-columns: 66px minmax(0, 1fr) minmax(252px, 0.8fr);
+  grid-template-rows: auto;
+}
+
+.km-container-shell.is-view-list .km-card-image-wrap {
+  width: 66px;
+  height: 100%;
+  min-height: 82px;
+}
+
+.km-container-shell .km-card-image-button > img {
+  object-fit: contain;
+  background: #0d0c0a;
+}
+
+.km-container-shell.is-view-list .km-card-body {
+  min-width: 0;
+  min-height: 82px;
+  padding: 10px 12px;
+}
+
+.km-container-shell.is-view-list .km-card-body h3 {
+  font-size: 14px;
+}
+
+.km-container-shell.is-view-list .km-card-meta {
+  margin-top: 7px;
+}
+
+.km-container-shell .km-card-stock {
+  color: #ead9b7;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.km-container-shell.is-view-list .km-container-card-actions {
+  min-width: 0;
+  padding: 8px 9px;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 8px;
+}
+
+.km-container-shell .km-container-card-actions .km-quantity-wrap {
+  min-width: 0;
+}
+
+.km-container-shell .km-container-card-actions .km-quantity-wrap input {
+  width: 58px;
+}
+
+.km-container-shell .km-container-card-actions .km-order-buttons {
+  width: 100%;
+  min-width: 0;
+  align-items: end;
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+
+.km-container-shell .km-container-details-button,
+.km-container-shell .km-container-take-item {
+  height: 32px;
+  min-width: 0;
+  margin: 0;
+  padding-inline: 9px;
+  flex: 1 1 0;
+}
+
+.km-container-shell .km-container-details-button {
+  border-color: rgba(216, 169, 77, 0.45);
+  color: #ead9b7;
+  background: linear-gradient(180deg, #302c25, #1e1b17);
+}
+
+.km-container-shell .km-container-take-item {
+  min-width: 92px;
+}
+
+.km-container-shell.is-view-list .km-shop-card.is-details-open {
+  min-height: 132px;
+  grid-template-columns: 86px minmax(0, 1fr) minmax(252px, 0.8fr);
+  grid-template-rows: auto;
+}
+
+.km-container-shell.is-view-list .km-shop-card.is-details-open .km-card-image-wrap {
+  width: 86px;
+  height: 100%;
+  min-height: 132px;
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.km-container-shell.is-view-list .km-shop-card.is-details-open .km-card-body {
+  padding: 12px 14px;
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.km-container-shell.is-view-list .km-shop-card.is-details-open .km-card-description {
+  display: block;
+  margin: 8px 0 12px;
+  overflow: visible;
+  color: var(--km-muted);
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  -webkit-box-orient: initial;
+  -webkit-line-clamp: unset;
+}
+
+.km-container-shell.is-view-list .km-shop-card.is-details-open .km-card-actions {
+  padding: 8px 9px;
+  border-top: 0;
+  border-left: 1px solid var(--km-line);
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.km-container-shell.is-view-full .km-shop-card {
+  min-height: 230px;
+  grid-template-columns: minmax(160px, 205px) minmax(0, 1fr);
+  grid-template-rows: minmax(150px, auto) auto;
+}
+
+.km-container-shell.is-view-full .km-card-image-wrap {
+  min-height: 230px;
+}
+
+.km-container-shell.is-view-full .km-card-body {
+  padding: 15px 17px 12px;
+}
+
+.km-container-shell.is-view-full .km-card-description {
+  margin: 9px 0 14px;
+  overflow: visible;
+  font-size: 12px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.km-container-shell.is-view-full .km-container-card-actions {
+  grid-template-columns: 62px minmax(0, 1fr);
+  padding: 10px 17px 12px;
+}
+
+.km-container-shell.is-view-full .km-container-details-button {
+  display: none;
+}
+
+.km-container-shell.is-view-full .km-container-take-item {
+  max-width: 180px;
+  margin-left: auto;
+}
+
+.km-container-shell .km-shop-empty,
+.km-container-shell .km-shop-search-empty {
+  min-height: 210px;
+}
+
+.km-container-shell.is-transferring {
+  pointer-events: none;
+}
+
+.km-container-shell.is-transferring::after {
+  position: absolute;
+  inset: 0;
+}
+
+@container km-container-window (max-width: 700px) {
+  .km-container-config-hero {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+
+  .km-container-config-portrait {
+    width: 48px;
+    height: 48px;
+  }
+
+  .km-container-empty-behavior {
+    grid-column: 1 / -1;
+  }
+
+  .km-container-config-settings {
+    grid-template-columns: 1fr;
+  }
+
+  .km-container-description-field {
+    grid-column: auto;
+  }
+
+  .km-container-currency-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  .km-container-hero {
+    grid-template-columns: 56px minmax(0, 1fr);
+  }
+
+  .km-container-hero-image,
+  .km-container-hero .km-shop-portrait {
+    width: 56px;
+    height: 56px;
+  }
+
+  .km-container-hero .km-wallet {
+    min-width: 0;
+    padding: 7px 9px;
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    flex-wrap: wrap;
+    gap: 4px 9px;
+  }
+
+  .km-container-hero .km-wallet small {
+    margin-left: auto;
+  }
+
+  .km-container-shell > .km-shop-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .km-container-shell > .km-shop-toolbar .km-search-field {
+    width: 100%;
+    flex-basis: auto;
+  }
+
+  .km-container-shell > .km-shop-toolbar .km-shop-toolbar-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .km-container-shell.is-view-list .km-shop-card,
+  .km-container-shell.is-view-list .km-shop-card.is-details-open {
+    grid-template-columns: 62px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+  }
+
+  .km-container-shell.is-view-list .km-card-image-wrap,
+  .km-container-shell.is-view-list .km-shop-card.is-details-open .km-card-image-wrap {
+    width: 62px;
+    min-height: 82px;
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .km-container-shell.is-view-list .km-card-body,
+  .km-container-shell.is-view-list .km-shop-card.is-details-open .km-card-body {
+    min-height: 82px;
+    padding: 10px 12px;
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .km-container-shell.is-view-list .km-card-actions,
+  .km-container-shell.is-view-list .km-shop-card.is-details-open .km-card-actions {
+    padding: 8px 10px 10px;
+    border-top: 1px solid var(--km-line);
+    border-left: 0;
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .km-container-panel-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+  }
+}
+
+@container km-container-window (max-width: 520px) {
+  .km-container-config-hero,
+  .km-container-config-settings,
+  .km-container-currency-config,
+  .km-container-inventory-config,
+  .km-container-hero,
+  .km-container-shell > .km-shop-toolbar,
+  .km-container-inventory {
+    padding-right: 13px;
+    padding-left: 13px;
+  }
+
+  .km-container-config-form .km-config-item {
+    grid-template-columns: 44px minmax(0, 1fr) 64px;
+    gap: 8px;
+  }
+
+  .km-container-config-form .km-config-item > img {
+    width: 44px;
+    height: 44px;
+  }
+
+  .km-container-config-form > .km-config-footer {
+    padding: 9px 13px;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .km-container-config-form > .km-config-footer .km-primary-button {
+    width: 100%;
+  }
+
+  .km-container-hero .km-shop-heading h2 {
+    font-size: 20px;
+  }
+
+  .km-container-content-scroll > .km-range-warning,
+  .km-container-currency-panel {
+    margin-right: 13px;
+    margin-left: 13px;
+  }
+
+  .km-container-currency-list {
+    grid-template-columns: 1fr;
+  }
+
+  .km-container-shell.is-view-full .km-shop-card {
+    min-height: 0;
+    grid-template-columns: 1fr;
+    grid-template-rows: 170px auto auto;
+  }
+
+  .km-container-shell.is-view-full .km-card-image-wrap {
+    width: 100%;
+    height: 170px;
+    min-height: 170px;
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .km-container-shell.is-view-full .km-card-body {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .km-container-shell.is-view-full .km-card-actions {
+    grid-column: 1;
+    grid-row: 3;
+  }
+}
+
+@container km-container-window (max-width: 390px) {
+  .km-container-config-form .km-config-item {
+    grid-template-columns: minmax(0, 1fr) 64px;
+  }
+
+  .km-container-config-form .km-config-item > img {
+    display: none;
+  }
+
+  .km-container-currency-input {
+    grid-template-columns: 28px minmax(0, 1fr) 68px;
+  }
+
+  .km-container-currency-input img,
+  .km-container-currency-input .km-container-currency-symbol {
+    width: 28px;
+    height: 28px;
+  }
+
+  .km-container-currency-input input {
+    width: 68px;
+  }
+
+  .km-container-shell > .km-shop-toolbar .km-shop-toolbar-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .km-container-shell .km-view-toggle {
+    width: 100%;
+  }
+
+  .km-container-shell .km-view-button {
+    flex: 1 1 0;
+    justify-content: center;
+  }
+
+  .km-container-take-all {
+    width: 100%;
+  }
+
+  .km-container-currency-card {
+    grid-template-columns: 32px minmax(0, 1fr);
+  }
+
+  .km-container-take-currency {
+    width: 100%;
+    grid-column: 1 / -1;
+  }
+
+  .km-container-shell.is-view-list .km-shop-card,
+  .km-container-shell.is-view-list .km-shop-card.is-details-open {
+    grid-template-columns: 54px minmax(0, 1fr);
+  }
+
+  .km-container-shell.is-view-list .km-card-image-wrap,
+  .km-container-shell.is-view-list .km-shop-card.is-details-open .km-card-image-wrap {
+    width: 54px;
+  }
+
+  .km-container-shell .km-container-card-actions,
+  .km-container-shell.is-view-list .km-container-card-actions,
+  .km-container-shell.is-view-full .km-container-card-actions {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  .km-container-shell .km-container-card-actions .km-quantity-wrap input {
+    width: 64px;
+  }
+}
+/* Foundry V12 compatibility: keep system form and image rules out of container layouts. */
+.khuzoe-container .km-container-config-form {
+  display: grid !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  grid-template-rows: auto minmax(0, 1fr) auto !important;
+  gap: 0 !important;
+}
+
+.khuzoe-container .km-container-config-form > .km-container-config-hero {
+  display: grid !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 80px !important;
+  padding: 14px 18px !important;
+  grid-template-columns: 52px minmax(0, 1fr) 178px !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.khuzoe-container .km-container-config-portrait {
+  display: block !important;
+  width: 52px !important;
+  min-width: 52px !important;
+  max-width: 52px !important;
+  height: 52px !important;
+  min-height: 52px !important;
+  max-height: 52px !important;
+  margin: 0 !important;
+  object-fit: contain !important;
+  flex: 0 0 52px !important;
+}
+
+.khuzoe-container .km-container-config-form > .km-container-config-scroll {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+.khuzoe-container .km-container-config-settings {
+  display: grid !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 14px 18px !important;
+  grid-template-columns: minmax(180px, 0.8fr) minmax(240px, 1.2fr) !important;
+  gap: 11px 14px !important;
+}
+
+.khuzoe-container .km-container-config-settings > .km-field {
+  display: flex !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+
+.khuzoe-container .km-container-description-field {
+  grid-column: 1 / -1 !important;
+}
+
+.khuzoe-container .km-container-file-input {
+  display: grid !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  grid-template-columns: minmax(0, 1fr) 36px !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.khuzoe-container .km-container-file-input > input {
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+
+.khuzoe-container .km-container-file-input > .km-container-pick-image {
+  display: inline-grid !important;
+  width: 36px !important;
+  min-width: 36px !important;
+  max-width: 36px !important;
+  height: 34px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  place-items: center !important;
+}
+
+.khuzoe-container .km-container-currency-config {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 13px 18px 14px !important;
+  overflow: visible !important;
+}
+
+.khuzoe-container .km-container-currency-config > .km-section-heading,
+.khuzoe-container .km-container-inventory-config > .km-section-heading {
+  display: flex !important;
+  width: 100% !important;
+}
+
+.khuzoe-container .km-container-currency-grid {
+  display: grid !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)) !important;
+  align-items: stretch !important;
+  gap: 7px !important;
+}
+
+.khuzoe-container .km-container-currency-input {
+  display: grid !important;
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 46px !important;
+  margin: 0 !important;
+  padding: 7px 8px !important;
+  grid-template-columns: 30px minmax(0, 1fr) 72px !important;
+  align-items: center !important;
+  gap: 7px !important;
+}
+
+.khuzoe-container .km-container-currency-input > img,
+.khuzoe-container .km-container-currency-input > .km-container-currency-symbol {
+  display: grid !important;
+  width: 30px !important;
+  min-width: 30px !important;
+  max-width: 30px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  place-items: center !important;
+  object-fit: contain !important;
+  flex: 0 0 30px !important;
+}
+
+.khuzoe-container .km-container-currency-input > .km-container-currency-name {
+  display: flex !important;
+  min-width: 0 !important;
+  flex-direction: column !important;
+}
+
+.khuzoe-container .km-container-currency-input > input {
+  display: block !important;
+  width: 72px !important;
+  min-width: 72px !important;
+  max-width: 72px !important;
+  height: 34px !important;
+  margin: 0 !important;
+  padding: 0 8px !important;
+}
+
+.khuzoe-container .km-container-inventory-config {
+  display: block !important;
+  width: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 14px 18px 20px !important;
+  overflow: visible !important;
+}
+
+.khuzoe-container .km-container-config-form .km-config-inventory {
+  display: block !important;
+  width: 100% !important;
+  min-height: 0 !important;
+  margin: 10px 0 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.khuzoe-container .km-container-config-form .km-config-item {
+  display: grid !important;
+  width: 100% !important;
+  margin: 0 0 7px !important;
+  padding: 9px !important;
+  grid-template-columns: 52px minmax(0, 1fr) 68px !important;
+  align-items: start !important;
+  gap: 10px !important;
+}
+
+.khuzoe-container .km-container-config-form .km-config-item > img {
+  display: block !important;
+  width: 52px !important;
+  min-width: 52px !important;
+  max-width: 52px !important;
+  height: 52px !important;
+  min-height: 52px !important;
+  max-height: 52px !important;
+  margin: 0 !important;
+  object-fit: contain !important;
+}
+
+.khuzoe-container .km-container-config-form > .km-config-footer {
+  display: flex !important;
+  width: 100% !important;
+  min-height: 56px !important;
+  margin: 0 !important;
+  padding: 10px 18px !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+
+.khuzoe-container .km-container-shell {
+  position: relative !important;
+  display: grid !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  grid-template-rows: auto auto minmax(0, 1fr) !important;
+  gap: 0 !important;
+}
+
+.khuzoe-container .km-container-shell > .km-container-content-scroll {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+.khuzoe-container .km-container-currency-card > img,
+.khuzoe-container .km-container-currency-card > .km-container-currency-symbol {
+  display: grid !important;
+  width: 34px !important;
+  min-width: 34px !important;
+  max-width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  margin: 0 !important;
+  object-fit: contain !important;
+  flex: 0 0 34px !important;
+}
+
+.khuzoe-container .km-container-shell .km-card-image-button > img {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  margin: 0 !important;
+  object-fit: contain !important;
+}
+
+@container km-container-window (max-width: 700px) {
+  .khuzoe-container .km-container-config-form > .km-container-config-hero {
+    grid-template-columns: 48px minmax(0, 1fr) !important;
+  }
+
+  .khuzoe-container .km-container-empty-behavior {
+    grid-column: 1 / -1 !important;
+  }
+
+  .khuzoe-container .km-container-config-settings {
+    grid-template-columns: 1fr !important;
+  }
+
+  .khuzoe-container .km-container-description-field {
+    grid-column: auto !important;
+  }
+}
+
+/* Compact image chooser: the preview is the control, never a visible file path. */
+.khuzoe-container .km-container-portrait-button {
+  position: relative !important;
+  display: grid !important;
+  width: 52px !important;
+  min-width: 52px !important;
+  max-width: 52px !important;
+  height: 52px !important;
+  min-height: 52px !important;
+  max-height: 52px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(244, 203, 117, 0.66) !important;
+  border-radius: 11px !important;
+  background: rgba(0, 0, 0, 0.34) !important;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.28) !important;
+  place-items: center !important;
+  cursor: pointer !important;
+}
+
+.khuzoe-container .km-container-portrait-button:hover {
+  border-color: var(--km-gold-bright) !important;
+  filter: brightness(1.08);
+}
+
+.khuzoe-container .km-container-portrait-button > .km-container-config-portrait {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+}
+
+.khuzoe-container .km-container-image-edit-cue {
+  position: absolute !important;
+  right: 2px !important;
+  bottom: 2px !important;
+  display: grid !important;
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 50% !important;
+  color: #241a0b !important;
+  background: var(--km-gold-bright) !important;
+  place-items: center !important;
+  font-size: 9px !important;
+  pointer-events: none !important;
+}
+
+.khuzoe-container .km-container-config-settings {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.khuzoe-container .km-container-card-actions,
+.khuzoe-container .km-container-shell.is-view-list .km-container-card-actions,
+.khuzoe-container .km-container-shell.is-view-full .km-container-card-actions {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.khuzoe-container .km-container-card-actions .km-order-buttons {
+  width: 100% !important;
+  grid-column: 1 / -1 !important;
+  justify-content: flex-end !important;
+}
+/* Transactional container deposits and GM withdrawal */
+.khuzoe-container .km-container-config-footer-actions {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.khuzoe-container .km-container-open-loot {
+  width: auto;
+  min-width: 190px;
+  height: 36px;
+  margin: 0;
+  padding: 0 14px;
+  border: 1px solid rgba(239, 200, 110, 0.48);
+  border-radius: 8px;
+  color: #f3dfb4;
+  background: linear-gradient(180deg, #302d26, #1d1c18);
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.24);
+}
+
+.khuzoe-container .km-container-open-loot:hover {
+  border-color: #efc86e;
+  color: #fff3d0;
+  filter: brightness(1.08);
+}
+
+.khuzoe-container .km-container-open-loot:focus-visible {
+  outline: none;
+  box-shadow: var(--km-focus);
+}
+
+@media (max-width: 720px) {
+  .khuzoe-container .km-container-config-footer-actions {
+    width: 100%;
+  }
+
+  .khuzoe-container .km-container-config-footer-actions > button {
+    min-width: 0;
+    flex: 1 1 0;
+  }
+}
+/* Shared deposits and keyed container locks */
+.khuzoe-container .km-container-shell {
+  grid-template-rows: auto auto auto minmax(0, 1fr) !important;
+}
+
+.khuzoe-container .km-container-key-config {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid rgba(216, 169, 77, 0.2);
+  border-radius: 10px;
+  background: linear-gradient(145deg, rgba(36, 31, 22, 0.82), rgba(12, 13, 12, 0.72));
+}
+
+.khuzoe-container .km-container-config-key,
+.khuzoe-container .km-container-key-slot {
+  display: grid;
+  min-width: 0;
+  align-items: center;
+  gap: 11px;
+  border: 1px solid rgba(239, 200, 110, 0.32);
+  border-radius: 10px;
+  background: rgba(7, 8, 7, 0.66);
+}
+
+.khuzoe-container .km-container-config-key {
+  padding: 9px;
+  grid-template-columns: 48px minmax(0, 1fr) 34px;
+}
+
+.khuzoe-container .km-container-config-key.is-inserted {
+  border-color: rgba(98, 190, 118, 0.55);
+  box-shadow: inset 3px 0 rgba(98, 190, 118, 0.75);
+}
+
+.khuzoe-container .km-container-config-key > img,
+.khuzoe-container .km-container-key-slot-icon,
+.khuzoe-container .km-container-key-slot-icon > img {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.khuzoe-container .km-container-key-slot-icon {
+  display: grid;
+  border: 1px solid rgba(239, 200, 110, 0.35);
+  background: #0b0c0b;
+  place-items: center;
+}
+
+.khuzoe-container .km-container-config-key > div,
+.khuzoe-container .km-container-key-slot-copy {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.khuzoe-container .km-container-config-key strong,
+.khuzoe-container .km-container-key-slot-copy strong {
+  overflow: hidden;
+  color: #f5deb0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.khuzoe-container .km-container-config-key span,
+.khuzoe-container .km-container-key-slot-copy small,
+.khuzoe-container .km-container-key-inserted-note {
+  color: #cbbd9f;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.khuzoe-container .km-container-key-inserted-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 11px;
+  border-radius: 8px;
+  color: #bfe1c4;
+  background: rgba(51, 116, 66, 0.18);
+}
+
+.khuzoe-container .km-container-transfer-tools {
+  display: grid;
+  min-width: 0;
+  gap: 7px;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(216, 169, 77, 0.18);
+  background: rgba(9, 10, 9, 0.78);
+}
+
+.khuzoe-container .km-container-key-slot {
+  padding: 8px 10px;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  border-color: rgba(98, 190, 118, 0.5);
+  background: linear-gradient(90deg, rgba(43, 96, 55, 0.22), rgba(12, 13, 12, 0.76));
+}
+
+.khuzoe-container .km-container-take-key {
+  width: auto;
+  min-width: 150px;
+  min-height: 36px;
+  margin: 0;
+  padding: 0 12px;
+  border: 1px solid rgba(239, 200, 110, 0.48);
+  border-radius: 8px;
+  color: #f5dfb3;
+  background: #29261f;
+  font-weight: 800;
+}
+
+.khuzoe-container .km-container-player-drop-zone {
+  display: grid;
+  min-width: 0;
+  padding: 8px 12px;
+  align-items: center;
+  gap: 10px;
+  grid-template-columns: 30px minmax(0, 1fr);
+  border: 1px dashed rgba(216, 169, 77, 0.42);
+  border-radius: 9px;
+  color: #d7c8aa;
+  background: rgba(216, 169, 77, 0.06);
+}
+
+.khuzoe-container .km-container-player-drop-zone > i {
+  color: #efc86e;
+  font-size: 18px;
+  text-align: center;
+}
+
+.khuzoe-container .km-container-player-drop-zone > div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.khuzoe-container .km-container-player-drop-zone strong {
+  color: #f0dfbd;
+  font-size: 12px;
+}
+
+.khuzoe-container .km-container-player-drop-zone span {
+  color: #b9ad95;
+  font-size: 10px;
+}
+
+.khuzoe-container .km-container-player-drop-zone.is-dragover {
+  border-color: #efc86e;
+  background: rgba(216, 169, 77, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(239, 200, 110, 0.3);
+}
+
+.khuzoe-container .km-container-player-drop-zone.is-disabled {
+  opacity: 0.52;
+}
+
+@media (max-width: 720px) {
+  .khuzoe-container .km-container-key-slot {
+    grid-template-columns: 42px minmax(0, 1fr);
+  }
+
+  .khuzoe-container .km-container-key-slot-icon,
+  .khuzoe-container .km-container-key-slot-icon > img {
+    width: 42px;
+    height: 42px;
+  }
+
+  .khuzoe-container .km-container-take-key {
+    width: 100%;
+    grid-column: 1 / -1;
+  }
+}

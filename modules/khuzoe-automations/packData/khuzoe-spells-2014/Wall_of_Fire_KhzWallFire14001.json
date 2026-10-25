@@ -1,0 +1,336 @@
+{
+  "_id": "KhzWallFire14001",
+  "name": "Wall of Fire",
+  "type": "spell",
+  "img": "icons/magic/fire/barrier-wall-flame-ring-yellow.webp",
+  "system": {
+    "description": {
+      "value": "<p>Crei un muro di fuoco su una superficie solida entro gittata. Puoi formare un muro lineare lungo fino a 60 ft, alto fino a 20 ft e spesso 1 ft, oppure un anello con diametro fino a 20 ft, alto fino a 20 ft e spesso 1 ft. Il muro è opaco e dura per la concentrazione, fino a 1 minuto.</p><p>Quando appare, ogni creatura nella sua area effettua un tiro salvezza su Destrezza, subendo 5d8 danni da fuoco se fallisce o la metà se riesce. Scegli un lato caldo: una creatura che termina il turno entro 10 ft da quel lato o dentro il muro subisce 5d8 danni da fuoco. Subisce lo stesso danno quando entra nel muro per la prima volta in un turno.</p><p>Lanciato con uno slot di 5° livello o superiore, il danno aumenta di 1d8 per ogni livello dello slot oltre il 4°.</p><p><strong>Automazione.</strong> Scegli linea o anello, dimensioni, altezza e lato caldo. Le Regioni vengono collegate alla concentrazione; il TS iniziale, l'ingresso/attraversamento e la fine turno sono gestiti automaticamente senza doppio danno nello stesso turno.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Player's Handbook",
+      "book": "",
+      "page": "285",
+      "license": "",
+      "rules": "2014"
+    },
+    "activation": {
+      "type": "action",
+      "condition": "",
+      "value": 1
+    },
+    "duration": {
+      "value": "1",
+      "units": "minute"
+    },
+    "target": {
+      "affects": {
+        "type": "creature",
+        "count": "",
+        "choice": false,
+        "special": "Creature nell'area effettiva del muro"
+      },
+      "template": {
+        "units": "ft",
+        "type": "",
+        "size": "",
+        "width": "",
+        "height": "",
+        "count": "",
+        "contiguous": false,
+        "stationary": true
+      }
+    },
+    "range": {
+      "value": "120",
+      "units": "ft",
+      "special": ""
+    },
+    "uses": {
+      "max": "",
+      "recovery": [],
+      "spent": 0
+    },
+    "level": 4,
+    "school": "evo",
+    "materials": {
+      "value": "Un piccolo pezzo di fosforo",
+      "consumed": false,
+      "cost": 0,
+      "supply": 0
+    },
+    "preparation": {
+      "mode": "prepared",
+      "prepared": false
+    },
+    "properties": [
+      "vocal",
+      "somatic",
+      "material",
+      "concentration"
+    ],
+    "activities": {
+      "KhzWallCast14001": {
+        "_id": "KhzWallCast14001",
+        "type": "save",
+        "activation": {
+          "type": "action",
+          "value": null,
+          "override": false
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": true
+        },
+        "description": {
+          "chatFlavor": "Crea il muro e risolve il tiro salvezza delle creature nella sua area effettiva."
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": false
+        },
+        "effects": [],
+        "range": {
+          "override": false
+        },
+        "target": {
+          "prompt": false,
+          "template": {
+            "contiguous": false,
+            "stationary": true,
+            "units": "ft",
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "count": ""
+          },
+          "affects": {
+            "choice": false,
+            "count": "",
+            "type": "creature",
+            "special": "Nella Regione sottile del muro"
+          },
+          "override": true
+        },
+        "damage": {
+          "onSave": "half",
+          "parts": [
+            {
+              "number": 5,
+              "denomination": 8,
+              "bonus": "",
+              "types": [
+                "fire"
+              ],
+              "custom": {
+                "enabled": false,
+                "formula": ""
+              },
+              "scaling": {
+                "mode": "whole",
+                "number": 1,
+                "formula": ""
+              }
+            }
+          ],
+          "critical": {
+            "allow": false
+          }
+        },
+        "save": {
+          "ability": [
+            "dex"
+          ],
+          "dc": {
+            "calculation": "spellcasting",
+            "formula": ""
+          }
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 0,
+        "name": "Cast",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "identifier": "khuzoe-wall-of-fire-cast",
+          "confirmTargets": "never",
+          "autoTargetType": "any",
+          "autoTargetAction": "none",
+          "automationOnly": false,
+          "magicEffect": true,
+          "magicDamage": true
+        },
+        "flags": {}
+      },
+      "KhzWallDmg140001": {
+        "_id": "KhzWallDmg140001",
+        "type": "damage",
+        "activation": {
+          "type": "special",
+          "value": null,
+          "override": true,
+          "condition": "Ingresso o attraversamento del muro, oppure fine turno nel lato caldo."
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": false
+        },
+        "description": {
+          "chatFlavor": "Danno automatico della Regione di Wall of Fire."
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "override": true,
+          "value": null,
+          "units": "any",
+          "special": "Muro o lato caldo"
+        },
+        "target": {
+          "prompt": false,
+          "template": {
+            "contiguous": false,
+            "stationary": true,
+            "units": "ft",
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "count": ""
+          },
+          "affects": {
+            "choice": false,
+            "count": "1",
+            "type": "creature",
+            "special": ""
+          },
+          "override": true
+        },
+        "damage": {
+          "critical": {
+            "allow": false
+          },
+          "parts": [
+            {
+              "number": 5,
+              "denomination": 8,
+              "bonus": "",
+              "types": [
+                "fire"
+              ],
+              "custom": {
+                "enabled": false,
+                "formula": ""
+              },
+              "scaling": {
+                "mode": "whole",
+                "number": 1,
+                "formula": ""
+              }
+            }
+          ]
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 10,
+        "name": "Wall of Fire: Region Damage",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "identifier": "khuzoe-wall-of-fire-damage",
+          "confirmTargets": "never",
+          "autoTargetType": "any",
+          "autoTargetAction": "none",
+          "automationOnly": true,
+          "magicEffect": true,
+          "magicDamage": true
+        },
+        "flags": {
+          "cat": {
+            "hidden": true
+          }
+        }
+      }
+    },
+    "identifier": "wall-of-fire"
+  },
+  "effects": [],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "never",
+      "magicdam": true,
+      "magiceffect": true
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [
+          "KhzWallDmg140001"
+        ],
+        "effect": []
+      }
+    },
+    "khuzoe-automations": {
+      "activityIdentifiers": {
+        "cast": "KhzWallCast14001",
+        "damage": "KhzWallDmg140001"
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "wall-of-fire"
+          }
+        ]
+      }
+    }
+  },
+  "folder": null,
+  "sort": 30,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzWallFire14001"
+}

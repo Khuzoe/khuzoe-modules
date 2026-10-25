@@ -1,0 +1,66 @@
+{
+  "_id": "KhzRKMasterRune1",
+  "name": "Master of Runes",
+  "type": "feat",
+  "img": "icons/commodities/treasure/token-runed-os-gold.webp",
+  "system": {
+    "description": {
+      "value": "<p>Puoi invocare ciascuna runa conosciuta due volte, recuperando tutti gli usi con un riposo breve o lungo.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Tasha's Cauldron of Everything",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "type": {
+      "value": "class",
+      "subtype": ""
+    },
+    "properties": [],
+    "requirements": "Rune Knight 15",
+    "prerequisites": {
+      "level": 15
+    },
+    "activities": {},
+    "identifier": "master-of-runes",
+    "enchant": {}
+  },
+  "effects": [],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": false,
+      "magiceffect": false
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [],
+        "effect": []
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzRKMasterRune1"
+}

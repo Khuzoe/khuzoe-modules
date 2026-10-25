@@ -1,0 +1,255 @@
+{
+  "_id": "KhzBless14Auto01",
+  "name": "Bless",
+  "type": "spell",
+  "img": "icons/magic/holy/prayer-hands-glowing-yellow-green.webp",
+  "system": {
+    "description": {
+      "value": "<p>Automazione Khuzoe per <strong>Bless</strong>: applica 1d4 ai tiri per colpire e ai tiri salvezza dei bersagli per la durata dell'incantesimo.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Khuzoe Automations",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "activation": {
+      "type": "action",
+      "condition": "",
+      "value": 1
+    },
+    "duration": {
+      "value": "1",
+      "units": "minute"
+    },
+    "target": {
+      "affects": {
+        "type": "creature",
+        "count": "@item.level + 2",
+        "choice": false,
+        "special": ""
+      },
+      "template": {
+        "units": "",
+        "contiguous": false,
+        "type": ""
+      }
+    },
+    "range": {
+      "value": "30",
+      "units": "ft",
+      "special": ""
+    },
+    "uses": {
+      "max": "",
+      "recovery": [],
+      "spent": 0
+    },
+    "level": 1,
+    "school": "enc",
+    "materials": {
+      "value": "",
+      "consumed": false,
+      "cost": 0,
+      "supply": 0
+    },
+    "preparation": {
+      "mode": "prepared",
+      "prepared": false
+    },
+    "properties": [
+      "vocal",
+      "somatic",
+      "material",
+      "concentration"
+    ],
+    "activities": {
+      "KhzBlessCast0001": {
+        "_id": "KhzBlessCast0001",
+        "type": "utility",
+        "activation": {
+          "type": "action",
+          "value": null,
+          "override": false
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": true
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": false
+        },
+        "effects": [
+          {
+            "_id": "KhzBlessEffect01",
+            "level": {
+              "min": null,
+              "max": null
+            }
+          }
+        ],
+        "range": {
+          "override": false
+        },
+        "target": {
+          "prompt": true,
+          "template": {
+            "contiguous": false,
+            "units": "ft"
+          },
+          "affects": {
+            "choice": false
+          },
+          "override": false
+        },
+        "roll": {
+          "formula": "",
+          "name": "",
+          "prompt": false,
+          "visible": false
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 0,
+        "name": "Cast",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {}
+      }
+    },
+    "identifier": "bless"
+  },
+  "effects": [
+    {
+      "_id": "KhzBlessEffect01",
+      "name": "Bless",
+      "img": "icons/magic/holy/prayer-hands-glowing-yellow-green.webp",
+      "type": "base",
+      "system": {
+        "changes": [
+          {
+            "key": "system.bonuses.abilities.save",
+            "value": "1d4",
+            "priority": null,
+            "type": "add"
+          },
+          {
+            "key": "system.bonuses.mwak.attack",
+            "value": "1d4",
+            "priority": null,
+            "type": "add"
+          },
+          {
+            "key": "system.bonuses.msak.attack",
+            "value": "1d4",
+            "priority": null,
+            "type": "add"
+          },
+          {
+            "key": "system.bonuses.rsak.attack",
+            "value": "1d4",
+            "priority": null,
+            "type": "add"
+          },
+          {
+            "key": "system.bonuses.rwak.attack",
+            "value": "1d4",
+            "priority": null,
+            "type": "add"
+          }
+        ]
+      },
+      "disabled": false,
+      "duration": {
+        "value": 60,
+        "units": "seconds",
+        "expiry": "turnStart",
+        "expired": false
+      },
+      "origin": null,
+      "tint": "#ffffff",
+      "transfer": false,
+      "statuses": [],
+      "description": "<p>Aggiunge 1d4 ai tiri per colpire e ai tiri salvezza.</p>",
+      "showIcon": 1,
+      "flags": {
+        "core": {
+          "overlay": false
+        },
+        "dae": {
+          "transfer": false,
+          "stackable": "noneNameOnly",
+          "enableCondition": "",
+          "disableCondition": "",
+          "expiryMode": "default",
+          "durationExpression": "",
+          "macroRepeat": "none",
+          "disableIncapacitated": false,
+          "selfTarget": false,
+          "selfTargetAlways": false,
+          "dontApply": false,
+          "specialDuration": []
+        },
+        "dnd5e": {
+          "riders": {
+            "statuses": []
+          }
+        },
+        "midi-qol": {
+          "forceCEOff": true
+        }
+      },
+      "start": null,
+      "folder": null,
+      "sort": 0,
+      "_key": "!items.effects!KhzBless14Auto01.KhzBlessEffect01"
+    }
+  ],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": false,
+      "magiceffect": true
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      }
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": []
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzBless14Auto01"
+}

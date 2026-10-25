@@ -1,0 +1,156 @@
+{
+  "_id": "KhzWildShapeA001",
+  "name": "Wild Shape",
+  "type": "feat",
+  "img": "icons/creatures/mammals/wolf-howl-moon-black.webp",
+  "system": {
+    "description": {
+      "value": "<p>Come azione assumi magicamente la forma di una bestia che hai visto. Khuzoe Automations mostra soltanto le forme consentite dal tuo livello, dalle capacità del circolo e dalle sorgenti configurate.</p><p>La trasformazione usa il sistema nativo D&amp;D5e v14. In forma animale, usa di nuovo Wild Shape o il comando nella barra della scheda per tornare alla forma originale.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Player's Handbook 2014",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "uses": {
+      "max": "2",
+      "spent": 0,
+      "recovery": [
+        {
+          "period": "sr",
+          "type": "recoverAll"
+        }
+      ]
+    },
+    "type": {
+      "value": "class",
+      "subtype": ""
+    },
+    "properties": [],
+    "requirements": "Druid 2",
+    "prerequisites": {
+      "level": 2
+    },
+    "activities": {
+      "KhzWildShapeU001": {
+        "_id": "KhzWildShapeU001",
+        "type": "utility",
+        "activation": {
+          "type": "action",
+          "value": 1,
+          "condition": "",
+          "override": true
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": false
+        },
+        "description": {
+          "chatFlavor": "Wild Shape"
+        },
+        "duration": {
+          "value": "",
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "value": null,
+          "units": "self",
+          "special": "",
+          "override": true
+        },
+        "target": {
+          "prompt": false,
+          "template": {
+            "count": "",
+            "contiguous": false,
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "units": "ft"
+          },
+          "affects": {
+            "count": "",
+            "type": "self",
+            "choice": false,
+            "special": ""
+          },
+          "override": true
+        },
+        "roll": {
+          "formula": "",
+          "name": "",
+          "prompt": false,
+          "visible": false
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 0,
+        "name": "Wild Shape",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "flags": {},
+        "midiProperties": {}
+      }
+    },
+    "identifier": "wild-shape",
+    "enchant": {}
+  },
+  "effects": [],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": false,
+      "magiceffect": false
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [],
+        "effect": []
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "wild-shape"
+          }
+        ]
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzWildShapeA001"
+}

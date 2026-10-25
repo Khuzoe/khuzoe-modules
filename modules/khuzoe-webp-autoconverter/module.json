@@ -1,0 +1,18 @@
+{
+  "id": "khuzoe-webp-autoconverter",
+  "title": "Khuzoe WebP Autoconverter",
+  "description": "Converte automaticamente PNG/JPG caricati tramite FilePicker in WebP prima dell'upload.",
+  "version": "1.1.0",
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14.367"
+  },
+  "authors": [
+    {
+      "name": "Khuzoe"
+    }
+  ],
+  "esmodules": [
+    "scripts/main.js"
+  ]
+}

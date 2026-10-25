@@ -1,0 +1,181 @@
+{
+  "_id": "KhzRKFireRune001",
+  "name": "Fire Rune",
+  "type": "feat",
+  "img": "icons/commodities/treasure/token-runed-circles-red.webp",
+  "system": {
+    "description": {
+      "value": "<p>Il bonus di competenza è raddoppiato per le prove con strumenti in cui sei competente.</p><p>Quando colpisci con un attacco con arma, puoi invocare la runa: infliggi 2d6 danni da fuoco extra. Il bersaglio effettua un TS Forza contro la tua CD runica; con un fallimento è restrained per 1 minuto, subisce 2d6 fuoco all'inizio di ogni turno e ripete il TS alla fine del turno.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Tasha's Cauldron of Everything",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "uses": {
+      "max": "1",
+      "spent": 0,
+      "recovery": [
+        {
+          "period": "sr",
+          "type": "recoverAll"
+        }
+      ]
+    },
+    "type": {
+      "value": "class",
+      "subtype": ""
+    },
+    "properties": [],
+    "requirements": "Rune Knight 3",
+    "prerequisites": {
+      "level": 3
+    },
+    "activities": {
+      "KhzRKFireSave001": {
+        "_id": "KhzRKFireSave001",
+        "type": "save",
+        "activation": {
+          "type": "special",
+          "value": null,
+          "condition": "",
+          "override": true
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": false
+        },
+        "description": {
+          "chatFlavor": "Fire Rune: ceppi infuocati"
+        },
+        "duration": {
+          "value": "",
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "value": null,
+          "units": "any",
+          "special": "",
+          "override": true
+        },
+        "target": {
+          "prompt": false,
+          "template": {
+            "count": "",
+            "contiguous": false,
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "units": "ft"
+          },
+          "affects": {
+            "count": "1",
+            "type": "creature",
+            "choice": false,
+            "special": ""
+          },
+          "override": true
+        },
+        "damage": {
+          "onSave": "none",
+          "parts": [],
+          "critical": {
+            "allow": false
+          }
+        },
+        "save": {
+          "ability": [
+            "str"
+          ],
+          "dc": {
+            "calculation": "con",
+            "formula": ""
+          }
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 0,
+        "name": "Fire Rune: ceppi infuocati",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "flags": {
+          "cat": {
+            "hidden": true
+          }
+        },
+        "midiProperties": {
+          "automationOnly": true
+        }
+      }
+    },
+    "identifier": "fire-rune",
+    "enchant": {}
+  },
+  "effects": [],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": false,
+      "magiceffect": false
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [
+          "KhzRKFireSave001"
+        ],
+        "effect": []
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "fire-rune"
+          }
+        ],
+        "tool": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "fire-rune"
+          }
+        ]
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzRKFireRune001"
+}

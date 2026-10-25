@@ -1,0 +1,228 @@
+{
+  "_id": "KhzNpcFeyProt001",
+  "name": "Protettore Spirituale",
+  "type": "feat",
+  "img": "icons/magic/defensive/shield-barrier-glowing-triangle-blue.webp",
+  "system": {
+    "description": {
+      "value": "<p>Quando una creatura nell'Aura Rinvigorente subisce danni, lo Spirito può usare la sua reazione per subirli al posto suo.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Homebrew",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014",
+      "revision": 1
+    },
+    "uses": {
+      "max": "",
+      "recovery": [],
+      "spent": 0
+    },
+    "type": {
+      "value": "",
+      "subtype": ""
+    },
+    "requirements": "Spirito Elementale Fatato",
+    "properties": [],
+    "activities": {
+      "xztCNqtVFEdqCbow": {
+        "_id": "xztCNqtVFEdqCbow",
+        "type": "utility",
+        "activation": {
+          "type": "reaction",
+          "value": 1,
+          "condition": "",
+          "override": false
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false
+          },
+          "spellSlot": true
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "concentration": false,
+          "value": "",
+          "units": "inst",
+          "special": "",
+          "override": false
+        },
+        "effects": [],
+        "range": {
+          "units": "self",
+          "special": "",
+          "override": false
+        },
+        "target": {
+          "template": {
+            "count": "",
+            "contiguous": false,
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "units": "ft",
+            "stationary": false
+          },
+          "affects": {
+            "count": "",
+            "type": "",
+            "choice": false,
+            "special": ""
+          },
+          "prompt": true,
+          "override": false
+        },
+        "uses": {
+          "spent": 0,
+          "max": "",
+          "recovery": []
+        },
+        "roll": {
+          "formula": "",
+          "name": "Subisce i danni",
+          "prompt": false,
+          "visible": false
+        },
+        "sort": 0,
+        "name": "Subisce i danni",
+        "useConditionText": "",
+        "useConditionReason": "",
+        "effectConditionText": "",
+        "macroData": {
+          "name": "",
+          "command": ""
+        },
+        "ignoreTraits": {
+          "idi": false,
+          "idr": false,
+          "idv": false,
+          "ida": false,
+          "idm": false
+        },
+        "midiProperties": {
+          "ignoreTraits": [],
+          "triggeredActivityId": "none",
+          "triggeredActivityConditionText": "",
+          "triggeredActivityTargets": "targets",
+          "triggeredActivityRollAs": "self",
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "automationOnly": false,
+          "otherActivityCompatible": true,
+          "identifier": "",
+          "displayActivityName": false,
+          "rollMode": "default",
+          "chooseEffects": false,
+          "toggleEffect": false,
+          "ignoreFullCover": false,
+          "triggeredActivityConsume": true,
+          "triggeredActivityConfigure": true,
+          "autoConsume": false,
+          "forceConsumeDialog": "default",
+          "forceRollDialog": "default",
+          "forceDamageDialog": "default",
+          "otherActivityAsParentType": true,
+          "removeChatButtons": "default",
+          "magicEffect": false,
+          "magicDamage": false,
+          "noConcentrationCheck": false,
+          "skipConcentrationCheck": false,
+          "autoCEEffects": "default"
+        },
+        "isOverTimeFlag": false,
+        "overTimeProperties": {
+          "saveRemoves": true,
+          "preRemoveConditionText": "",
+          "postRemoveConditionText": "",
+          "rollAs": "target"
+        },
+        "otherActivityId": "none",
+        "img": null,
+        "flags": {},
+        "visibility": {
+          "level": {},
+          "requireAttunement": false,
+          "requireIdentification": false,
+          "requireMagic": false
+        },
+        "regionBehavior": {
+          "enabled": false,
+          "dispositionFilter": -1,
+          "excludeSource": true,
+          "oncePerTurn": true,
+          "wallRestriction": "none",
+          "regionVisibility": 2,
+          "attachToken": "default",
+          "rules": []
+        },
+        "regionLight": {
+          "enabled": false,
+          "dim": 0,
+          "bright": 0,
+          "color": null,
+          "alpha": 0.5,
+          "luminosity": 0.5,
+          "animationType": "",
+          "animationSpeed": 5,
+          "animationIntensity": 5
+        },
+        "otherActivityAsParentType": true
+      }
+    },
+    "enchant": {},
+    "prerequisites": {
+      "level": null,
+      "repeatable": false,
+      "items": []
+    },
+    "identifier": "spirito-elementale-fatato-p-quando-una-creatura-n",
+    "advancement": {},
+    "cover": null,
+    "crewed": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "spirito-elementale-fatato-p-quando-una-creatura-n"
+          }
+        ],
+        "aura": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "spirito-elementale-fatato-p-quando-una-creatura-n"
+          }
+        ]
+      }
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": []
+      }
+    }
+  },
+  "_key": "!items!KhzNpcFeyProt001"
+}

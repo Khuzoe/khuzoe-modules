@@ -1,0 +1,207 @@
+{
+  "_id": "KhzRKHillRune001",
+  "name": "Hill Rune",
+  "type": "feat",
+  "img": "icons/commodities/treasure/token-runed-os-grey.webp",
+  "system": {
+    "description": {
+      "value": "<p>Hai resistenza ai danni da veleno e vantaggio ai tiri salvezza contro l'avvelenamento.</p><p>Come azione bonus puoi ottenere per 1 minuto resistenza ai danni contundenti, perforanti e taglienti.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Tasha's Cauldron of Everything",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "uses": {
+      "max": "1",
+      "spent": 0,
+      "recovery": [
+        {
+          "period": "sr",
+          "type": "recoverAll"
+        }
+      ]
+    },
+    "type": {
+      "value": "class",
+      "subtype": ""
+    },
+    "properties": [],
+    "requirements": "Rune Knight 7",
+    "prerequisites": {
+      "level": 7
+    },
+    "activities": {
+      "KhzRKHillUse0001": {
+        "_id": "KhzRKHillUse0001",
+        "type": "utility",
+        "activation": {
+          "type": "bonus",
+          "value": 1,
+          "condition": "",
+          "override": true
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": false
+        },
+        "description": {
+          "chatFlavor": "Hill Rune"
+        },
+        "duration": {
+          "value": "1",
+          "units": "minute",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "value": null,
+          "units": "self",
+          "special": "",
+          "override": true
+        },
+        "target": {
+          "prompt": false,
+          "template": {
+            "count": "",
+            "contiguous": false,
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "units": "ft"
+          },
+          "affects": {
+            "count": "",
+            "type": "self",
+            "choice": false,
+            "special": ""
+          },
+          "override": true
+        },
+        "roll": {
+          "formula": "",
+          "name": "",
+          "prompt": false,
+          "visible": false
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 0,
+        "name": "Hill Rune",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "flags": {},
+        "midiProperties": {}
+      }
+    },
+    "identifier": "hill-rune",
+    "enchant": {}
+  },
+  "effects": [
+    {
+      "_id": "KhzRKHillPass001",
+      "name": "Hill Rune: resistenza al veleno",
+      "img": "icons/commodities/treasure/token-runed-os-grey.webp",
+      "type": "base",
+      "system": {
+        "changes": [
+          {
+            "key": "system.traits.dr.value",
+            "value": "poison",
+            "priority": 20,
+            "type": "add"
+          }
+        ]
+      },
+      "disabled": false,
+      "duration": {
+        "value": null,
+        "units": "seconds",
+        "expired": false
+      },
+      "origin": null,
+      "tint": "#ffffff",
+      "transfer": true,
+      "statuses": [],
+      "description": "",
+      "showIcon": 0,
+      "flags": {
+        "core": {
+          "overlay": false
+        },
+        "dae": {
+          "transfer": true,
+          "stackable": "noneNameOnly",
+          "specialDuration": [],
+          "expiryMode": "delete",
+          "disableIncapacitated": false
+        }
+      },
+      "folder": null,
+      "sort": 0,
+      "_key": "!items.effects!KhzRKHillRune001.KhzRKHillPass001"
+    }
+  ],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": false,
+      "magiceffect": false
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [],
+        "effect": []
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "hill-rune"
+          }
+        ],
+        "save": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "hill-rune"
+          }
+        ]
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzRKHillRune001"
+}

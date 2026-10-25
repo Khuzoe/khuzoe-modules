@@ -1,0 +1,17 @@
+{
+  "KHZ_DND5E_EXTENSIONS": {
+    "Damage": {
+      "Genie": "Geniale"
+    },
+    "Creature": {
+      "Genie": "Genio",
+      "GeniePlural": "Geni"
+    },
+    "Settings": {
+      "DefaultGenieVulnerability": {
+        "Name": "Vulnerabilità predefinita ai danni Geniali",
+        "Hint": "Quando è attiva, ogni personaggio o NPC che non possiede resistenza o immunità ai danni Geniali viene trattato come vulnerabile a quei danni. Non modifica permanentemente le schede e rispetta il moltiplicatore configurato in dnd5e o Midi-QOL."
+      }
+    }
+  }
+}

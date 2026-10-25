@@ -1,0 +1,75 @@
+{
+  "_id": "KhzKeeperGiant01",
+  "name": "Keeper of Giant's Strength",
+  "type": "feat",
+  "img": "icons/skills/melee/unarmed-punch-fist-yellow-red.webp",
+  "system": {
+    "description": {
+      "value": "<p>Una volta in ciascuno dei tuoi turni, quando ottieni un colpo critico con un attacco in mischia basato su Forza contro una creatura più piccola di te, aggiungi ai danni il tuo modificatore di Forza per ogni categoria di taglia di differenza.</p><p>Prima di effettuare un attacco in mischia basato su Forza contro una creatura afferrata da te o più piccola di te, puoi subire una penalità di −5 al tiro per colpire. Se l'attacco colpisce, infligge 10 danni aggiuntivi.</p><p><strong>Homebrew.</strong> Questa capacità non appartiene ai manuali ufficiali.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Homebrew — Cripta di Sangue",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "type": {
+      "value": "feat",
+      "subtype": ""
+    },
+    "properties": [],
+    "requirements": "Homebrew",
+    "prerequisites": {
+      "level": null
+    },
+    "activities": {},
+    "identifier": "keeper-of-giants-strength",
+    "enchant": {}
+  },
+  "effects": [],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": false,
+      "magiceffect": false
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [],
+        "effect": []
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "keeper-of-giants-strength"
+          }
+        ]
+      }
+    }
+  },
+  "folder": null,
+  "sort": 120,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzKeeperGiant01"
+}

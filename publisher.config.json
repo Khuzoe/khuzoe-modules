@@ -1,0 +1,17 @@
+{
+  "repository": "Khuzoe/khuzoe-modules",
+  "pagesUrl": "https://khuzoe.github.io/khuzoe-modules",
+  "modules": [
+    "khuzoe-address-sender",
+    "khuzoe-auras",
+    "khuzoe-automations",
+    "khuzoe-boss-bar",
+    "khuzoe-calendar",
+    "khuzoe-dnd5e-extensions",
+    "khuzoe-merchant",
+    "khuzoe-monster-hud",
+    "khuzoe-tokenizer",
+    "khuzoe-webp-autoconverter",
+    "cripta-wiki-sync"
+  ]
+}

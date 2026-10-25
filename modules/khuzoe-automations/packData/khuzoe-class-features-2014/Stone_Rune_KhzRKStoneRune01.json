@@ -1,0 +1,232 @@
+{
+  "_id": "KhzRKStoneRune01",
+  "name": "Stone Rune",
+  "type": "feat",
+  "img": "icons/commodities/treasure/token-runed-spiral-grey.webp",
+  "system": {
+    "description": {
+      "value": "<p>Hai vantaggio alle prove di Insight e scurovisione fino a 120 ft.</p><p>Quando una creatura che puoi vedere termina il turno entro 30 ft, puoi usare la reazione. Fallendo un TS Saggezza contro la tua CD runica, è charmed, incapacitated e con velocità 0 per 1 minuto; ripete il TS alla fine di ogni turno.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Tasha's Cauldron of Everything",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "uses": {
+      "max": "1",
+      "spent": 0,
+      "recovery": [
+        {
+          "period": "sr",
+          "type": "recoverAll"
+        }
+      ]
+    },
+    "type": {
+      "value": "class",
+      "subtype": ""
+    },
+    "properties": [],
+    "requirements": "Rune Knight 3",
+    "prerequisites": {
+      "level": 3
+    },
+    "activities": {
+      "KhzRKStoneUse001": {
+        "_id": "KhzRKStoneUse001",
+        "type": "save",
+        "activation": {
+          "type": "reaction",
+          "value": 1,
+          "condition": "",
+          "override": true
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": false
+        },
+        "description": {
+          "chatFlavor": "Stone Rune: sguardo onirico"
+        },
+        "duration": {
+          "value": "",
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "value": "30",
+          "units": "ft",
+          "special": "",
+          "override": true
+        },
+        "target": {
+          "prompt": false,
+          "template": {
+            "count": "",
+            "contiguous": false,
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "units": "ft"
+          },
+          "affects": {
+            "count": "1",
+            "type": "creature",
+            "choice": false,
+            "special": ""
+          },
+          "override": true
+        },
+        "damage": {
+          "onSave": "none",
+          "parts": [],
+          "critical": {
+            "allow": false
+          }
+        },
+        "save": {
+          "ability": [
+            "wis"
+          ],
+          "dc": {
+            "calculation": "con",
+            "formula": ""
+          }
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 0,
+        "name": "Stone Rune: sguardo onirico",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "flags": {
+          "cat": {
+            "hidden": true
+          }
+        },
+        "midiProperties": {
+          "automationOnly": true
+        }
+      }
+    },
+    "identifier": "stone-rune",
+    "enchant": {}
+  },
+  "effects": [
+    {
+      "_id": "KhzRKStonePass01",
+      "name": "Stone Rune: scurovisione",
+      "img": "icons/commodities/treasure/token-runed-spiral-grey.webp",
+      "type": "base",
+      "system": {
+        "changes": [
+          {
+            "key": "system.attributes.senses.ranges.darkvision",
+            "value": "120",
+            "priority": 20,
+            "type": "upgrade"
+          }
+        ]
+      },
+      "disabled": false,
+      "duration": {
+        "value": null,
+        "units": "seconds",
+        "expired": false
+      },
+      "origin": null,
+      "tint": "#ffffff",
+      "transfer": true,
+      "statuses": [],
+      "description": "",
+      "showIcon": 0,
+      "flags": {
+        "core": {
+          "overlay": false
+        },
+        "dae": {
+          "transfer": true,
+          "stackable": "noneNameOnly",
+          "specialDuration": [],
+          "expiryMode": "delete",
+          "disableIncapacitated": false
+        }
+      },
+      "folder": null,
+      "sort": 0,
+      "_key": "!items.effects!KhzRKStoneRune01.KhzRKStonePass01"
+    }
+  ],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": false,
+      "magiceffect": false
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [
+          "KhzRKStoneUse001"
+        ],
+        "effect": []
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "stone-rune"
+          }
+        ],
+        "combat": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "stone-rune"
+          }
+        ],
+        "skill": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "stone-rune"
+          }
+        ]
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzRKStoneRune01"
+}

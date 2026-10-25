@@ -1,0 +1,14 @@
+<section class="khz-shapechange-content">
+  <header><p>Trasforma <strong>{{target}}</strong></p><p class="hint">Scegli una creatura tra gli actor a cui hai accesso.</p></header>
+  <input data-search type="search" placeholder="Cerca una forma…" aria-label="Cerca una forma" autofocus>
+  <div class="khz-shapechange-grid">
+    {{#each forms}}
+    <label class="khz-shapechange-card" data-form data-name="{{name}}">
+      <input type="radio" name="formUuid" value="{{uuid}}">
+      <img src="{{img}}" alt="" loading="lazy"><span>{{name}}</span>
+    </label>
+    {{/each}}
+    <p data-empty hidden>Nessuna forma corrisponde alla ricerca.</p>
+  </div>
+  <footer><button type="button" data-action="cancel">Annulla</button><button type="submit"><i class="fa-solid fa-wand-magic-sparkles"></i> Trasforma</button></footer>
+</section>

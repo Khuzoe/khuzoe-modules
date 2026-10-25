@@ -1,0 +1,166 @@
+{
+  "_id": "KhzBardicInsp001",
+  "name": "Bardic Inspiration",
+  "type": "feat",
+  "img": "icons/magic/control/buff-flight-wings-runes-blue.webp",
+  "system": {
+    "description": {
+      "value": "<p>Come azione bonus, scegli un'altra creatura entro 60 ft che possa sentirti. La creatura ottiene un dado di Bardic Inspiration, determinato dal tuo livello da bardo, per 10 minuti.</p><p>Una volta entro la durata, dopo aver tirato un d20 per una prova di caratteristica, un tiro per colpire o un tiro salvezza, la creatura può tirare il dado e aggiungerlo al risultato. CAT propone automaticamente il dado anche per le prove di abilità e lo consuma soltanto quando viene selezionato.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Player's Handbook",
+      "book": "",
+      "page": "53",
+      "license": "",
+      "rules": "2014"
+    },
+    "uses": {
+      "max": "max(@abilities.cha.mod, 1)",
+      "recovery": [
+        {
+          "period": "lr",
+          "type": "recoverAll"
+        }
+      ],
+      "spent": 0
+    },
+    "type": {
+      "value": "class",
+      "subtype": ""
+    },
+    "properties": [],
+    "requirements": "Bard 1",
+    "prerequisites": {
+      "level": 1
+    },
+    "activities": {
+      "KhzBardicUse0001": {
+        "_id": "KhzBardicUse0001",
+        "type": "utility",
+        "activation": {
+          "type": "bonus",
+          "value": 1,
+          "condition": "",
+          "override": false
+        },
+        "consumption": {
+          "targets": [
+            {
+              "type": "itemUses",
+              "target": "",
+              "value": "1",
+              "scaling": {
+                "mode": "",
+                "formula": ""
+              }
+            }
+          ],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": false
+        },
+        "description": {
+          "chatFlavor": "Bardic Inspiration"
+        },
+        "duration": {
+          "value": "10",
+          "units": "minute",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "value": "60",
+          "units": "ft",
+          "special": "Il bersaglio deve poterti sentire.",
+          "override": true
+        },
+        "target": {
+          "prompt": true,
+          "template": {
+            "count": "",
+            "contiguous": false,
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "units": "ft"
+          },
+          "affects": {
+            "count": "1",
+            "type": "creature",
+            "choice": false,
+            "special": "Un'altra creatura"
+          },
+          "override": true
+        },
+        "roll": {
+          "formula": "",
+          "name": "",
+          "prompt": false,
+          "visible": false
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 0,
+        "name": "Bardic Inspiration",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "flags": {},
+        "midiProperties": {}
+      }
+    },
+    "identifier": "bardic-inspiration",
+    "enchant": {}
+  },
+  "effects": [],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "always",
+      "magicdam": false,
+      "magiceffect": false
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [],
+        "effect": []
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "bardic-inspiration"
+          }
+        ]
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzBardicInsp001"
+}

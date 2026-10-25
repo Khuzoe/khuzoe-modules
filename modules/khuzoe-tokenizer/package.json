@@ -1,0 +1,9 @@
+{
+  "name": "khuzoe-tokenizer",
+  "version": "1.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/module.test.mjs && node tests/features.test.mjs"
+  }
+}

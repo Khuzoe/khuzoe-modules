@@ -1,0 +1,14 @@
+{
+  "KHAS.Settings.Webhook.Name": "Discord webhook URL",
+  "KHAS.Settings.Webhook.Hint": "Paste the Discord webhook that should automatically receive the server address.",
+  "KHAS.Settings.Port.Name": "Fixed public port",
+  "KHAS.Settings.Port.Hint": "Use 0 to detect the current port, or enter the public port that should be shared.",
+  "KHAS.UI.Title": "Server address",
+  "KHAS.UI.Copy": "Copy",
+  "KHAS.UI.Send": "Send",
+  "KHAS.Notifications.MissingWebhook": "Configure the Discord webhook in the module settings first.",
+  "KHAS.Notifications.Sent": "Address sent to Discord!",
+  "KHAS.Notifications.SendFailed": "Discord delivery failed. Check the webhook and try again.",
+  "KHAS.Notifications.Copied": "Address copied to the clipboard!",
+  "KHAS.Notifications.AddressFailed": "The public IP address could not be retrieved. Try again shortly."
+}

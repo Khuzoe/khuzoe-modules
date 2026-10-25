@@ -1,0 +1,273 @@
+{
+  "_id": "KhzDmgBondTurn01",
+  "name": "Legame del Danno (una volta per turno)",
+  "type": "feat",
+  "img": "icons/magic/control/energy-stream-link-spiral-blue.webp",
+  "system": {
+    "description": {
+      "value": "<p>Crei un legame con uno o più alleati. Quando stai per subire danni puoi scegliere un singolo alleato collegato e dividere con lui il danno finale.</p><p>Dopo un trasferimento riuscito non puoi usare nuovamente questa capacità fino al turno successivo. Il limite è condiviso fra tutti i legami.</p><p>Usa <strong>Configura legami</strong> o il pulsante nel Medkit per scegliere gli alleati.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Khuzoe Homebrew",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "type": {
+      "value": "class",
+      "subtype": ""
+    },
+    "properties": [],
+    "requirements": "",
+    "prerequisites": {
+      "level": null
+    },
+    "activities": {
+      "KhzDmgBondCfg001": {
+        "_id": "KhzDmgBondCfg001",
+        "type": "utility",
+        "activation": {
+          "type": "special",
+          "value": null,
+          "condition": "",
+          "override": true
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": false
+        },
+        "description": {
+          "chatFlavor": "Configura legami"
+        },
+        "duration": {
+          "value": "",
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "value": null,
+          "units": "self",
+          "special": "",
+          "override": true
+        },
+        "target": {
+          "prompt": false,
+          "template": {
+            "count": "",
+            "contiguous": false,
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "units": "ft"
+          },
+          "affects": {
+            "count": "",
+            "type": "self",
+            "choice": false,
+            "special": ""
+          },
+          "override": true
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 0,
+        "name": "Configura legami",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "roll": {
+          "formula": "",
+          "name": "",
+          "prompt": false,
+          "visible": false
+        },
+        "midiProperties": {
+          "confirmTargets": "never",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "automationOnly": false,
+          "magicEffect": false,
+          "magicDamage": false
+        },
+        "flags": {}
+      },
+      "KhzDmgBondDmg001": {
+        "_id": "KhzDmgBondDmg001",
+        "type": "damage",
+        "activation": {
+          "type": "special",
+          "value": null,
+          "condition": "",
+          "override": true
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": false
+        },
+        "description": {
+          "chatFlavor": "Danno trasferito"
+        },
+        "duration": {
+          "value": "",
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "value": null,
+          "units": "any",
+          "special": "",
+          "override": true
+        },
+        "target": {
+          "prompt": false,
+          "template": {
+            "count": "",
+            "contiguous": false,
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "units": "ft"
+          },
+          "affects": {
+            "count": "1",
+            "type": "creature",
+            "choice": false,
+            "special": ""
+          },
+          "override": true
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 100000,
+        "name": "Danno trasferito",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "damage": {
+          "critical": {
+            "allow": false
+          },
+          "parts": [
+            {
+              "custom": {
+                "enabled": true,
+                "formula": "1"
+              },
+              "number": null,
+              "denomination": 0,
+              "bonus": "",
+              "types": [
+                "force"
+              ],
+              "scaling": {
+                "mode": "",
+                "number": null,
+                "formula": ""
+              }
+            }
+          ]
+        },
+        "midiProperties": {
+          "identifier": "khuzoe-damage-bond-transfer",
+          "confirmTargets": "never",
+          "forceDamageDialog": "never",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "automationOnly": true,
+          "magicEffect": false,
+          "magicDamage": false,
+          "ignoreTraits": [
+            "idi",
+            "idr",
+            "idv",
+            "ida",
+            "idm"
+          ]
+        },
+        "flags": {
+          "cat": {
+            "hidden": true
+          }
+        }
+      }
+    },
+    "identifier": "damage-bond-once-per-turn",
+    "enchant": {}
+  },
+  "effects": [],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "never",
+      "magicdam": false,
+      "magiceffect": false
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [
+          "KhzDmgBondDmg001"
+        ],
+        "effect": []
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "damage-bond-once-per-turn"
+          }
+        ]
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzDmgBondTurn01"
+}

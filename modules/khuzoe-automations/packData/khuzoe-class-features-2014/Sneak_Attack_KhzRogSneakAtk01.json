@@ -1,0 +1,75 @@
+{
+  "_id": "KhzRogSneakAtk01",
+  "name": "Sneak Attack",
+  "type": "feat",
+  "img": "icons/skills/melee/strike-dagger-blood-red.webp",
+  "system": {
+    "description": {
+      "value": "<p>Una volta per turno puoi infliggere danni extra quando colpisci con un attacco con arma a distanza o con un'arma finesse. Devi avere vantaggio, oppure un altro nemico del bersaglio deve trovarsi entro 5 ft da esso e non devi avere svantaggio.</p><p>L'automazione propone l'uso solo quando le condizioni sono soddisfatte e ricava i dadi dalla scala di Sneak Attack del Ladro.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Player's Handbook 2014",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "type": {
+      "value": "class",
+      "subtype": ""
+    },
+    "properties": [],
+    "requirements": "Rogue 1",
+    "prerequisites": {
+      "level": 1
+    },
+    "activities": {},
+    "identifier": "sneak-attack",
+    "enchant": {}
+  },
+  "effects": [],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": false,
+      "magiceffect": false
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [],
+        "effect": []
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "sneak-attack"
+          }
+        ]
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzRogSneakAtk01"
+}

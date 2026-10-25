@@ -1,0 +1,36 @@
+<section class="khz-chat-summary">
+  <header class="khz-chat-heading">
+    <i class="fa-solid fa-sun" aria-hidden="true"></i>
+    <strong>{{title}}</strong>
+  </header>
+  {{#each groups as |group|}}
+    <section class="khz-chat-group">
+      <header class="khz-chat-group-heading">
+        <strong>{{group.auraName}}</strong>
+        <span class="khz-chat-event">{{group.eventLabel}}</span>
+        <span class="khz-chat-source">{{../sourceLabel}}: <strong>{{group.sourceName}}</strong></span>
+      </header>
+      <ol>
+        {{#each group.rows as |row|}}
+          <li class="khz-chat-row khz-chat-row--{{row.status}}">
+            <div class="khz-chat-target"><strong>{{row.targetName}}</strong><i class="fa-solid {{row.icon}}" aria-hidden="true"></i></div>
+            <div class="khz-chat-outcome">{{row.outcome}}</div>
+            {{#if row.isError}}{{#if row.error}}<div class="khz-chat-error">{{row.error}}</div>{{/if}}{{/if}}
+            {{#if row.rollLabel}}<div class="khz-chat-roll">{{row.rollLabel}}{{#if row.formula}} <span>({{row.formula}})</span>{{/if}}</div>{{/if}}
+            {{#if row.save}}
+              <div class="khz-chat-save"><span>{{row.saveLabel}}</span><strong class="khz-chat-save--{{#if row.save.success}}success{{else}}failure{{/if}}">{{row.saveOutcome}}</strong></div>
+            {{/if}}
+            {{#if row.effects.length}}
+              <ul class="khz-chat-effects">
+                {{#each row.effects as |effect|}}
+                  <li class="{{#if effect.failed}}khz-chat-effect--failed{{/if}}"><strong>{{effect.name}}</strong><span>{{effect.label}}</span>{{#if effect.error}}<small>{{effect.error}}</small>{{/if}}</li>
+                {{/each}}
+              </ul>
+            {{/if}}
+            {{#if row.immunityLabel}}<div class="khz-chat-immunity"><i class="fa-solid fa-shield" aria-hidden="true"></i>{{row.immunityLabel}}</div>{{/if}}
+          </li>
+        {{/each}}
+      </ol>
+    </section>
+  {{/each}}
+</section>

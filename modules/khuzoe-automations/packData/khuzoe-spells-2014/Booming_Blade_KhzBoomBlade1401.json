@@ -1,0 +1,407 @@
+{
+  "_id": "KhzBoomBlade1401",
+  "name": "Booming Blade",
+  "type": "spell",
+  "img": "icons/magic/lightning/bolt-strike-blue.webp",
+  "system": {
+    "description": {
+      "value": "<p>Come parte dell'azione di lancio effettui un attacco in mischia con un'arma. Ai livelli 5, 11 e 17 il colpo infligge rispettivamente 1d8, 2d8 e 3d8 danni da tuono aggiuntivi. Se il bersaglio si muove volontariamente prima dell'inizio del tuo turno successivo subisce 1d8 danni da tuono, aumentati di un dado agli stessi livelli.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Khuzoe Automations",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "activation": {
+      "type": "action",
+      "condition": "",
+      "value": 1
+    },
+    "duration": {
+      "value": "1",
+      "units": "round"
+    },
+    "target": {
+      "affects": {
+        "type": "creature",
+        "count": "1",
+        "choice": false,
+        "special": ""
+      },
+      "template": {
+        "units": "",
+        "contiguous": false,
+        "type": "",
+        "size": "",
+        "width": "",
+        "height": "",
+        "count": ""
+      }
+    },
+    "range": {
+      "value": "5",
+      "units": "ft",
+      "special": ""
+    },
+    "uses": {
+      "max": "",
+      "recovery": [],
+      "spent": 0
+    },
+    "level": 0,
+    "school": "evo",
+    "materials": {
+      "value": "",
+      "consumed": false,
+      "cost": 0,
+      "supply": 0
+    },
+    "preparation": {
+      "mode": "prepared",
+      "prepared": true
+    },
+    "properties": [
+      "somatic",
+      "material"
+    ],
+    "activities": {
+      "KhzBoomCast00001": {
+        "_id": "KhzBoomCast00001",
+        "type": "utility",
+        "activation": {
+          "type": "action",
+          "value": null,
+          "override": false,
+          "condition": ""
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": true
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": false
+        },
+        "effects": [],
+        "range": {
+          "override": false
+        },
+        "target": {
+          "prompt": true,
+          "template": {
+            "contiguous": false,
+            "stationary": false,
+            "units": "ft",
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "count": ""
+          },
+          "affects": {
+            "choice": false,
+            "count": "1",
+            "type": "creature",
+            "special": ""
+          },
+          "override": false
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 0,
+        "name": "Booming Blade",
+        "img": "",
+        "useConditionText": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "automationOnly": false,
+          "magicEffect": true,
+          "magicDamage": false
+        },
+        "flags": {},
+        "roll": {
+          "formula": "",
+          "name": "",
+          "prompt": false,
+          "visible": false
+        }
+      },
+      "KhzBoomHit000001": {
+        "_id": "KhzBoomHit000001",
+        "type": "damage",
+        "activation": {
+          "type": "special",
+          "value": null,
+          "override": true,
+          "condition": ""
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": false
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": false
+        },
+        "effects": [],
+        "range": {
+          "override": true,
+          "value": "5",
+          "units": "ft",
+          "special": "Bersaglio colpito"
+        },
+        "target": {
+          "prompt": false,
+          "template": {
+            "contiguous": false,
+            "stationary": false,
+            "units": "ft",
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "count": ""
+          },
+          "affects": {
+            "choice": false,
+            "count": "1",
+            "type": "creature",
+            "special": ""
+          },
+          "override": true
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 0,
+        "name": "Booming Blade: colpo",
+        "img": "",
+        "useConditionText": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "automationOnly": true,
+          "magicEffect": true,
+          "magicDamage": true
+        },
+        "flags": {
+          "cat": {
+            "hidden": true
+          }
+        },
+        "damage": {
+          "critical": {
+            "allow": false
+          },
+          "parts": [
+            {
+              "custom": {
+                "enabled": true,
+                "formula": "1d8"
+              },
+              "number": null,
+              "denomination": 0,
+              "bonus": "",
+              "types": [
+                "thunder"
+              ],
+              "scaling": {
+                "mode": "",
+                "number": null,
+                "formula": ""
+              }
+            }
+          ]
+        }
+      },
+      "KhzBoomMove00001": {
+        "_id": "KhzBoomMove00001",
+        "type": "damage",
+        "activation": {
+          "type": "special",
+          "value": null,
+          "override": true,
+          "condition": ""
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": false
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": false
+        },
+        "effects": [],
+        "range": {
+          "override": true,
+          "value": null,
+          "units": "any",
+          "special": "Bersaglio marchiato"
+        },
+        "target": {
+          "prompt": false,
+          "template": {
+            "contiguous": false,
+            "stationary": false,
+            "units": "ft",
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "count": ""
+          },
+          "affects": {
+            "choice": false,
+            "count": "1",
+            "type": "creature",
+            "special": ""
+          },
+          "override": true
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 0,
+        "name": "Booming Blade: movimento",
+        "img": "",
+        "useConditionText": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "automationOnly": true,
+          "magicEffect": true,
+          "magicDamage": true
+        },
+        "flags": {
+          "cat": {
+            "hidden": true
+          }
+        },
+        "damage": {
+          "critical": {
+            "allow": false
+          },
+          "parts": [
+            {
+              "custom": {
+                "enabled": true,
+                "formula": "1d8"
+              },
+              "number": null,
+              "denomination": 0,
+              "bonus": "",
+              "types": [
+                "thunder"
+              ],
+              "scaling": {
+                "mode": "",
+                "number": null,
+                "formula": ""
+              }
+            }
+          ]
+        }
+      }
+    },
+    "identifier": "booming-blade"
+  },
+  "effects": [],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true,
+      "reactionCondition": ""
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": false,
+      "magiceffect": true
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [
+          "KhzBoomHit000001",
+          "KhzBoomMove00001"
+        ],
+        "effect": []
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "booming-blade"
+          }
+        ]
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzBoomBlade1401"
+}

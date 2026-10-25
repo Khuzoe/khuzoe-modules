@@ -1,0 +1,259 @@
+{
+  "_id": "KhzNpcElaBrain01",
+  "name": "Brain Storm",
+  "type": "feat",
+  "system": {
+    "source": {
+      "custom": "",
+      "book": "ToB3",
+      "page": "405",
+      "license": "",
+      "rules": "2014",
+      "revision": 1
+    },
+    "description": {
+      "value": "<div class=\"rd__b  rd__b--3\"><p>The psychophant lashes out with a brutal manifestation of psychic force, wracking its foes' psyches. Each creature within 30 feet of the psychophant must make a [[/save ability=int dc=16]] saving throw. On a failure, a creature takes 31 ([[/damage 9d6 type=psychic]]) damage and is &amp;Reference[condition=poisoned] for 1 minute as it suffers a debilitating headache. On a success, a creature takes half the damage and isn't &amp;Reference[condition=poisoned]. A &amp;Reference[condition=poisoned] creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success.</p></div>",
+      "chat": ""
+    },
+    "requirements": "",
+    "uses": {
+      "max": "1",
+      "recovery": [
+        {
+          "formula": "6",
+          "period": "recharge",
+          "type": "recoverAll"
+        }
+      ],
+      "spent": 1
+    },
+    "type": {
+      "value": "monster",
+      "subtype": ""
+    },
+    "properties": [],
+    "advancement": {},
+    "activities": {
+      "IvzRiOwzMJ0mQ9rY": {
+        "_id": "IvzRiOwzMJ0mQ9rY",
+        "type": "save",
+        "name": "",
+        "activation": {
+          "type": "action",
+          "value": 1,
+          "override": false,
+          "condition": ""
+        },
+        "consumption": {
+          "scaling": {
+            "allowed": false
+          },
+          "spellSlot": true,
+          "targets": [
+            {
+              "type": "itemUses",
+              "value": "1",
+              "target": "",
+              "scaling": {}
+            }
+          ]
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": false
+        },
+        "effects": [],
+        "range": {
+          "units": "self",
+          "override": false,
+          "special": ""
+        },
+        "target": {
+          "template": {
+            "count": "",
+            "contiguous": false,
+            "type": "radius",
+            "size": "30",
+            "width": "",
+            "height": "",
+            "units": "ft",
+            "stationary": false
+          },
+          "affects": {
+            "count": "",
+            "type": "enemy",
+            "choice": false,
+            "special": ""
+          },
+          "override": false,
+          "prompt": true
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "save": {
+          "ability": [
+            "int"
+          ],
+          "dc": {
+            "calculation": "",
+            "formula": "16"
+          }
+        },
+        "damage": {
+          "onSave": "half",
+          "parts": [
+            {
+              "custom": {
+                "enabled": false,
+                "formula": ""
+              },
+              "number": 9,
+              "denomination": 6,
+              "bonus": "",
+              "types": [
+                "psychic"
+              ],
+              "scaling": {
+                "number": 1
+              }
+            }
+          ],
+          "critical": {
+            "allow": false
+          }
+        },
+        "sort": 0,
+        "useConditionText": "",
+        "useConditionReason": "",
+        "effectConditionText": "",
+        "macroData": {
+          "name": "",
+          "command": ""
+        },
+        "ignoreTraits": {
+          "idi": false,
+          "idr": false,
+          "idv": false,
+          "ida": false,
+          "idm": false
+        },
+        "midiProperties": {
+          "ignoreTraits": [],
+          "triggeredActivityId": "none",
+          "triggeredActivityConditionText": "",
+          "triggeredActivityTargets": "targets",
+          "triggeredActivityRollAs": "self",
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "automationOnly": false,
+          "otherActivityCompatible": true,
+          "identifier": "",
+          "displayActivityName": false,
+          "rollMode": "default",
+          "chooseEffects": false,
+          "toggleEffect": false,
+          "ignoreFullCover": false,
+          "triggeredActivityConsume": true,
+          "triggeredActivityConfigure": true,
+          "autoConsume": false,
+          "forceConsumeDialog": "default",
+          "forceRollDialog": "default",
+          "forceDamageDialog": "default",
+          "otherActivityAsParentType": true,
+          "removeChatButtons": "default",
+          "magicEffect": false,
+          "magicDamage": false,
+          "noConcentrationCheck": false,
+          "skipConcentrationCheck": false,
+          "autoCEEffects": "default"
+        },
+        "isOverTimeFlag": false,
+        "overTimeProperties": {
+          "saveRemoves": true,
+          "preRemoveConditionText": "",
+          "postRemoveConditionText": "",
+          "rollAs": "target"
+        },
+        "otherActivityId": "",
+        "img": "",
+        "flags": {},
+        "visibility": {
+          "level": {},
+          "requireAttunement": false,
+          "requireIdentification": false,
+          "requireMagic": false
+        },
+        "regionBehavior": {
+          "enabled": false,
+          "dispositionFilter": -1,
+          "excludeSource": true,
+          "oncePerTurn": true,
+          "wallRestriction": "none",
+          "regionVisibility": 2,
+          "attachToken": "default",
+          "rules": []
+        },
+        "regionLight": {
+          "enabled": false,
+          "dim": 0,
+          "bright": 0,
+          "color": null,
+          "alpha": 0.5,
+          "luminosity": 0.5,
+          "animationType": "",
+          "animationSpeed": 5,
+          "animationIntensity": 5
+        },
+        "otherActivityAsParentType": true,
+        "friendlySave": "default"
+      }
+    },
+    "identifier": "brain-storm",
+    "cover": null,
+    "crewed": false,
+    "enchant": {},
+    "prerequisites": {
+      "level": null,
+      "repeatable": false,
+      "items": []
+    }
+  },
+  "ownership": {
+    "default": 0
+  },
+  "img": "icons/magic/control/mouth-smile-deception-purple.webp",
+  "flags": {
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "brain-storm"
+          }
+        ]
+      }
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": []
+      }
+    }
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "_key": "!items!KhzNpcElaBrain01"
+}

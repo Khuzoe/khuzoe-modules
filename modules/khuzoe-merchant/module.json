@@ -1,0 +1,40 @@
+{
+  "id": "khuzoe-merchant",
+  "title": "Khuzoe Merchant",
+  "description": "Negozi per NPC, oggetti raccoglibili, contenitori condivisi e produzione periodica, con trasferimenti convalidati dal GM.",
+  "version": "1.21.2",
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14.367"
+  },
+  "authors": [
+    {
+      "name": "Khuzoe Merchant contributors"
+    }
+  ],
+  "esmodules": [
+    "scripts/main.js"
+  ],
+  "styles": [
+    "styles/merchant.css",
+    "styles/economy.css",
+    "styles/v14.css"
+  ],
+  "languages": [
+    {
+      "lang": "it",
+      "name": "Italiano",
+      "path": "lang/it.json"
+    },
+    {
+      "lang": "en",
+      "name": "Italiano",
+      "path": "lang/it.json"
+    }
+  ],
+  "socket": true,
+  "license": "LICENSE",
+  "readme": "README.md",
+  "changelog": "CHANGELOG.md"
+}
+

@@ -1,0 +1,45 @@
+{
+  "id": "khuzoe-dnd5e-extensions",
+  "title": "Khuzoe D&D 5e Extensions",
+  "description": "Estensioni fondamentali per D&D 5e: tipi di creatura e di danno personalizzati usati dai moduli Khuzoe.",
+  "version": "0.2.0",
+  "library": false,
+  "authors": [
+    {
+      "name": "Khuzoe"
+    }
+  ],
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14.367",
+    "maximum": "14"
+  },
+  "esmodules": [
+    "scripts/main.mjs"
+  ],
+  "languages": [
+    {
+      "lang": "it",
+      "name": "Italiano",
+      "path": "lang/it.json"
+    },
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "relationships": {
+    "systems": [
+      {
+        "id": "dnd5e",
+        "type": "system",
+        "compatibility": {
+          "minimum": "5.3.3",
+          "verified": "5.3.3",
+          "maximum": "5.9.9"
+        }
+      }
+    ]
+  }
+}

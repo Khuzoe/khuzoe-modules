@@ -1,0 +1,63 @@
+{
+  "_id": "KhzArcaneWard001",
+  "_key": "!items!KhzArcaneWard001",
+  "name": "Arcane Ward",
+  "type": "feat",
+  "img": "icons/magic/defensive/shield-barrier-glowing-triangle-blue.webp",
+  "system": {
+    "identifier": "arcane-ward",
+    "source": {
+      "rules": "2014",
+      "custom": "Khuzoe Automations — regole 2014"
+    },
+    "description": {
+      "value": "<p>Protezione 2014: creazione con un incantesimo di abiurazione, recupero in base al livello di lancio e assorbimento prima di resistenze e PF temporanei. Si azzera al riposo lungo.</p><p>Massimo PF: due volte il livello da mago più il modificatore di Intelligenza. Quando lanci un incantesimo di abiurazione di livello 1 o superiore puoi creare la protezione fino al prossimo riposo lungo. Gli incantesimi successivi le restituiscono due PF per livello di lancio, senza superare il massimo. La protezione resta presente anche a zero PF e non concede PF temporanei.</p>",
+      "chat": ""
+    },
+    "type": {
+      "value": "class"
+    },
+    "activities": {},
+    "uses": {
+      "max": "max(0, 2 * @classes.wizard.levels + @abilities.int.mod)",
+      "spent": 0,
+      "recovery": []
+    },
+    "properties": [],
+    "requirements": "School of Abjuration 2"
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "arcane-ward"
+          }
+        ]
+      }
+    },
+    "khuzoe-automations": {
+      "armorerFeature": "ward"
+    },
+    "midi-qol": {
+      "forceCEOff": true
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": []
+      }
+    }
+  }
+}

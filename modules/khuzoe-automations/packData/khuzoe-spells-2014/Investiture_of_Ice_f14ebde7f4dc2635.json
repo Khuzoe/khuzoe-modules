@@ -1,0 +1,388 @@
+{
+  "type": "spell",
+  "system": {
+    "description": {
+      "value": "",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Khuzoe Automations",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "activation": {
+      "type": "action",
+      "condition": "",
+      "value": 1
+    },
+    "duration": {
+      "value": "10",
+      "units": "minute"
+    },
+    "target": {
+      "affects": {
+        "type": "self",
+        "count": "",
+        "choice": false,
+        "special": ""
+      },
+      "template": {
+        "units": "",
+        "contiguous": false,
+        "type": ""
+      }
+    },
+    "range": {
+      "units": "self",
+      "special": ""
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "ability": "",
+    "level": 6,
+    "school": "trs",
+    "materials": {
+      "value": "",
+      "consumed": false,
+      "cost": 0,
+      "supply": 0
+    },
+    "preparation": {
+      "mode": "prepared",
+      "prepared": false
+    },
+    "properties": [
+      "vocal",
+      "somatic",
+      "concentration"
+    ],
+    "activities": {
+      "dnd5eactivity000": {
+        "_id": "dnd5eactivity000",
+        "type": "utility",
+        "activation": {
+          "type": "action",
+          "value": null,
+          "override": false
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": true
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": false
+        },
+        "effects": [],
+        "range": {
+          "override": false
+        },
+        "target": {
+          "prompt": true,
+          "template": {
+            "contiguous": false,
+            "units": "ft"
+          },
+          "affects": {
+            "choice": false
+          },
+          "override": false
+        },
+        "uses": {
+          "spent": 0,
+          "max": "",
+          "recovery": []
+        },
+        "roll": {
+          "formula": "",
+          "name": "",
+          "prompt": false,
+          "visible": false
+        },
+        "sort": 0,
+        "useConditionText": "",
+        "forceDialog": false,
+        "effectConditionText": "",
+        "name": "Investiture of Ice",
+        "img": "icons/magic/water/strike-ice-blade-axe.webp",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "magicDamage": true,
+          "magicEffect": true,
+          "automationOnly": false,
+          "identifier": "investitureOfIce"
+        },
+        "flags": {}
+      },
+      "QOxgmSerRDTYPMri": {
+        "type": "save",
+        "_id": "QOxgmSerRDTYPMri",
+        "sort": 0,
+        "activation": {
+          "type": "action",
+          "value": null,
+          "override": false
+        },
+        "consumption": {
+          "targets": [],
+          "spellSlot": false,
+          "scaling": {
+            "allowed": false
+          }
+        },
+        "description": {
+          "chatFlavor": "Investiture of Ice: Cone"
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [
+          {
+            "_id": "c6a65848d37d763c",
+            "level": {
+              "min": null,
+              "max": null
+            }
+          }
+        ],
+        "range": {
+          "override": false
+        },
+        "target": {
+          "template": {
+            "contiguous": false,
+            "units": "ft",
+            "type": "cone",
+            "size": "15",
+            "count": ""
+          },
+          "affects": {
+            "choice": false,
+            "count": "",
+            "type": "creature",
+            "special": ""
+          },
+          "override": true,
+          "prompt": true
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "damage": {
+          "parts": [
+            {
+              "custom": {
+                "enabled": false,
+                "formula": ""
+              },
+              "number": 4,
+              "denomination": "6",
+              "bonus": "",
+              "types": [
+                "cold"
+              ],
+              "scaling": {
+                "mode": ""
+              }
+            }
+          ],
+          "critical": {
+            "allow": false
+          },
+          "onSave": "half"
+        },
+        "save": {
+          "ability": [
+            "con"
+          ],
+          "dc": {
+            "calculation": "spellcasting",
+            "formula": ""
+          }
+        },
+        "useConditionText": "",
+        "forceDialog": false,
+        "effectConditionText": "",
+        "name": "Investiture of Ice: Cone",
+        "img": "icons/magic/water/strike-ice-blade-axe.webp",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "magicDamage": true,
+          "magicEffect": true,
+          "automationOnly": false,
+          "identifier": "investitureOfIceCone"
+        },
+        "flags": {
+          "cat": {
+            "hidden": true
+          }
+        }
+      }
+    },
+    "identifier": "investiture-of-ice",
+    "sourceClass": ""
+  },
+  "name": "Investiture of Ice",
+  "flags": {
+    "midiProperties": {
+      "magicdam": true,
+      "magiceffect": true,
+      "confirmTargets": "default",
+      "saveDamage": "default",
+      "autoFailFriendly": false,
+      "autoSaveFriendly": false,
+      "rollOther": false,
+      "critOther": false,
+      "offHandWeapon": false,
+      "concentration": false,
+      "noConcentrationCheck": false,
+      "toggleEffect": false,
+      "ignoreTotalCover": false,
+      "idr": false,
+      "idi": false,
+      "idv": false,
+      "ida": false
+    },
+    "core": {},
+    "midi-qol": {
+      "AoETargetType": "any",
+      "AoETargetTypeIncludeSelf": true,
+      "autoTarget": "default",
+      "removeAttackDamageButtons": "default",
+      "effectActivation": false,
+      "onUseMacroName": "",
+      "rollAttackPerTarget": "default",
+      "itemCondition": "",
+      "effectCondition": "",
+      "-=onUseMacroName": null,
+      "reactionCondition": "",
+      "otherCondition": ""
+    },
+    "dnd5e": {
+      "persistSourceMigration": true,
+      "riders": {
+        "activity": [],
+        "effect": [
+          "c6a65848d37d763c"
+        ]
+      },
+      "last": {
+        "QOxgmSerRDTYPMri": {
+          "damageType": {
+            "0": "cold"
+          }
+        }
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "investiture-of-ice"
+          }
+        ]
+      }
+    },
+    "khuzoe-automations": {
+      "importedFrom": "Cauldron 1.2.39 (document schema only; runtime-independent)",
+      "sourceIdentifier": "investitureOfIce",
+      "activityIdentifiers": {
+        "investitureOfIce": "dnd5eactivity000",
+        "investitureOfIceCone": "QOxgmSerRDTYPMri"
+      }
+    }
+  },
+  "effects": [
+    {
+      "name": "Investiture of Ice: Cone",
+      "img": "icons/magic/water/strike-ice-blade-axe.webp",
+      "origin": null,
+      "transfer": false,
+      "_id": "c6a65848d37d763c",
+      "type": "base",
+      "system": {
+        "changes": [
+          {
+            "key": "system.attributes.movement.all",
+            "value": "/2",
+            "priority": 20,
+            "type": "custom"
+          }
+        ]
+      },
+      "disabled": false,
+      "duration": {
+        "value": 600,
+        "units": "seconds",
+        "expiry": "turnStart",
+        "expired": false
+      },
+      "description": "",
+      "tint": "#ffffff",
+      "statuses": [],
+      "flags": {
+        "dae": {
+          "transfer": false,
+          "stackable": "noneName",
+          "expiryMode": "delete",
+          "specialDuration": [
+            "turnStartSource"
+          ]
+        },
+        "core": {
+          "overlay": false
+        }
+      },
+      "sort": 0,
+      "_key": "!items.effects!f14ebde7f4dc2635.c6a65848d37d763c",
+      "showIcon": 0
+    }
+  ],
+  "img": "icons/magic/water/strike-ice-blade-axe.webp",
+  "folder": null,
+  "_id": "f14ebde7f4dc2635",
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!f14ebde7f4dc2635"
+}

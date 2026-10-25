@@ -1,0 +1,158 @@
+{
+  "_id": "KhzGrapple140001",
+  "name": "Grapple",
+  "type": "feat",
+  "img": "icons/magic/control/buff-strength-muscle-damage-red.webp",
+  "system": {
+    "description": {
+      "value": "<p>Quando effettui l'azione Attack puoi sostituire uno dei tuoi attacchi con un tentativo di afferrare una creatura entro portata che non sia più di una taglia più grande di te.</p><p>Effettua una prova di Atletica (FOR) contrapposta ad Atletica (FOR) o Acrobazia (DES), a scelta del bersaglio. Il difensore vince i pareggi. Se riesci, il bersaglio è <strong>Grappled</strong> e riceve automaticamente l'azione <strong>Escape Grapple</strong>.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Player's Handbook 2014",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "type": {
+      "value": "feat",
+      "subtype": ""
+    },
+    "properties": [],
+    "requirements": "Combat action 2014",
+    "prerequisites": {
+      "level": null
+    },
+    "activities": {
+      "KhzGrappleAct001": {
+        "_id": "KhzGrappleAct001",
+        "type": "utility",
+        "activation": {
+          "type": "action",
+          "value": 1,
+          "condition": "",
+          "override": true
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": false
+        },
+        "description": {
+          "chatFlavor": "Grapple"
+        },
+        "duration": {
+          "value": "",
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "value": 5,
+          "units": "ft",
+          "special": "",
+          "override": true
+        },
+        "target": {
+          "prompt": true,
+          "template": {
+            "count": "",
+            "contiguous": false,
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "units": "ft"
+          },
+          "affects": {
+            "count": "1",
+            "type": "creature",
+            "choice": false,
+            "special": ""
+          },
+          "override": true
+        },
+        "roll": {
+          "formula": "",
+          "name": "",
+          "prompt": false,
+          "visible": false
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 0,
+        "name": "Grapple",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "confirmTargets": "always",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "automationOnly": false,
+          "magicEffect": false,
+          "magicDamage": false
+        },
+        "flags": {}
+      }
+    },
+    "identifier": "grapple",
+    "enchant": {}
+  },
+  "effects": [],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "always",
+      "magicdam": false,
+      "magiceffect": false
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [],
+        "effect": []
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "grapple"
+          }
+        ]
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzGrapple140001"
+}

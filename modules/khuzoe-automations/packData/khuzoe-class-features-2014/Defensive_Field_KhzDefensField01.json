@@ -1,0 +1,119 @@
+{
+  "_id": "KhzDefensField01",
+  "_key": "!items!KhzDefensField01",
+  "name": "Defensive Field",
+  "type": "feat",
+  "img": "icons/magic/defensive/shield-barrier-glowing-triangle-blue.webp",
+  "system": {
+    "identifier": "defensive-field",
+    "source": {
+      "rules": "2014",
+      "custom": "Khuzoe Automations — regole 2014"
+    },
+    "description": {
+      "value": "<p>Azione bonus: sostituisce i PF temporanei con il livello da artefice. Usi pari alla competenza, recuperati al riposo lungo.</p>",
+      "chat": ""
+    },
+    "type": {
+      "value": "class"
+    },
+    "activities": {
+      "KhzArmorerUse001": {
+        "_id": "KhzArmorerUse001",
+        "name": "Defensive Field",
+        "type": "utility",
+        "activation": {
+          "type": "bonus",
+          "value": 1,
+          "override": true
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false
+          },
+          "spellSlot": false
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "units": "self",
+          "override": true
+        },
+        "target": {
+          "override": true,
+          "prompt": false,
+          "affects": {
+            "type": "self"
+          },
+          "template": {
+            "units": "ft"
+          }
+        },
+        "roll": {
+          "formula": "",
+          "prompt": false,
+          "visible": false
+        },
+        "midiProperties": {
+          "confirmTargets": "never"
+        },
+        "uses": {
+          "max": "",
+          "spent": 0,
+          "recovery": []
+        }
+      }
+    },
+    "uses": {
+      "max": "@prof",
+      "spent": 0,
+      "recovery": [
+        {
+          "period": "lr",
+          "type": "recoverAll"
+        }
+      ]
+    },
+    "properties": [],
+    "requirements": "Armorer 3"
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "defensive-field"
+          }
+        ]
+      }
+    },
+    "khuzoe-automations": {
+      "armorerFeature": "field"
+    },
+    "midi-qol": {
+      "forceCEOff": true
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": []
+      }
+    }
+  }
+}

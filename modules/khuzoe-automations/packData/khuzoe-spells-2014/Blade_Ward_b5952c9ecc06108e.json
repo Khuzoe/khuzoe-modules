@@ -1,0 +1,305 @@
+{
+  "name": "Blade Ward",
+  "type": "spell",
+  "img": "icons/equipment/shield/buckler-wooden-boss-glowing-blue.webp",
+  "effects": [
+    {
+      "_id": "9e7a4b97fe054c15",
+      "disabled": false,
+      "duration": {
+        "value": 12,
+        "units": "seconds",
+        "expiry": "turnStart",
+        "expired": false
+      },
+      "transfer": false,
+      "flags": {
+        "dae": {
+          "transfer": false,
+          "stackable": "noneName",
+          "expiryMode": "delete",
+          "specialDuration": [
+            "turnEndSource"
+          ]
+        },
+        "core": {
+          "overlay": false
+        },
+        "khuzoe-automations": {
+          "expandedSpell": {
+            "identifier": "blade-ward"
+          }
+        },
+        "cat": {
+          "identifier": "khuzoe-expanded-spell-effect",
+          "macros": {
+            "roll": [
+              {
+                "source": "khuzoe-automations",
+                "rules": "2014",
+                "identifier": "khuzoe-expanded-spell-effect"
+              }
+            ],
+            "combat": [
+              {
+                "source": "khuzoe-automations",
+                "rules": "2014",
+                "identifier": "khuzoe-expanded-spell-effect"
+              }
+            ],
+            "effect": [
+              {
+                "source": "khuzoe-automations",
+                "rules": "2014",
+                "identifier": "khuzoe-expanded-spell-effect"
+              }
+            ],
+            "save": [
+              {
+                "source": "khuzoe-automations",
+                "rules": "2014",
+                "identifier": "khuzoe-expanded-spell-effect"
+              }
+            ],
+            "check": [
+              {
+                "source": "khuzoe-automations",
+                "rules": "2014",
+                "identifier": "khuzoe-expanded-spell-effect"
+              }
+            ]
+          }
+        }
+      },
+      "tint": "#ffffff",
+      "origin": null,
+      "name": "Blade Ward",
+      "description": "",
+      "statuses": [],
+      "img": "icons/equipment/shield/buckler-wooden-boss-glowing-blue.webp",
+      "type": "base",
+      "system": {
+        "changes": []
+      },
+      "sort": 0,
+      "_key": "!items.effects!b5952c9ecc06108e.9e7a4b97fe054c15",
+      "showIcon": 0
+    }
+  ],
+  "flags": {
+    "midi-qol": {
+      "effectActivation": false,
+      "rollAttackPerTarget": "default",
+      "itemCondition": "",
+      "effectCondition": "",
+      "AoETargetType": "any",
+      "AoETargetTypeIncludeSelf": true,
+      "autoTarget": "default",
+      "removeAttackDamageButtons": "default",
+      "reactionCondition": "",
+      "otherCondition": ""
+    },
+    "midiProperties": {
+      "nodam": false,
+      "fulldam": false,
+      "halfdam": false,
+      "rollOther": false,
+      "critOther": false,
+      "magicdam": false,
+      "magiceffect": false,
+      "concentration": false,
+      "toggleEffect": false,
+      "ignoreTotalCover": false,
+      "autoFailFriendly": false,
+      "autoSaveFriendly": false,
+      "offHandWeapon": false,
+      "confirmTargets": "default",
+      "noConcentrationCheck": false,
+      "idr": false,
+      "idi": false,
+      "idv": false,
+      "ida": false
+    },
+    "core": {},
+    "dnd5e": {
+      "persistSourceMigration": true,
+      "riders": {
+        "activity": [],
+        "effect": [
+          "9e7a4b97fe054c15"
+        ]
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "blade-ward"
+          }
+        ]
+      }
+    },
+    "khuzoe-automations": {
+      "importedFrom": "Cauldron 1.2.39 (document schema only; runtime-independent)",
+      "sourceIdentifier": "bladeWard",
+      "activityIdentifiers": {}
+    }
+  },
+  "system": {
+    "description": {
+      "value": "",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Khuzoe Automations",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "activation": {
+      "type": "action",
+      "condition": "",
+      "value": 1
+    },
+    "duration": {
+      "value": "2",
+      "units": "round"
+    },
+    "target": {
+      "affects": {
+        "type": "self",
+        "count": "",
+        "choice": false,
+        "special": ""
+      },
+      "template": {
+        "units": "",
+        "contiguous": false,
+        "type": ""
+      }
+    },
+    "range": {
+      "units": "self",
+      "special": ""
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "ability": "",
+    "level": 0,
+    "school": "abj",
+    "materials": {
+      "value": "",
+      "consumed": false,
+      "cost": 0,
+      "supply": 0
+    },
+    "preparation": {
+      "mode": "prepared",
+      "prepared": true
+    },
+    "properties": [
+      "vocal",
+      "somatic"
+    ],
+    "activities": {
+      "dnd5eactivity000": {
+        "_id": "dnd5eactivity000",
+        "type": "utility",
+        "activation": {
+          "type": "action",
+          "value": null,
+          "override": false
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": true
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": false
+        },
+        "effects": [
+          {
+            "_id": "9e7a4b97fe054c15",
+            "level": {
+              "min": null,
+              "max": null
+            }
+          }
+        ],
+        "range": {
+          "override": false
+        },
+        "target": {
+          "prompt": true,
+          "template": {
+            "contiguous": false,
+            "units": "ft"
+          },
+          "affects": {
+            "choice": false
+          },
+          "override": false
+        },
+        "uses": {
+          "spent": 0,
+          "max": "",
+          "recovery": []
+        },
+        "roll": {
+          "formula": "",
+          "name": "",
+          "prompt": false,
+          "visible": false
+        },
+        "sort": 0,
+        "useConditionText": "",
+        "forceDialog": false,
+        "effectConditionText": "",
+        "name": "Blade Ward",
+        "img": "icons/equipment/shield/buckler-wooden-boss-glowing-blue.webp",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "magicDamage": false,
+          "magicEffect": false
+        },
+        "flags": {}
+      }
+    },
+    "identifier": "blade-ward",
+    "sourceClass": ""
+  },
+  "folder": null,
+  "_id": "b5952c9ecc06108e",
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!b5952c9ecc06108e"
+}

@@ -1,0 +1,21 @@
+<form class="ktz-token-variant-selector" autocomplete="off">
+  <div class="ktz-token-variant-grid">
+    {{#each choices}}
+    <button type="button" class="ktz-token-variant-choice {{#if active}}is-active{{/if}} {{#if base}}is-base{{/if}}" data-variant-id="{{id}}" title="{{name}}">
+      <span class="ktz-token-variant-preview">
+        {{#if src}}
+        <img src="{{src}}" alt="{{name}}">
+        {{else}}
+        <i class="fas fa-user"></i>
+        {{/if}}
+      </span>
+      <span class="ktz-token-variant-name">{{name}}</span>
+      <span class="ktz-token-variant-size">{{width}}x{{height}}</span>
+      {{#unless base}}<span class="ktz-token-variant-size">{{localize "khuzoe-tokenizer.labels.variantScale"}}: {{#if scale}}{{scale}}{{else}}{{localize "khuzoe-tokenizer.labels.inheritScale"}}{{/if}}</span>{{/unless}}
+      {{#if active}}
+      <i class="fas fa-check ktz-token-variant-active"></i>
+      {{/if}}
+    </button>
+    {{/each}}
+  </div>
+</form>

@@ -1,0 +1,40 @@
+/* Native Foundry V14 window integration. The core owns frames and header controls. */
+
+.ktz-application-v14 > .window-content {
+  overflow: auto;
+  padding: 0;
+}
+
+.ktz-application-v14 .khuzoe-tokenizer-app,
+.ktz-application-v14 .khuzoe-item-image-app,
+.ktz-application-v14 .ktz-token-variant-manager,
+.ktz-application-v14 .ktz-token-variant-selector {
+  box-sizing: border-box;
+  margin: 0;
+  width: 100%;
+}
+
+.ktz-application-v14 .khuzoe-tokenizer-app {
+  min-width: 0;
+}
+
+.ktz-application-v14 :is(button, input, select):focus-visible {
+  outline: 2px solid var(--ktz-accent, var(--color-warm-1, #d8a64f));
+  outline-offset: 2px;
+}
+
+.ktz-application-v14 button > i:only-child,
+.ktz-token-config-variants-button > i:only-child,
+.ktz-token-variants-toggle > i:only-child {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ktz-application-v14 *,
+  .ktz-application-v14 *::before,
+  .ktz-application-v14 *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+

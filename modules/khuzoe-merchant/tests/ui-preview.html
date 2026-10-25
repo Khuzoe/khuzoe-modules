@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Khuzoe Merchant UI preview</title>
+  <link rel="stylesheet" href="../styles/merchant.css">
+  <link rel="stylesheet" href="../styles/economy.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 18px; color: #ece6d9; background: #26231e; font: 14px Arial, sans-serif; }
+    .preview-switcher { position: sticky; z-index: 20; top: 0; display: flex; max-width: 920px; margin: 0 auto 12px; padding: 8px; border: 1px solid #736344; border-radius: 10px; gap: 6px; background: #13130f; }
+    .preview-switcher button { min-height: 34px; padding: 0 12px; border: 1px solid #4f4633; border-radius: 7px; color: #e7dcc7; background: #24231d; cursor: pointer; }
+    .preview-switcher button.is-active { border-color: #cda75c; color: #17130c; background: #d4ae63; }
+    .preview-window { display: none; width: min(920px, calc(100vw - 36px)); height: min(760px, calc(100vh - 92px)); margin: auto; overflow: hidden; border: 1px solid #7a6a4a; border-radius: 8px; background: #11130f; box-shadow: 0 20px 70px #0009; }
+    .preview-window.is-active { display: grid; grid-template-rows: 36px minmax(0, 1fr); }
+    .preview-titlebar { display: flex; padding: 0 12px; align-items: center; justify-content: space-between; color: #eadfca; background: linear-gradient(#33332f, #23231f); font-size: 12px; font-weight: 700; }
+    .preview-window .window-content { min-height: 0; overflow: hidden; }
+    .preview-window img { display: block; }
+    .mock-image { background: linear-gradient(145deg, #7e6942, #2a251a) !important; }
+    .mock-icon { display: inline-grid; place-items: center; color: #f2d597; font-style: normal; }
+    .preview-window i.fas::before { content: "◆"; font-size: .72em; }
+    @media (max-width: 640px) {
+      body { padding: 6px; }
+      .preview-switcher { overflow-x: auto; margin-bottom: 6px; }
+      .preview-switcher button { flex: 0 0 auto; }
+      .preview-window { width: calc(100vw - 12px); height: calc(100vh - 58px); }
+    }
+  </style>
+</head>
+<body>
+  <nav class="preview-switcher" aria-label="Anteprime">
+    <button class="is-active" data-preview="merchant-config">Mercante · configurazione</button>
+    <button data-preview="container-config">Cassa · configurazione</button>
+    <button data-preview="merchant-player">Mercante · giocatore</button>
+    <button data-preview="container-player">Cassa · giocatore</button>
+  </nav>
+
+  <section class="preview-window khuzoe-merchant is-active" data-window="merchant-config">
+    <div class="preview-titlebar"><span>Configurazione mercante — Emporio di Khuzoe</span><span>× Chiudi</span></div>
+    <div class="window-content">
+      <form class="km-config-form km-ui-v2">
+        <header class="km-config-hero km-ui-config-hero">
+          <div class="km-config-portrait mock-image"></div>
+          <div class="km-config-heading"><span class="km-eyebrow">CONFIGURAZIONE MERCANTE</span><h2>Emporio di Khuzoe</h2><p>Impostazioni generali, catalogo e rifornimento sono separati in aree semplici.</p></div>
+          <label class="km-switch km-ui-master-switch"><input type="checkbox" checked><span class="km-switch-track"><span class="km-switch-thumb"></span></span><span>Mercante attivo</span></label>
+        </header>
+        <nav class="km-config-tabs" role="tablist">
+          <button type="button" data-tab="general">◆ Generale</button>
+          <button type="button" class="is-active" data-tab="catalog">◆ Catalogo <small>3</small></button>
+          <button type="button" data-tab="production">◆ Produzione <small>2</small></button>
+        </nav>
+        <div class="km-config-workspace">
+          <section class="km-config-panel is-active" data-panel="catalog">
+            <div class="km-panel-heading"><div><span class="km-eyebrow">INVENTARIO</span><h3>Catalogo del mercante</h3></div><p>Trascina qui gli oggetti. Prezzo e disponibilità restano ben leggibili.</p></div>
+            <div class="km-drop-zone"><i class="fas"></i><div><strong>Trascina qui un oggetto</strong><span>Puoi aggiungerlo da una scheda o dalla directory Oggetti.</span></div></div>
+            <div class="km-config-inventory km-ui-config-list">
+              <article class="km-config-item">
+                <div class="km-config-item-thumb mock-image"><span>Consumabile</span></div>
+                <div class="km-config-item-main"><div class="km-config-item-title"><strong>Lunarmana Rosso</strong></div><p>Un reagente alchemico raro dal bagliore cremisi, raccolto soltanto durante la luna nuova.</p></div>
+                <div class="km-config-item-fields"><label>Prezzo<input type="number" value="25"><small>monete d'oro</small></label><label>Valuta<select><option>mo</option></select><small>Taglio del prezzo</small></label><label>Scorte<input type="number" value="6"><small>0 = esaurito</small></label></div>
+                <div class="km-config-item-actions"><button class="km-icon-button" type="button">✎</button><button class="km-icon-button" type="button">×</button></div>
+              </article>
+              <article class="km-config-item">
+                <div class="km-config-item-thumb mock-image"><span>Arma</span></div>
+                <div class="km-config-item-main"><div class="km-config-item-title"><strong>Pugnale cerimoniale</strong></div><p>La lama reca una lunga iscrizione che può essere letta interamente aprendo i dettagli dell'oggetto.</p></div>
+                <div class="km-config-item-fields"><label>Prezzo<input type="number" value="8"><small>monete d'oro</small></label><label>Valuta<select><option>mo</option></select><small>Taglio del prezzo</small></label><label>Scorte<input type="number" value="2"><small>Quantità disponibile</small></label></div>
+                <div class="km-config-item-actions"><button class="km-icon-button" type="button">✎</button><button class="km-icon-button" type="button">×</button></div>
+              </article>
+              <article class="km-config-item">
+                <div class="km-config-item-thumb mock-image"><span>Pozione</span></div>
+                <div class="km-config-item-main"><div class="km-config-item-title"><strong>Pozione di cura</strong></div><p>Una pozione comune dal sapore dolce e speziato.</p></div>
+                <div class="km-config-item-fields"><label>Prezzo<input type="number" value="50"><small>monete d'oro</small></label><label>Valuta<select><option>mo</option></select><small>Taglio del prezzo</small></label><label>Scorte<input type="number" value="0"><small>Esaurito</small></label></div>
+                <div class="km-config-item-actions"><button class="km-icon-button" type="button">✎</button><button class="km-icon-button" type="button">×</button></div>
+              </article>
+            </div>
+          </section>
+        </div>
+        <footer class="km-config-footer km-ui-footer"><span>◆ Le modifiche vengono salvate sul mercante selezionato.</span><button type="button" class="km-primary-button">◆ Salva modifiche</button></footer>
+      </form>
+    </div>
+  </section>
+
+  <section class="preview-window khuzoe-merchant khuzoe-container" data-window="container-config">
+    <div class="preview-titlebar"><span>Configurazione contenitore — Forziere</span><span>× Chiudi</span></div>
+    <div class="window-content">
+      <form class="km-config-form km-container-config-form km-ui-v2">
+        <header class="km-config-hero km-container-config-hero km-ui-config-hero">
+          <div class="km-config-portrait mock-image"></div>
+          <div class="km-config-heading"><span class="km-eyebrow">CONFIGURAZIONE CONTENITORE</span><h2>Forziere rinforzato</h2><p>Contenuto, serratura e produzione sono separati e sempre raggiungibili.</p></div>
+          <span class="km-ui-status-pill">◆ Aperto</span>
+        </header>
+        <nav class="km-config-tabs" role="tablist">
+          <button type="button" data-tab="general">◆ Generale</button>
+          <button type="button" class="is-active" data-tab="content">◆ Contenuto <small>4</small></button>
+          <button type="button" data-tab="lock">◆ Serratura</button>
+          <button type="button" data-tab="production">◆ Produzione <small>2</small></button>
+        </nav>
+        <div class="km-config-workspace">
+          <section class="km-config-panel is-active" data-panel="content">
+            <div class="km-panel-heading"><div><span class="km-eyebrow">TESORO</span><h3>Contenuto del forziere</h3></div><p>Monete e oggetti hanno dimensioni compatte; la pagina scorre senza sovrapposizioni.</p></div>
+            <section class="km-container-currency-config">
+              <div class="km-subsection-heading"><span>◆ Monete e valute</span><small>Gli importi vengono trasferiti dal GM</small></div>
+              <div class="km-container-currency-grid">
+                <label class="km-container-currency-input" style="--km-currency-accent:#d7c5a2"><span class="km-container-currency-symbol">mp</span><span class="km-container-currency-name"><strong>Platino</strong><small>mp</small></span><input type="number" value="0"></label>
+                <label class="km-container-currency-input" style="--km-currency-accent:#d6a84f"><span class="km-container-currency-symbol">mo</span><span class="km-container-currency-name"><strong>Oro</strong><small>mo</small></span><input type="number" value="125"></label>
+                <label class="km-container-currency-input" style="--km-currency-accent:#a9adb3"><span class="km-container-currency-symbol">ma</span><span class="km-container-currency-name"><strong>Argento</strong><small>ma</small></span><input type="number" value="38"></label>
+                <label class="km-container-currency-input" style="--km-currency-accent:#a76643"><span class="km-container-currency-symbol">mr</span><span class="km-container-currency-name"><strong>Rame</strong><small>mr</small></span><input type="number" value="9"></label>
+              </div>
+            </section>
+            <div class="km-drop-zone"><i class="fas"></i><div><strong>Deposita un oggetto</strong><span>Trascina qui un oggetto e scegli la quantità.</span></div></div>
+            <section class="km-container-inventory-config">
+              <div class="km-subsection-heading"><span>◆ Oggetti conservati</span><small>3 tipi · 7 unità</small></div>
+              <article class="km-config-item km-container-config-item">
+                <div class="km-config-item-thumb mock-image"><span>Gemma</span></div>
+                <div class="km-config-item-main"><div class="km-config-item-title"><strong>Lunarmana Rosso</strong></div><p>Gemma alchemica dal bagliore cremisi.</p></div>
+                <div class="km-container-item-fields"><label>Quantità<input type="number" value="4"></label></div>
+                <div class="km-config-item-actions"><button type="button" class="km-icon-button">×</button></div>
+              </article>
+              <article class="km-config-item km-container-config-item">
+                <div class="km-config-item-thumb mock-image"><span>Chiave</span></div>
+                <div class="km-config-item-main"><div class="km-config-item-title"><strong>Chiave del forziere</strong></div><p>Una piccola chiave in ferro brunito.</p></div>
+                <div class="km-container-item-fields"><label>Quantità<input type="number" value="1"></label></div>
+                <div class="km-config-item-actions"><button type="button" class="km-icon-button">×</button></div>
+              </article>
+            </section>
+          </section>
+        </div>
+        <footer class="km-config-footer km-ui-footer"><span>◆ I trasferimenti sono sempre convalidati dal GM.</span><div><button type="button">Apri contenitore</button><button type="button" class="km-primary-button">◆ Salva</button></div></footer>
+      </form>
+    </div>
+  </section>
+
+  <section class="preview-window khuzoe-merchant" data-window="merchant-player">
+    <div class="preview-titlebar"><span>Emporio di Khuzoe</span><span>× Chiudi</span></div>
+    <div class="window-content">
+      <div class="km-shop-shell km-ui-v2 is-view-list">
+        <header class="km-shop-hero km-ui-shop-hero">
+          <div class="km-shop-portrait-wrap"><div class="km-shop-portrait mock-image"></div><span class="km-shop-open-badge">◆</span></div>
+          <div class="km-shop-heading"><span class="km-eyebrow">MERCANTE</span><h2>Emporio di Khuzoe</h2><p>Reagenti, armi rare e provviste per il lungo viaggio.</p></div>
+          <div class="km-wallet"><div class="mock-image"></div><span><small>I tuoi fondi</small><strong>◆ 128 mo, 7 ma</strong><em>Eldrin</em></span></div>
+        </header>
+        <div class="km-shop-toolbar km-ui-toolbar"><label class="km-search-field">◆ <input type="search" placeholder="Cerca nel catalogo"></label><span class="km-toolbar-count">◆ 3 articoli</span><div class="km-view-toggle"><button class="km-view-button is-active">☷ Elenco</button><button class="km-view-button">▦ Completa</button></div></div>
+        <main class="km-shop-inventory km-ui-shop-list">
+          <article class="km-shop-card"><div class="km-card-image-wrap mock-image"><button class="km-card-image-button" aria-label="Ingrandisci immagine"></button></div><div class="km-card-body"><div class="km-card-title-row"><h3>Lunarmana Rosso</h3><span class="km-list-type">Consumabile</span></div><p class="km-card-description">Un reagente alchemico raro dal bagliore cremisi.</p><div class="km-card-meta"><span class="km-card-price"><small>Prezzo unitario</small><strong>◆ 25 mo</strong></span><span class="km-card-stock"><small>Disponibilità</small><strong>◆ 6 in stock</strong></span></div></div><footer class="km-card-actions"><div class="km-order-summary"><label class="km-quantity-wrap"><span class="km-field-label">Quantità</span><input type="number" value="1"></label><div class="km-total-wrap"><span class="km-field-label">Totale</span><strong>25 mo</strong></div></div><div class="km-order-buttons"><button class="km-item-details-button">◆ Dettagli</button><button class="km-buy-button">◆ Compra</button></div></footer></article>
+          <article class="km-shop-card"><div class="km-card-image-wrap mock-image"><button class="km-card-image-button" aria-label="Ingrandisci immagine"></button></div><div class="km-card-body"><div class="km-card-title-row"><h3>Pugnale cerimoniale</h3><span class="km-list-type">Arma</span></div><p class="km-card-description">La lama reca un'iscrizione antica.</p><div class="km-card-meta"><span class="km-card-price"><small>Prezzo unitario</small><strong>◆ 8 mo</strong></span><span class="km-card-stock"><small>Disponibilità</small><strong>◆ 2 in stock</strong></span></div></div><footer class="km-card-actions"><div class="km-order-summary"><label class="km-quantity-wrap"><span class="km-field-label">Quantità</span><input type="number" value="1"></label><div class="km-total-wrap"><span class="km-field-label">Totale</span><strong>8 mo</strong></div></div><div class="km-order-buttons"><button class="km-item-details-button">◆ Dettagli</button><button class="km-buy-button">◆ Compra</button></div></footer></article>
+          <article class="km-shop-card is-sold-out"><div class="km-card-image-wrap mock-image"><button class="km-card-image-button" aria-label="Ingrandisci immagine"></button></div><div class="km-card-body"><div class="km-card-title-row"><h3>Pozione di cura</h3><span class="km-list-type">Pozione</span></div><p class="km-card-description">Una pozione dal sapore dolce e speziato.</p><div class="km-card-meta"><span class="km-card-price"><small>Prezzo unitario</small><strong>◆ 50 mo</strong></span><span class="km-card-stock"><small>Disponibilità</small><strong>◆ Esaurito</strong></span></div></div><footer class="km-card-actions"><div class="km-order-summary"><label class="km-quantity-wrap"><span class="km-field-label">Quantità</span><input type="number" value="1" disabled></label><div class="km-total-wrap"><span class="km-field-label">Totale</span><strong>50 mo</strong></div></div><div class="km-order-buttons"><button class="km-item-details-button">◆ Dettagli</button><button class="km-buy-button" disabled>Esaurito</button></div></footer></article>
+        </main>
+      </div>
+    </div>
+  </section>
+
+  <section class="preview-window khuzoe-merchant khuzoe-container" data-window="container-player">
+    <div class="preview-titlebar"><span>Contenitore — Forziere rinforzato</span><span>× Chiudi</span></div>
+    <div class="window-content">
+      <div class="km-shop-shell km-container-shell km-ui-v2 is-view-list">
+        <header class="km-shop-hero km-container-hero km-ui-shop-hero"><div class="km-shop-portrait-wrap"><button class="km-container-hero-image mock-image"></button><span class="km-shop-open-badge">◆</span></div><div class="km-shop-heading"><span class="km-eyebrow">CONTENITORE</span><h2>Forziere rinforzato</h2><p>Una vecchia cassa rinforzata, coperta di polvere.</p></div><div class="km-wallet km-recipient-card"><div class="mock-image"></div><span><small>Destinatario</small><strong>Eldrin</strong><em>Bottino condiviso</em></span></div></header>
+        <div class="km-shop-toolbar km-ui-toolbar"><label class="km-search-field">◆ <input type="search" placeholder="Cerca nel contenitore"></label><span class="km-toolbar-count">◆ 7 oggetti · 2 valute</span><div class="km-shop-toolbar-actions"><div class="km-view-toggle"><button class="km-view-button is-active">☷ Elenco</button><button class="km-view-button">▦ Completa</button></div><button class="km-primary-button km-container-take-all">Prendi tutto</button></div></div>
+        <div class="km-container-transfer-tools"><section class="km-container-key-slot"><div class="km-container-key-slot-icon mock-image"></div><div class="km-container-key-slot-copy"><span class="km-eyebrow">SERRATURA</span><strong>Chiave del forziere inserita</strong><small>Prelevala per richiudere il contenitore.</small></div><button class="km-container-take-key">◆ Prendi chiave e chiudi</button></section><div class="km-container-player-drop-zone"><i class="fas"></i><div><strong>Deposita nel contenitore</strong><span>Trascina qui oggetti o valuta e scegli la quantità.</span></div></div></div>
+        <div class="km-container-content-scroll"><section class="km-container-currency-panel"><div class="km-container-panel-heading"><span>◆ Monete e valute</span><small>Scegli quale importo prendere</small></div><div class="km-container-currency-list"><article class="km-container-currency-card" style="--km-currency-accent:#d6a84f"><span class="km-container-currency-symbol">mo</span><span class="km-container-currency-value"><strong>125</strong><small>Oro</small></span><button>◆ Prendi</button></article><article class="km-container-currency-card" style="--km-currency-accent:#a9adb3"><span class="km-container-currency-symbol">ma</span><span class="km-container-currency-value"><strong>38</strong><small>Argento</small></span><button>◆ Prendi</button></article></div></section><main class="km-shop-inventory km-container-inventory km-ui-shop-list"><article class="km-shop-card"><div class="km-card-image-wrap mock-image"><button class="km-card-image-button"></button></div><div class="km-card-body"><div class="km-card-title-row"><h3>Lunarmana Rosso</h3><span class="km-list-type">Gemma</span></div><p class="km-card-description">Gemma alchemica dal bagliore cremisi.</p><div class="km-card-meta"><span class="km-card-stock"><small>Disponibilità</small><strong>◆ 4 disponibili</strong></span></div></div><footer class="km-card-actions km-container-card-actions"><div class="km-order-buttons"><button class="km-item-details-button">◆ Dettagli</button><button class="km-buy-button">◆ Prendi</button></div></footer></article><article class="km-shop-card"><div class="km-card-image-wrap mock-image"><button class="km-card-image-button"></button></div><div class="km-card-body"><div class="km-card-title-row"><h3>Pergamena della soglia</h3><span class="km-list-type">Pergamena</span></div><p class="km-card-description">Il testo completo resta consultabile nei dettagli.</p><div class="km-card-meta"><span class="km-card-stock"><small>Disponibilità</small><strong>◆ 2 disponibili</strong></span></div></div><footer class="km-card-actions km-container-card-actions"><div class="km-order-buttons"><button class="km-item-details-button">◆ Dettagli</button><button class="km-buy-button">◆ Prendi</button></div></footer></article></main></div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const switches = [...document.querySelectorAll('[data-preview]')];
+    for (const button of switches) button.addEventListener('click', () => {
+      for (const item of switches) item.classList.toggle('is-active', item === button);
+      for (const windowElement of document.querySelectorAll('[data-window]')) windowElement.classList.toggle('is-active', windowElement.dataset.window === button.dataset.preview);
+    });
+  </script>
+</body>
+</html>

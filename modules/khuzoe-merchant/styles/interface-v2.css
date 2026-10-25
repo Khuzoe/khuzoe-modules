@@ -1,0 +1,1612 @@
+/* Khuzoe interface v2 — task-oriented configuration and compact player views. */
+.khuzoe-merchant .km-ui-v2 {
+  --km-ui-bg: #11130f;
+  --km-ui-surface: #191b17;
+  --km-ui-surface-raised: #22241f;
+  --km-ui-surface-soft: #151713;
+  --km-ui-border: rgba(226, 192, 119, 0.22);
+  --km-ui-border-strong: rgba(226, 192, 119, 0.42);
+  --km-ui-text: #f2eadb;
+  --km-ui-muted: #b8ad99;
+  --km-ui-dim: #8d8473;
+  --km-ui-gold: #e1b85f;
+  --km-ui-green: #78bd82;
+  --km-ui-red: #d87c70;
+  color: var(--km-ui-text);
+  background: var(--km-ui-bg);
+}
+
+.khuzoe-merchant .km-ui-v2 [hidden] {
+  display: none !important;
+}
+
+.khuzoe-merchant .km-ui-v2 button,
+.khuzoe-merchant .km-ui-v2 input,
+.khuzoe-merchant .km-ui-v2 select,
+.khuzoe-merchant .km-ui-v2 textarea {
+  box-sizing: border-box;
+}
+
+.khuzoe-merchant .km-ui-v2 input[type="text"],
+.khuzoe-merchant .km-ui-v2 input[type="number"],
+.khuzoe-merchant .km-ui-v2 input[type="search"],
+.khuzoe-merchant .km-ui-v2 select,
+.khuzoe-merchant .km-ui-v2 textarea {
+  border: 1px solid rgba(226, 192, 119, 0.28);
+  color: var(--km-ui-text);
+  background: #0d0f0c;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.khuzoe-merchant .km-ui-v2 input:focus,
+.khuzoe-merchant .km-ui-v2 select:focus,
+.khuzoe-merchant .km-ui-v2 textarea:focus {
+  border-color: var(--km-ui-gold);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(225, 184, 95, 0.15);
+}
+
+/* Configuration shells */
+.khuzoe-merchant .km-ui-v2.km-config-form {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  background: linear-gradient(145deg, #171914, #0e100d);
+}
+
+.khuzoe-container .km-ui-v2.km-container-config-form {
+  grid-template-rows: auto auto minmax(0, 1fr) auto !important;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-ui-config-hero {
+  min-height: 82px;
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--km-ui-border);
+  grid-template-columns: 54px minmax(0, 1fr) auto;
+  gap: 13px;
+  background:
+    linear-gradient(90deg, rgba(225, 184, 95, 0.12), transparent 56%),
+    #171914;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-ui-config-hero .km-config-portrait {
+  width: 54px;
+  height: 54px;
+  border-width: 1px;
+  border-radius: 11px;
+  object-fit: contain;
+  background: #0b0d0a;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-heading h2 {
+  overflow: hidden;
+  color: var(--km-ui-text);
+  font-size: 21px;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-heading p {
+  max-width: 650px;
+  margin-top: 4px;
+  color: var(--km-ui-muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-ui-master-switch,
+.khuzoe-merchant .km-ui-v2 .km-production-heading .km-switch {
+  min-height: 38px;
+  padding: 7px 10px;
+  border: 1px solid var(--km-ui-border);
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-ui-status-pill {
+  display: inline-flex;
+  min-height: 34px;
+  padding: 0 11px;
+  border: 1px solid rgba(120, 189, 130, 0.35);
+  border-radius: 999px;
+  align-items: center;
+  gap: 7px;
+  color: #cfe8d2;
+  background: rgba(56, 112, 67, 0.18);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-ui-status-pill.is-locked {
+  border-color: rgba(216, 124, 112, 0.38);
+  color: #f0c1ba;
+  background: rgba(124, 55, 47, 0.18);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-tabs {
+  display: flex;
+  min-width: 0;
+  min-height: 48px;
+  padding: 6px 18px 0;
+  border-bottom: 1px solid var(--km-ui-border);
+  gap: 4px;
+  background: #12140f;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-tabs > button {
+  position: relative;
+  display: inline-flex;
+  width: auto;
+  min-width: 120px;
+  min-height: 41px;
+  margin: 0;
+  padding: 0 15px;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--km-ui-muted);
+  background: transparent;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-tabs > button:hover {
+  color: var(--km-ui-text);
+  background: rgba(225, 184, 95, 0.07);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-tabs > button.is-active {
+  border-color: var(--km-ui-border);
+  color: #f7dfaa;
+  background: #1b1d18;
+  box-shadow: inset 0 3px var(--km-ui-gold);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-tabs > button i {
+  color: var(--km-ui-gold);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-tabs > button small {
+  display: grid;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  color: #d9ccb2;
+  background: rgba(255, 255, 255, 0.08);
+  place-items: center;
+  font-size: 9px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-workspace {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-color: rgba(225, 184, 95, 0.55) rgba(0, 0, 0, 0.18);
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-panel {
+  min-width: 0;
+  min-height: 100%;
+  padding: 20px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-panel.is-active {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-panel-heading {
+  display: flex;
+  min-width: 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(226, 192, 119, 0.16);
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-panel-heading h3 {
+  margin: 0;
+  border: 0;
+  color: var(--km-ui-text);
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-panel-heading > p {
+  max-width: 440px;
+  margin: 0;
+  color: var(--km-ui-muted);
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: right;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-ui-settings-grid,
+.khuzoe-container .km-ui-v2 .km-container-config-settings {
+  display: grid;
+  width: 100%;
+  margin: 0;
+  padding: 0 !important;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.45fr) !important;
+  gap: 12px !important;
+  border: 0;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-ui-settings-grid .km-field,
+.khuzoe-container .km-ui-v2 .km-container-config-settings .km-field {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--km-ui-border);
+  border-radius: 10px;
+  background: var(--km-ui-surface);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-field > span {
+  color: #c8bda9;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-field small {
+  color: var(--km-ui-dim);
+  line-height: 1.3;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-container-description-field {
+  grid-column: 1 / -1;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-container-description-field textarea {
+  min-height: 110px;
+  padding: 10px;
+  resize: vertical;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-summary {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-summary article {
+  display: grid;
+  min-height: 94px;
+  padding: 13px;
+  border: 1px solid var(--km-ui-border);
+  border-radius: 11px;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  background: var(--km-ui-surface);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-summary article i {
+  color: var(--km-ui-gold);
+  font-size: 20px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-summary article span {
+  color: var(--km-ui-muted);
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-summary article strong {
+  color: var(--km-ui-text);
+  font-size: 22px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-summary article.is-warning {
+  border-color: rgba(216, 124, 112, 0.4);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-summary article.is-warning i {
+  color: var(--km-ui-red);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-summary article.is-success {
+  border-color: rgba(120, 189, 130, 0.4);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-summary article.is-success i {
+  color: var(--km-ui-green);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-panel-note {
+  display: flex;
+  min-height: 46px;
+  padding: 11px 13px;
+  border: 1px solid rgba(225, 184, 95, 0.2);
+  border-radius: 9px;
+  align-items: center;
+  gap: 9px;
+  color: var(--km-ui-muted);
+  background: rgba(225, 184, 95, 0.05);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-panel-note i {
+  color: var(--km-ui-gold);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-panel-note.is-success {
+  border-color: rgba(120, 189, 130, 0.28);
+  background: rgba(120, 189, 130, 0.08);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-panel-note.is-success i {
+  color: var(--km-ui-green);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-image-choice-card {
+  display: grid;
+  width: 100%;
+  min-height: 72px;
+  margin: 0;
+  padding: 9px;
+  border: 1px solid var(--km-ui-border);
+  border-radius: 10px;
+  grid-template-columns: 52px minmax(0, 1fr) 24px;
+  align-items: center;
+  gap: 11px;
+  color: var(--km-ui-text);
+  background: var(--km-ui-surface);
+  text-align: left;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-image-choice-card:hover {
+  border-color: var(--km-ui-border-strong);
+  background: var(--km-ui-surface-raised);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-image-choice-card img {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  object-fit: contain;
+  background: #090a08;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-image-choice-card span {
+  display: grid;
+  gap: 3px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-image-choice-card small {
+  color: var(--km-ui-muted);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-drop-zone {
+  min-height: 64px;
+  border-color: rgba(225, 184, 95, 0.38);
+  background: rgba(225, 184, 95, 0.045);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-drop-zone:hover {
+  border-color: rgba(225, 184, 95, 0.62);
+  background: rgba(225, 184, 95, 0.08);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-ui-config-list {
+  min-height: 160px;
+  margin: 0;
+  padding: 0 3px 8px 0;
+  overflow: visible;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-item,
+.khuzoe-container .km-ui-v2 .km-container-config-item {
+  display: grid;
+  min-width: 0;
+  margin: 0 0 8px;
+  padding: 9px;
+  border: 1px solid var(--km-ui-border);
+  border-radius: 10px;
+  grid-template-columns: 58px minmax(160px, 1fr) minmax(300px, 0.9fr) 34px;
+  align-items: center;
+  gap: 10px;
+  background: var(--km-ui-surface);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-item:hover {
+  border-color: rgba(225, 184, 95, 0.36);
+  background: #1d1f1a;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-item-thumb {
+  position: relative;
+  display: grid;
+  width: 58px;
+  height: 58px;
+  overflow: hidden;
+  border: 1px solid rgba(225, 184, 95, 0.25);
+  border-radius: 8px;
+  background: #090a08;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-item-thumb img {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  object-fit: contain;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-item-thumb span {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  left: 2px;
+  overflow: hidden;
+  padding: 2px 4px;
+  border-radius: 4px;
+  color: #ead8b0;
+  background: rgba(0, 0, 0, 0.78);
+  font-size: 7px;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-item-main {
+  align-self: center;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-item-title strong {
+  color: var(--km-ui-text);
+  font-size: 13px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-item-main > p {
+  display: -webkit-box;
+  margin: 5px 0 0;
+  overflow: hidden;
+  color: var(--km-ui-muted);
+  font-size: 10px;
+  line-height: 1.35;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-item-main > p.is-empty {
+  color: var(--km-ui-dim);
+  font-style: italic;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-item-fields,
+.khuzoe-container .km-ui-v2 .km-container-item-fields {
+  display: grid;
+  width: 100%;
+  max-width: none;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.khuzoe-container .km-ui-v2 .km-container-item-fields {
+  grid-template-columns: minmax(90px, 140px);
+  justify-content: end;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-item-fields label,
+.khuzoe-container .km-ui-v2 .km-container-item-fields label {
+  display: flex;
+  min-width: 0;
+  padding: 0;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  color: var(--km-ui-muted);
+  font-size: 8px;
+  letter-spacing: 0.06em;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-item-fields input,
+.khuzoe-merchant .km-ui-v2 .km-config-item-fields select {
+  width: 100%;
+  height: 31px !important;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-item-fields small {
+  overflow: hidden;
+  color: var(--km-ui-dim);
+  font-size: 8px;
+  letter-spacing: 0;
+  text-overflow: ellipsis;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-config-item-actions,
+.khuzoe-container .km-ui-v2 .km-config-item-actions {
+  display: flex;
+  width: 34px;
+  align-self: center;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-icon-button {
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  border-color: rgba(226, 192, 119, 0.14);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-subsection-heading {
+  display: flex;
+  min-height: 34px;
+  margin-bottom: 8px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--km-ui-text);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-subsection-heading i {
+  margin-right: 5px;
+  color: var(--km-ui-gold);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-subsection-heading small {
+  color: var(--km-ui-dim);
+  font-size: 9px;
+  font-weight: 500;
+}
+
+.khuzoe-container .km-ui-v2 .km-container-currency-config,
+.khuzoe-container .km-ui-v2 .km-container-inventory-config {
+  margin: 0;
+  padding: 0 !important;
+  border: 0;
+  overflow: visible;
+}
+
+.khuzoe-container .km-ui-v2 .km-container-currency-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(205px, 1fr));
+  gap: 7px;
+}
+
+.khuzoe-container .km-ui-v2 .km-container-currency-input {
+  min-height: 52px;
+  padding: 7px;
+  border: 1px solid var(--km-ui-border);
+  border-left: 3px solid var(--km-currency-accent, var(--km-ui-gold));
+  border-radius: 9px;
+  background: var(--km-ui-surface);
+}
+
+.khuzoe-container .km-ui-v2 .km-container-currency-input input {
+  width: 78px !important;
+  height: 32px;
+}
+
+/* Lock panel */
+.khuzoe-container .km-ui-v2 .km-container-config-key {
+  display: grid;
+  min-height: 86px;
+  margin: 0;
+  padding: 11px;
+  border: 1px solid var(--km-ui-border-strong);
+  border-radius: 11px;
+  grid-template-columns: 62px minmax(0, 1fr) 36px;
+  align-items: center;
+  gap: 12px;
+  background: var(--km-ui-surface);
+}
+
+.khuzoe-container .km-ui-v2 .km-container-config-key.is-inserted {
+  border-color: rgba(120, 189, 130, 0.48);
+  box-shadow: inset 3px 0 var(--km-ui-green);
+}
+
+.khuzoe-container .km-ui-v2 .km-container-config-key > img {
+  width: 62px;
+  height: 62px;
+  border-radius: 9px;
+  object-fit: contain;
+  background: #090a08;
+}
+
+.khuzoe-container .km-ui-v2 .km-container-config-key > div {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.khuzoe-container .km-ui-v2 .km-container-config-key strong {
+  color: var(--km-ui-text);
+  font-size: 15px;
+}
+
+.khuzoe-container .km-ui-v2 .km-container-config-key small {
+  color: var(--km-ui-muted);
+  font-size: 10px;
+}
+
+.khuzoe-container .km-ui-v2 .km-lock-explanation {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.khuzoe-container .km-ui-v2 .km-lock-explanation article {
+  display: flex;
+  min-height: 66px;
+  padding: 10px;
+  border: 1px solid var(--km-ui-border);
+  border-radius: 9px;
+  align-items: center;
+  gap: 9px;
+  color: var(--km-ui-muted);
+  background: var(--km-ui-surface);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.khuzoe-container .km-ui-v2 .km-lock-explanation i {
+  display: grid;
+  min-width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  color: #241b0e;
+  background: var(--km-ui-gold);
+  place-items: center;
+}
+
+/* Production panel */
+.khuzoe-merchant .km-ui-v2 .km-production-panel {
+  background: transparent;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-production-heading {
+  margin: 0;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-production-settings {
+  display: grid;
+  grid-template-columns: minmax(190px, 1.25fr) minmax(160px, 0.85fr) minmax(125px, 0.65fr) minmax(145px, 0.75fr);
+  gap: 8px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-production-settings .km-field {
+  padding: 10px;
+  border: 1px solid var(--km-ui-border);
+  border-radius: 9px;
+  background: var(--km-ui-surface);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-production-status {
+  min-height: 44px;
+  margin: 0;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-production-table-head {
+  display: grid;
+  padding: 0 9px;
+  grid-template-columns: minmax(210px, 1.5fr) minmax(95px, 0.62fr) minmax(110px, 0.58fr) minmax(95px, 0.54fr);
+  gap: 8px;
+  color: var(--km-ui-dim);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-production-rule {
+  background: var(--km-ui-surface);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-production-rule > label:not(.km-production-rule-toggle) > span:first-child {
+  display: none;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-production-disabled-note {
+  display: grid;
+  min-height: 132px;
+  padding: 20px;
+  border: 1px dashed rgba(225, 184, 95, 0.28);
+  border-radius: 11px;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  color: var(--km-ui-muted);
+  background: rgba(0, 0, 0, 0.14);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-production-disabled-note > i {
+  color: var(--km-ui-gold);
+  font-size: 26px;
+  text-align: center;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-production-disabled-note > div {
+  display: grid;
+  gap: 4px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-production-disabled-note strong {
+  color: var(--km-ui-text);
+  font-size: 14px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-production-disabled-note span {
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-ui-footer {
+  min-height: 58px;
+  padding: 10px 18px;
+  border-top: 1px solid var(--km-ui-border);
+  background: #12140f;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-ui-footer > span {
+  max-width: 580px;
+  color: var(--km-ui-muted);
+  line-height: 1.35;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-ui-footer .km-primary-button {
+  min-width: 150px;
+  min-height: 36px;
+  margin: 0;
+}
+
+/* Player-facing merchant and container */
+.khuzoe-merchant .km-ui-v2.km-shop-shell {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  background: var(--km-ui-bg);
+}
+
+.khuzoe-merchant .km-ui-v2.km-shop-shell.has-range-warning {
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+}
+
+.khuzoe-container .km-ui-v2.km-container-shell {
+  grid-template-rows: auto auto auto minmax(0, 1fr) !important;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-ui-shop-hero {
+  min-height: 96px;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--km-ui-border);
+  grid-template-columns: 66px minmax(0, 1fr) minmax(210px, auto);
+  gap: 14px;
+  background:
+    linear-gradient(90deg, rgba(225, 184, 95, 0.1), transparent 58%),
+    #171914;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-shop-portrait-wrap,
+.khuzoe-merchant .km-ui-v2 .km-shop-portrait,
+.khuzoe-container .km-ui-v2 .km-container-hero-image {
+  width: 66px;
+  height: 66px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-shop-portrait {
+  border: 1px solid rgba(225, 184, 95, 0.42);
+  border-radius: 11px;
+  object-fit: contain;
+  background: #090a08;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-shop-heading h2 {
+  overflow: hidden;
+  margin: 0;
+  color: var(--km-ui-text);
+  font-size: 22px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-shop-heading p {
+  display: -webkit-box;
+  max-width: 620px;
+  margin: 5px 0 0;
+  overflow: hidden;
+  color: var(--km-ui-muted);
+  font-size: 11px;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-wallet {
+  display: grid;
+  min-width: 210px;
+  min-height: 62px;
+  padding: 7px 10px;
+  border: 1px solid var(--km-ui-border);
+  border-radius: 10px;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  background: rgba(0, 0, 0, 0.24);
+  text-align: left;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-wallet > img {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-wallet > span {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-wallet small,
+.khuzoe-merchant .km-ui-v2 .km-wallet em {
+  overflow: hidden;
+  color: var(--km-ui-dim);
+  font-size: 8px;
+  font-style: normal;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-wallet strong {
+  overflow: hidden;
+  color: #f4d48e;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-recipient-card strong {
+  color: var(--km-ui-text);
+  font-size: 12px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-ui-toolbar {
+  display: grid;
+  min-height: 56px;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--km-ui-border);
+  grid-template-columns: minmax(210px, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  background: #12140f;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-search-field {
+  min-width: 0;
+  height: 36px;
+  border-color: rgba(225, 184, 95, 0.26);
+  background: #0b0d0a;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-search-field input {
+  min-width: 0;
+  height: 34px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-toolbar-count {
+  display: inline-flex;
+  min-height: 30px;
+  padding: 0 9px;
+  border: 1px solid rgba(225, 184, 95, 0.16);
+  border-radius: 999px;
+  align-items: center;
+  gap: 6px;
+  color: var(--km-ui-muted);
+  background: rgba(255, 255, 255, 0.025);
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-toolbar-count i {
+  color: var(--km-ui-gold);
+}
+
+.khuzoe-merchant .km-ui-v2 .km-shop-toolbar-actions {
+  display: flex;
+  width: auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-view-toggle {
+  display: flex;
+  width: auto;
+  min-width: 0;
+  padding: 3px;
+  border: 1px solid var(--km-ui-border);
+  border-radius: 8px;
+  background: #0b0d0a;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-view-button {
+  width: auto;
+  min-width: 76px;
+  height: 30px;
+  margin: 0;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 6px;
+  gap: 5px;
+  color: var(--km-ui-muted);
+  background: transparent;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-view-button.is-active {
+  color: #f5dcaa;
+  background: #302a1e;
+  box-shadow: none;
+}
+
+.khuzoe-merchant .km-ui-v2 > .km-range-warning {
+  margin: 8px 14px 0;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-ui-shop-list {
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 12px 14px 18px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-color: rgba(225, 184, 95, 0.55) rgba(0, 0, 0, 0.18);
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+}
+
+.khuzoe-merchant .km-ui-v2.is-view-list .km-shop-inventory {
+  display: flex;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.khuzoe-merchant .km-ui-v2.is-view-list .km-shop-card {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  min-height: 82px;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid var(--km-ui-border);
+  border-radius: 10px;
+  grid-template-columns: 66px minmax(180px, 1fr) minmax(280px, 0.78fr);
+  align-items: stretch;
+  gap: 10px;
+  background: var(--km-ui-surface);
+  box-shadow: none;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-shop-card:hover {
+  border-color: rgba(225, 184, 95, 0.42);
+  background: #1d1f1a;
+  transform: none;
+}
+
+.khuzoe-merchant .km-ui-v2.is-view-list .km-card-image-wrap {
+  width: 66px;
+  min-height: 66px;
+  border-radius: 8px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-card-image-button,
+.khuzoe-merchant .km-ui-v2 .km-card-image-button > img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #090a08;
+}
+
+.khuzoe-merchant .km-ui-v2.is-view-list .km-card-body {
+  display: flex;
+  min-width: 0;
+  padding: 1px 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-card-title-row h3 {
+  overflow: hidden;
+  margin: 0;
+  color: var(--km-ui-text);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-list-type {
+  color: var(--km-ui-gold);
+  font-size: 8px;
+}
+
+.khuzoe-merchant .km-ui-v2.is-view-list .km-card-description {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: var(--km-ui-muted);
+  font-size: 10px;
+  line-height: 1.35;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-card-description.is-empty {
+  color: var(--km-ui-dim);
+  font-style: italic;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-card-meta {
+  display: flex;
+  margin: 0;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-card-price,
+.khuzoe-merchant .km-ui-v2 .km-card-stock {
+  display: inline-grid;
+  min-height: 31px;
+  padding: 4px 8px;
+  border: 1px solid rgba(225, 184, 95, 0.18);
+  border-radius: 7px;
+  gap: 1px;
+  color: var(--km-ui-text);
+  background: rgba(0, 0, 0, 0.18);
+  font-size: 10px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-card-price small,
+.khuzoe-merchant .km-ui-v2 .km-card-stock small {
+  color: var(--km-ui-dim);
+  font-size: 7px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-card-price strong,
+.khuzoe-merchant .km-ui-v2 .km-card-stock strong {
+  color: inherit;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-card-price {
+  color: #f3cf7e;
+}
+
+.khuzoe-merchant .km-ui-v2.is-view-list .km-card-actions {
+  display: grid;
+  width: auto;
+  min-width: 0;
+  padding: 0 0 0 10px;
+  border-top: 0;
+  border-left: 1px solid rgba(226, 192, 119, 0.14);
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  gap: 7px;
+  background: transparent;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-order-summary {
+  display: grid;
+  grid-template-columns: minmax(72px, 0.55fr) minmax(90px, 1fr);
+  gap: 7px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-quantity-wrap,
+.khuzoe-merchant .km-ui-v2 .km-total-wrap {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-field-label {
+  color: var(--km-ui-dim);
+  font-size: 7px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-quantity-wrap input {
+  width: 100%;
+  height: 31px;
+  text-align: center;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-total-wrap strong {
+  display: flex;
+  min-height: 31px;
+  padding: 0 8px;
+  border: 1px solid rgba(225, 184, 95, 0.18);
+  border-radius: 7px;
+  align-items: center;
+  color: #f3cf7e;
+  background: rgba(0, 0, 0, 0.18);
+  font-size: 11px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-order-buttons {
+  display: grid;
+  grid-template-columns: minmax(84px, 0.7fr) minmax(120px, 1fr);
+  gap: 6px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-item-details-button,
+.khuzoe-merchant .km-ui-v2 .km-buy-button {
+  width: 100%;
+  min-height: 33px;
+  margin: 0;
+  padding: 0 9px;
+  border-radius: 7px;
+  font-size: 10px;
+}
+
+.khuzoe-merchant .km-ui-v2 .km-item-details-button {
+  border: 1px solid rgba(225, 184, 95, 0.28);
+  color: #dbc89f;
+  background: #292820;
+}
+
+.khuzoe-merchant .km-ui-v2.is-view-list .km-shop-card.is-details-open {
+  grid-template-columns: 132px minmax(0, 1fr) minmax(280px, 0.7fr);
+  align-items: stretch;
+}
+
+.khuzoe-merchant .km-ui-v2.is-view-list .km-shop-card.is-details-open .km-card-image-wrap {
+  width: 132px;
+  min-height: 132px;
+}
+
+.khuzoe-merchant .km-ui-v2.is-view-list .km-shop-card.is-details-open .km-card-description {
+  display: block;
+  max-height: 180px;
+  padding-right: 4px;
+  overflow-y: auto;
+  white-space: normal;
+}
+
+.khuzoe-merchant .km-ui-v2.is-view-full .km-shop-inventory {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  align-content: start;
+  gap: 10px;
+}
+
+.khuzoe-merchant .km-ui-v2.is-view-full .km-shop-card {
+  display: grid;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--km-ui-border);
+  border-radius: 11px;
+  grid-template-rows: 185px minmax(155px, 1fr) auto;
+  background: var(--km-ui-surface);
+  box-shadow: none;
+}
+
+.khuzoe-merchant .km-ui-v2.is-view-full .km-card-image-wrap {
+  min-height: 185px;
+}
+
+.khuzoe-merchant .km-ui-v2.is-view-full .km-card-body {
+  display: flex;
+  min-width: 0;
+  padding: 12px;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.khuzoe-merchant .km-ui-v2.is-view-full .km-card-description {
+  display: block;
+  max-height: 180px;
+  margin: 0;
+  padding-right: 4px;
+  overflow-y: auto;
+  color: var(--km-ui-muted);
+  font-size: 10px;
+  line-height: 1.45;
+  white-space: normal;
+}
+
+.khuzoe-merchant .km-ui-v2.is-view-full .km-card-actions {
+  display: grid;
+  padding: 10px 12px 12px;
+  border-top: 1px solid rgba(226, 192, 119, 0.14);
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.khuzoe-merchant .km-ui-v2.is-view-full .km-item-details-button {
+  display: none;
+}
+
+/* Player container refinements */
+.khuzoe-container .km-ui-v2 .km-container-transfer-tools {
+  display: grid;
+  min-width: 0;
+  padding: 7px 14px;
+  border-bottom: 1px solid var(--km-ui-border);
+  gap: 6px;
+  background: #10120e;
+}
+
+.khuzoe-container .km-ui-v2 .km-container-player-drop-zone {
+  min-height: 42px;
+  padding: 7px 10px;
+  border-color: rgba(225, 184, 95, 0.34);
+  background: rgba(225, 184, 95, 0.045);
+}
+
+.khuzoe-container .km-ui-v2 .km-container-key-slot {
+  min-height: 58px;
+  padding: 7px 9px;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+}
+
+.khuzoe-container .km-ui-v2 .km-container-key-slot-icon,
+.khuzoe-container .km-ui-v2 .km-container-key-slot-icon > img {
+  width: 42px;
+  height: 42px;
+}
+
+.khuzoe-container .km-ui-v2 .km-container-content-scroll {
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.khuzoe-container .km-ui-v2 .km-container-currency-panel {
+  margin: 10px 14px 0;
+  padding: 10px;
+  border: 1px solid var(--km-ui-border);
+  border-radius: 10px;
+  background: var(--km-ui-surface-soft);
+}
+
+.khuzoe-container .km-ui-v2 .km-container-panel-heading {
+  margin-bottom: 7px;
+}
+
+.khuzoe-container .km-ui-v2 .km-container-currency-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(205px, 1fr));
+  gap: 6px;
+}
+
+.khuzoe-container .km-ui-v2 .km-container-currency-card {
+  min-height: 50px;
+  padding: 7px;
+  border-left: 3px solid var(--km-currency-accent, var(--km-ui-gold));
+  background: #11130f;
+}
+
+.khuzoe-container .km-ui-v2 .km-container-take-currency {
+  min-width: 72px;
+  min-height: 30px;
+  margin: 0;
+  border-radius: 7px;
+  font-size: 9px;
+}
+
+.khuzoe-container .km-ui-v2 .km-container-inventory {
+  padding-top: 10px;
+}
+
+.khuzoe-container .km-ui-v2.is-view-list .km-shop-card {
+  grid-template-columns: 66px minmax(180px, 1fr) minmax(170px, 0.42fr);
+}
+
+.khuzoe-container .km-ui-v2 .km-container-card-actions .km-order-buttons {
+  grid-template-columns: minmax(80px, 0.75fr) minmax(100px, 1fr);
+}
+
+.khuzoe-container .km-ui-v2 .km-container-take-all {
+  width: auto;
+  min-width: 120px;
+  min-height: 36px;
+  margin: 0;
+  padding: 0 11px;
+}
+
+.khuzoe-container .km-ui-v2.is-view-full .km-container-card-actions .km-order-buttons {
+  grid-template-columns: 1fr;
+}
+
+.khuzoe-container .km-ui-v2.is-view-full .km-container-details-button {
+  display: none;
+}
+
+/* Responsive configuration */
+@container km-container-window (max-width: 780px) {
+  .khuzoe-container .km-ui-v2 .km-container-config-tabs > button {
+    min-width: 0;
+    flex: 1 1 0;
+    padding-inline: 8px;
+  }
+}
+
+@media (max-width: 760px) {
+  .khuzoe-merchant .km-ui-v2 .km-ui-status-pill {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    justify-content: center;
+    white-space: nowrap;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-config-tabs {
+    padding-inline: 8px;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-config-tabs > button {
+    min-width: 0;
+    flex: 1 1 0;
+    padding-inline: 8px;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-config-tabs > button span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-config-panel {
+    padding: 14px;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-ui-settings-grid,
+  .khuzoe-container .km-ui-v2 .km-container-config-settings,
+  .khuzoe-merchant .km-ui-v2 .km-production-settings {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-config-summary {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-config-item,
+  .khuzoe-container .km-ui-v2 .km-container-config-item {
+    grid-template-columns: 52px minmax(0, 1fr) 34px;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-config-item-thumb {
+    width: 52px;
+    height: 52px;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-config-item-fields,
+  .khuzoe-container .km-ui-v2 .km-container-item-fields {
+    grid-column: 2 / 3;
+    grid-row: 2;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    justify-content: stretch;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-config-item-actions,
+  .khuzoe-container .km-ui-v2 .km-config-item-actions {
+    grid-column: 3;
+    grid-row: 1 / 3;
+  }
+
+  .khuzoe-container .km-ui-v2 .km-lock-explanation {
+    grid-template-columns: 1fr;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-production-table-head {
+    display: none;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-production-rule {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-production-rule-toggle {
+    grid-column: 1 / -1;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-production-rule > label:not(.km-production-rule-toggle) > span:first-child {
+    display: block;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-ui-shop-hero {
+    grid-template-columns: 56px minmax(0, 1fr) minmax(180px, auto);
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-shop-portrait-wrap,
+  .khuzoe-merchant .km-ui-v2 .km-shop-portrait,
+  .khuzoe-container .km-ui-v2 .km-container-hero-image {
+    width: 56px;
+    height: 56px;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-ui-toolbar {
+    grid-template-columns: minmax(180px, 1fr) auto;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-toolbar-count {
+    display: none;
+  }
+
+  .khuzoe-merchant .km-ui-v2.is-view-list .km-shop-card,
+  .khuzoe-container .km-ui-v2.is-view-list .km-shop-card {
+    grid-template-columns: 62px minmax(0, 1fr);
+  }
+
+  .khuzoe-merchant .km-ui-v2.is-view-list .km-card-actions {
+    padding: 8px 0 0;
+    border-top: 1px solid rgba(226, 192, 119, 0.14);
+    border-left: 0;
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr) minmax(190px, 0.85fr);
+  }
+
+  .khuzoe-merchant .km-ui-v2.is-view-list .km-shop-card.is-details-open {
+    grid-template-columns: 110px minmax(0, 1fr);
+  }
+
+  .khuzoe-merchant .km-ui-v2.is-view-list .km-shop-card.is-details-open .km-card-image-wrap {
+    width: 110px;
+    min-height: 110px;
+  }
+}
+
+@media (max-width: 560px) {
+  .khuzoe-merchant .km-ui-v2 .km-ui-config-hero {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-ui-master-switch,
+  .khuzoe-merchant .km-ui-v2 .km-ui-status-pill {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    justify-content: center;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-config-tabs > button span {
+    display: none;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-config-tabs > button {
+    min-width: 46px;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-panel-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-panel-heading > p {
+    text-align: left;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-ui-settings-grid,
+  .khuzoe-container .km-ui-v2 .km-container-config-settings,
+  .khuzoe-merchant .km-ui-v2 .km-production-settings,
+  .khuzoe-merchant .km-ui-v2 .km-config-summary {
+    grid-template-columns: 1fr !important;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-config-item,
+  .khuzoe-container .km-ui-v2 .km-container-config-item {
+    grid-template-columns: 48px minmax(0, 1fr) 34px;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-config-item-thumb {
+    width: 48px;
+    height: 48px;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-config-item-fields,
+  .khuzoe-container .km-ui-v2 .km-container-item-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-production-rule {
+    grid-template-columns: 1fr;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-production-rule-toggle {
+    grid-column: auto;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-ui-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-ui-footer > span {
+    display: none;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-container-config-footer-actions {
+    width: 100%;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-ui-shop-hero {
+    grid-template-columns: 52px minmax(0, 1fr);
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-wallet {
+    min-width: 0;
+    grid-column: 1 / -1;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-ui-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-shop-toolbar-actions {
+    justify-content: stretch;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-view-toggle {
+    flex: 1;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-view-button {
+    flex: 1;
+  }
+
+  .khuzoe-merchant .km-ui-v2.is-view-list .km-card-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .khuzoe-merchant .km-ui-v2 .km-order-buttons {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .khuzoe-merchant .km-ui-v2.is-view-full .km-shop-inventory {
+    grid-template-columns: 1fr;
+  }
+
+  .khuzoe-container .km-ui-v2 .km-container-key-slot {
+    grid-template-columns: 42px minmax(0, 1fr);
+  }
+
+  .khuzoe-container .km-ui-v2 .km-container-take-key {
+    width: 100%;
+    grid-column: 1 / -1;
+  }
+}

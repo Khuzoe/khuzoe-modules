@@ -1,0 +1,111 @@
+{
+  "_id": "KhzRogReliable01",
+  "name": "Reliable Talent",
+  "type": "feat",
+  "img": "icons/skills/trades/academics-investigation-puzzles.webp",
+  "system": {
+    "description": {
+      "value": "<p>Quando effettui una prova di caratteristica che include il tuo bonus di competenza, tratti un risultato naturale del d20 inferiore a 10 come se fosse 10.</p><p>L'effetto usa direttamente la gestione di Reliable Talent del sistema D&D5e.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Player's Handbook 2014",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "type": {
+      "value": "class",
+      "subtype": ""
+    },
+    "properties": [],
+    "requirements": "Rogue 11",
+    "prerequisites": {
+      "level": 11
+    },
+    "activities": {},
+    "identifier": "reliable-talent",
+    "enchant": {}
+  },
+  "effects": [
+    {
+      "_id": "KhzRogReliabEf01",
+      "name": "Reliable Talent",
+      "img": "icons/skills/trades/academics-investigation-puzzles.webp",
+      "type": "base",
+      "system": {
+        "changes": [
+          {
+            "key": "flags.dnd5e.reliableTalent",
+            "value": "1",
+            "priority": 20,
+            "type": "override"
+          }
+        ]
+      },
+      "disabled": false,
+      "duration": {
+        "value": null,
+        "units": "seconds",
+        "expired": false
+      },
+      "origin": null,
+      "tint": "#ffffff",
+      "transfer": true,
+      "statuses": [],
+      "description": "",
+      "showIcon": 0,
+      "flags": {
+        "core": {
+          "overlay": false
+        },
+        "dae": {
+          "transfer": true,
+          "stackable": "noneNameOnly",
+          "specialDuration": [],
+          "expiryMode": "delete",
+          "disableIncapacitated": false
+        }
+      },
+      "folder": null,
+      "_key": "!items.effects!KhzRogReliable01.KhzRogReliabEf01"
+    }
+  ],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": false,
+      "magiceffect": false
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [],
+        "effect": [
+          "KhzRogReliabEf01"
+        ]
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzRogReliable01"
+}

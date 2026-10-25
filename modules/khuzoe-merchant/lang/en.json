@@ -1,0 +1,195 @@
+{
+  "KM": {
+    "Common": {
+      "SceneUnits": "units"
+    },
+    "QuantityDialog": {
+      "TakeTitle": "Choose how many to take",
+      "DepositTitle": "Choose how many to place",
+      "TakeIntro": "How many <strong>{item}</strong> do you want to take?",
+      "DepositIntro": "How many <strong>{item}</strong> do you want to place?",
+      "Available": "Available",
+      "Quantity": "Quantity",
+      "Take": "Take",
+      "Deposit": "Place",
+      "Cancel": "Cancel",
+      "Something": "items"
+    },
+    "Header": {
+      "Merchant": "Merchant",
+      "MerchantActive": "Merchant active"
+    },
+    "Settings": {
+      "DefaultDistance": {
+        "Name": "Default distance",
+        "Hint": "Maximum distance proposed for new merchants, in scene units. Distance is measured between token edges."
+      },
+      "ActorTypes": {
+        "Name": "Merchant Actor types",
+        "Hint": "Comma-separated allowed Actor types (for example npc,creature). Use * for all types."
+      },
+      "RequireControlled": {
+        "Name": "Require a controlled token",
+        "Hint": "A player must control one of their tokens to open the shop. Disable to automatically use their nearest owned token."
+      },
+      "ShopView": {
+        "Name": "Shop view",
+        "Hint": "Personal preference for displaying the catalogue."
+      },
+      "CurrencyMode": {
+        "Name": "Currency handling",
+        "Hint": "Automatic uses the complete D&D5e wallet and a single currency in other systems.",
+        "Auto": "Automatic",
+        "Dnd5e": "D&D5e (pp/gp/ep/sp/cp)",
+        "Simple": "Configurable single currency"
+      },
+      "CurrencyPath": {
+        "Name": "Actor currency path",
+        "Hint": "Data path used in single-currency mode, such as system.currency.gp. It must begin with system."
+      },
+      "PricePath": {
+        "Name": "Item price path",
+        "Hint": "Path used to read a price when an Item is added, such as system.price.value. The GM can edit it afterward."
+      },
+      "CurrencyLabel": {
+        "Name": "Currency label",
+        "Hint": "Short label shown in single-currency mode, such as gp or credits."
+      },
+      "ChatReceipts": {
+        "Name": "Private chat receipts",
+        "Hint": "Whisper a receipt to the buyer and GMs after every purchase."
+      }
+    },
+    "Config": {
+      "Title": "Merchant — {name}",
+      "Eyebrow": "Merchant configuration",
+      "Intro": "Set up the counter, choose a range, and drop in the Items you want to sell.",
+      "Enabled": "Merchant",
+      "EnabledHint": "Enable or disable the shop on this NPC.",
+      "Subtitle": "Shop subtitle",
+      "SubtitlePlaceholder": "Rare goods, fair prices, and no questions asked…",
+      "Distance": "Maximum distance",
+      "DistanceHint": "Measured between token edges in scene units.",
+      "InventoryEyebrow": "Goods counter",
+      "Inventory": "Inventory",
+      "Denominations": "Currencies: {values}",
+      "DropTitle": "Drop an Item here",
+      "DropHint": "You can use world Items, Compendiums, or Actor inventories.",
+      "Price": "Price",
+      "Denomination": "Currency",
+      "Stock": "Stock",
+      "EditSource": "Open and edit the original Item",
+      "Remove": "Remove from inventory",
+      "EmptyTitle": "The counter is still empty",
+      "EmptyHint": "Drop an Item in the area above to get started.",
+      "SecurityNote": "Prices, funds, distance, and stock are all rechecked by the GM.",
+      "Save": "Save merchant",
+      "Saved": "Configuration for {name} saved."
+    },
+    "Shop": {
+      "Title": "Shop — {name}",
+      "Eyebrow": "Local merchant",
+      "DefaultSubtitle": "Take a look; you may find exactly what you need.",
+      "YourFunds": "Your funds",
+      "WalletHint": "{buyer}'s wallet",
+      "Search": "Search the shop…",
+      "ViewMode": "Catalogue view",
+      "ViewList": "List",
+      "ViewFull": "Full",
+      "ViewListHint": "Show a concise, compact list",
+      "ViewFullHint": "Show large images and complete descriptions",
+      "Expand": "Enlarge",
+      "ExpandImage": "Enlarge the image for {item}",
+      "ItemImage": "Item image",
+      "Details": "Details",
+      "CloseDetails": "Collapse",
+      "DetailsHint": "Show the complete card for {item}",
+      "CloseDetailsHint": "Close the details for {item}",
+      "Distance": "{current} / {maximum} {unit}",
+      "TooFarTitle": "You moved away from the merchant",
+      "TooFarHint": "Move within {distance} {unit} to make a purchase.",
+      "SoldOut": "Sold out",
+      "Unlimited": "Unlimited",
+      "Stock": "Stock: {value}",
+      "Quantity": "Quantity",
+      "Total": "Total",
+      "Buy": "Buy",
+      "Buying": "Buying…",
+      "InsufficientFundsShort": "Insufficient funds",
+      "OutOfRangeShort": "Move closer",
+      "SearchEmptyTitle": "No items found",
+      "SearchEmptyHint": "Try changing your search terms.",
+      "EmptyTitle": "No goods available",
+      "EmptyHint": "The merchant has not placed anything on the counter yet.",
+      "PurchaseSuccess": "Purchased {quantity}× {item} for {price}."
+    },
+    "Receipt": {
+      "Title": "Merchant receipt",
+      "Body": "{buyer} bought {quantity}× {item} from {merchant} for {price}."
+    },
+    "GroundLoot": {
+      "Drop": "Drop to ground",
+      "DropTitle": "Drop — {name}",
+      "DropHint": "The Item is removed from inventory only after its Token has been created in the scene.",
+      "Quantity": "Quantity",
+      "Dropped": "Dropped: {quantity}× {item}.",
+      "Pickup": "Pick up",
+      "PickupTitle": "Ground Item",
+      "PickupHint": "It will be added to {actor}'s inventory.",
+      "PickedUp": "{actor} picks up {quantity}× {item}.",
+      "Transferred": "{actor} receives {quantity}× {item}.",
+      "Settings": {
+        "Distance": {
+          "Name": "Ground Item pickup distance",
+          "Hint": "Maximum distance between the character Token and ground Item, in scene units."
+        },
+        "Scale": {
+          "Name": "Ground Item preview size",
+          "Hint": "Image size relative to one grid space."
+        }
+      },
+      "Errors": {
+        "NotDroppable": "Only physical Items, equipment, and consumables can be dropped to the ground.",
+        "InvalidPosition": "The selected scene position is invalid.",
+        "DirectoryGmOnly": "Only the GM can place copies from the Item Directory.",
+        "NoSourceToken": "Select or place a Token for the character that owns the Item.",
+        "NoBuyerToken": "Select the Token whose Actor should pick the ground item up.",
+        "SourceUnavailable": "The Item is no longer available in the source inventory.",
+        "InvalidQuantity": "The requested quantity is invalid.",
+        "DropFailed": "The Item could not be dropped; the inventory should be unchanged.",
+        "AlreadyTaken": "The ground Item is no longer available.",
+        "OutOfRange": "You are too far away; move within {distance} {unit}.",
+        "InvalidData": "The ground Item data is invalid.",
+        "PickupFailed": "Pickup failed; the Item should still be on the ground.",
+        "MultipleBuyerTokens": "Select exactly one Token; its Actor will receive the ground item.",
+        "InvalidCurrency": "This currency or amount is invalid.",
+        "InsufficientCurrency": "The Actor does not own enough of this currency.",
+        "InvalidTarget": "The recipient is not a valid or visible Actor.",
+        "SameActor": "You cannot transfer an Item to the same Actor.",
+        "TransferFailed": "The transfer failed; both inventories were restored.",
+        "MoveFailed": "The ground Item could not be moved."
+      }
+    },
+    "Errors": {
+      "SourceUnavailable": "The original Item is no longer available.",
+      "DropItemOnly": "Only Item documents can be added.",
+      "DuplicateItem": "This Item is already in the inventory.",
+      "DropFailed": "This Item could not be added.",
+      "NoGM": "At least one GM must be connected to make a purchase.",
+      "NoBuyerToken": "Select one of your tokens before opening the shop.",
+      "OutOfRange": "You are too far away; move within {distance} {unit}.",
+      "UserUnavailable": "The player is no longer available.",
+      "SceneUnavailable": "You must be in the same scene as the merchant.",
+      "TokenUnavailable": "One of the involved tokens is no longer available.",
+      "InvalidBuyer": "The buyer token is invalid.",
+      "NotOwner": "You cannot purchase for this character.",
+      "NotMerchant": "This NPC is no longer an active merchant.",
+      "InvalidQuantity": "The requested quantity is invalid.",
+      "ItemUnavailable": "This Item is no longer available.",
+      "NotEnoughStock": "The merchant does not have enough stock.",
+      "NotEnoughMoney": "Insufficient funds: {price} required, {balance} available.",
+      "Transaction": "The purchase failed. You should not have been charged.",
+      "Timeout": "The GM did not respond in time. Try again shortly."
+    }
+  }
+}

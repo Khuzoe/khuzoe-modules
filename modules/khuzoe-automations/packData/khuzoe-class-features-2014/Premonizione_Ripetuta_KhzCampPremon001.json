@@ -1,0 +1,63 @@
+{
+  "_id": "KhzCampPremon001",
+  "_key": "!items!KhzCampPremon001",
+  "name": "Premonizione Ripetuta",
+  "type": "feat",
+  "img": "icons/magic/perception/eye-ringed-glow-angry-small-red.webp",
+  "system": {
+    "identifier": "premonizione-ripetuta",
+    "source": {
+      "rules": "2024",
+      "custom": "Cripta di Sangue"
+    },
+    "description": {
+      "value": "<p>Quando una creatura ostile ti colpisce con un attacco, ottieni +1 alla Classe Armatura fino all'inizio del tuo turno successivo. Il bonus si accumula fino al tuo modificatore di Saggezza.</p>",
+      "chat": ""
+    },
+    "type": {
+      "value": "class"
+    },
+    "activities": {},
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "properties": [],
+    "requirements": ""
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2024",
+            "identifier": "premonizione-ripetuta"
+          }
+        ]
+      }
+    },
+    "khuzoe-automations": {
+      "campaignFeature": "premonition"
+    },
+    "midi-qol": {
+      "forceCEOff": true
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": []
+      }
+    }
+  }
+}

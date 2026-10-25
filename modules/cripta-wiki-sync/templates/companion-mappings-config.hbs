@@ -1,0 +1,53 @@
+<div class="cripta-companion-mappings-config">
+  <p class="notes">Configurazione tecnica di fallback. Per gestire i companion usa il pulsante Companion direttamente sulla scheda Foundry del personaggio; qui rimangono visibili gli ID per diagnosi o recupero.</p>
+
+  <div class="form-group">
+    <table>
+      <thead>
+        <tr>
+          <th>Utente Foundry</th>
+          <th>Account wiki</th>
+          <th>Personaggio wiki</th>
+          <th>Actor ID personaggio</th>
+          <th>Actor ID companion</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each users}}
+          <tr>
+            <td>
+              <strong>{{this.name}}</strong>
+              {{#if this.isGM}}<span class="tag">GM</span>{{/if}}
+              <div class="hint">{{this.id}}</div>
+            </td>
+            <td>
+              <input type="text" name="account.{{this.id}}" value="{{this.accountId}}" placeholder="accountId" autocomplete="off">
+            </td>
+            <td>
+              <input type="text" name="character.{{this.id}}" value="{{this.characterId}}" list="cripta-wiki-character-list" placeholder="orion, mena, sion..." autocomplete="off">
+              {{#if this.characterName}}<div class="hint">{{this.characterName}}</div>{{/if}}
+            </td>
+            <td>
+              <input type="text" name="actor.{{this.id}}" value="{{this.actor}}" placeholder="Actor ID personaggio" autocomplete="off">
+            </td>
+            <td>
+              <input type="text" name="companions.{{this.id}}" value="{{this.companions}}" placeholder="Actor ID companion, Actor ID 2" autocomplete="off">
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+    <datalist id="cripta-wiki-character-list">
+      {{#each campaignPlayers}}
+        <option value="{{this.id}}">{{this.name}} {{#if this.accountId}}({{this.accountId}}){{/if}}</option>
+      {{/each}}
+    </datalist>
+  </div>
+
+  <footer class="sheet-footer flexrow">
+    <button type="submit">
+      <i class="fas fa-save"></i>
+      Salva
+    </button>
+  </footer>
+</div>

@@ -1,0 +1,368 @@
+{
+  "type": "spell",
+  "system": {
+    "description": {
+      "value": "<p>Il tipo di danno viene scelto fra i risultati dei due d8. Se sono uguali, dopo il danno puoi scegliere un'altra creatura entro 30 ft dal bersaglio per un nuovo attacco. Ogni creatura può essere bersagliata una sola volta nella stessa catena; i rimbalzi non consumano altri slot.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Khuzoe Automations",
+      "book": "Xanathar's Guide to Everything",
+      "page": "151",
+      "license": "",
+      "revision": 1,
+      "rules": "2014"
+    },
+    "activation": {
+      "type": "action",
+      "condition": "",
+      "value": 1
+    },
+    "duration": {
+      "value": "",
+      "units": "inst"
+    },
+    "target": {
+      "affects": {
+        "type": "creature",
+        "count": "1",
+        "choice": false,
+        "special": ""
+      },
+      "template": {
+        "units": "",
+        "contiguous": false,
+        "type": ""
+      }
+    },
+    "range": {
+      "value": "120",
+      "units": "ft",
+      "special": ""
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "ability": "",
+    "level": 1,
+    "school": "evo",
+    "materials": {
+      "value": "",
+      "consumed": false,
+      "cost": 0,
+      "supply": 0
+    },
+    "preparation": {
+      "mode": "prepared",
+      "prepared": false
+    },
+    "properties": [
+      "vocal",
+      "somatic",
+      "mgc"
+    ],
+    "activities": {
+      "f3f7246175a096b3": {
+        "_id": "f3f7246175a096b3",
+        "type": "attack",
+        "name": "Chaos Bolt",
+        "img": "icons/magic/lightning/bolt-strike-beam-purple.webp",
+        "activation": {
+          "type": "action",
+          "value": 1,
+          "override": true,
+          "condition": ""
+        },
+        "consumption": {
+          "spellSlot": true,
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          }
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "units": "ft",
+          "value": "120",
+          "override": true,
+          "special": ""
+        },
+        "target": {
+          "override": true,
+          "prompt": true,
+          "affects": {
+            "type": "creature",
+            "count": "1",
+            "choice": false,
+            "special": ""
+          },
+          "template": {
+            "type": "",
+            "units": "ft",
+            "contiguous": false,
+            "size": "",
+            "count": ""
+          }
+        },
+        "uses": {
+          "spent": 0,
+          "max": "",
+          "recovery": []
+        },
+        "sort": 0,
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "identifier": "chaosBolt",
+          "automationOnly": false,
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "magicEffect": true,
+          "magicDamage": true
+        },
+        "flags": {
+          "cat": {
+            "hidden": false
+          }
+        },
+        "damage": {
+          "parts": [
+            {
+              "number": 2,
+              "denomination": 8,
+              "bonus": "",
+              "types": [],
+              "custom": {
+                "enabled": false,
+                "formula": ""
+              },
+              "scaling": {
+                "mode": "",
+                "number": null,
+                "formula": ""
+              }
+            },
+            {
+              "number": 1,
+              "denomination": 6,
+              "bonus": "",
+              "types": [],
+              "custom": {
+                "enabled": false,
+                "formula": ""
+              },
+              "scaling": {
+                "mode": "whole",
+                "number": 1,
+                "formula": ""
+              }
+            }
+          ],
+          "includeBase": false,
+          "critical": {
+            "bonus": ""
+          }
+        },
+        "attack": {
+          "ability": "",
+          "bonus": "",
+          "flat": false,
+          "critical": {
+            "threshold": null
+          },
+          "type": {
+            "value": "ranged",
+            "classification": "spell"
+          }
+        }
+      },
+      "fef9e2b93415538b": {
+        "_id": "fef9e2b93415538b",
+        "type": "attack",
+        "name": "Chaos Bolt — Rimbalzo",
+        "img": "icons/magic/lightning/bolt-strike-beam-purple.webp",
+        "activation": {
+          "type": "special",
+          "value": 1,
+          "override": true,
+          "condition": ""
+        },
+        "consumption": {
+          "spellSlot": false,
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          }
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "units": "any",
+          "override": true,
+          "special": ""
+        },
+        "target": {
+          "override": true,
+          "prompt": true,
+          "affects": {
+            "type": "creature",
+            "count": "1",
+            "choice": false,
+            "special": ""
+          },
+          "template": {
+            "type": "",
+            "units": "ft",
+            "contiguous": false,
+            "size": "",
+            "count": ""
+          }
+        },
+        "uses": {
+          "spent": 0,
+          "max": "",
+          "recovery": []
+        },
+        "sort": 0,
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "identifier": "chaosBoltBounce",
+          "automationOnly": true,
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "magicEffect": true,
+          "magicDamage": true
+        },
+        "flags": {
+          "cat": {
+            "hidden": true
+          }
+        },
+        "damage": {
+          "parts": [
+            {
+              "number": 2,
+              "denomination": 8,
+              "bonus": "",
+              "types": [],
+              "custom": {
+                "enabled": false,
+                "formula": ""
+              },
+              "scaling": {
+                "mode": "",
+                "number": null,
+                "formula": ""
+              }
+            },
+            {
+              "number": 1,
+              "denomination": 6,
+              "bonus": "",
+              "types": [],
+              "custom": {
+                "enabled": false,
+                "formula": ""
+              },
+              "scaling": {
+                "mode": "whole",
+                "number": 1,
+                "formula": ""
+              }
+            }
+          ],
+          "includeBase": false,
+          "critical": {
+            "bonus": ""
+          }
+        },
+        "attack": {
+          "ability": "",
+          "bonus": "",
+          "flat": false,
+          "critical": {
+            "threshold": null
+          },
+          "type": {
+            "value": "ranged",
+            "classification": "spell"
+          }
+        }
+      }
+    },
+    "identifier": "chaos-bolt",
+    "sourceClass": ""
+  },
+  "name": "Chaos Bolt",
+  "flags": {
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "chaos-bolt"
+          }
+        ]
+      }
+    },
+    "khuzoe-automations": {
+      "sourceIdentifier": "chaosBolt",
+      "activityIdentifiers": {
+        "chaosBolt": "f3f7246175a096b3",
+        "chaosBoltBounce": "fef9e2b93415538b"
+      }
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [
+          "fef9e2b93415538b"
+        ],
+        "effect": []
+      }
+    }
+  },
+  "effects": [],
+  "img": "icons/magic/lightning/bolt-strike-beam-purple.webp",
+  "folder": null,
+  "_id": "351730aa01698dee",
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!351730aa01698dee"
+}

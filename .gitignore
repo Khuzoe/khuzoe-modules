@@ -1,0 +1,9 @@
+build/
+dist/
+.work/
+**/node_modules/
+**/.maintenance/
+**/LOG
+**/LOG.old
+**/LOCK
+*.user

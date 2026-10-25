@@ -1,0 +1,17 @@
+{
+  "KHZ_DND5E_EXTENSIONS": {
+    "Damage": {
+      "Genie": "Genie"
+    },
+    "Creature": {
+      "Genie": "Genie",
+      "GeniePlural": "Genies"
+    },
+    "Settings": {
+      "DefaultGenieVulnerability": {
+        "Name": "Default vulnerability to Genie damage",
+        "Hint": "When enabled, every character or NPC without resistance or immunity to Genie damage is treated as vulnerable to it. This does not permanently alter actor sheets and respects the multiplier configured in dnd5e or Midi-QOL."
+      }
+    }
+  }
+}

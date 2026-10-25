@@ -1,0 +1,77 @@
+{
+  "KHMH": {
+    "Config": {
+      "Title": "Monster HUD — {name}",
+      "Intro": "Choose quick abilities and configure the Multiattack groups shown in the overlay.",
+      "QuickActions": "Quick abilities",
+      "QuickActionsHint": "Each ability appears once and uses the artwork from its Item sheet.",
+      "AutoQuick": "Suggest actions automatically when selection is empty",
+      "NoActions": "This NPC has no usable abilities.",
+      "Multiattack": "Multiattack groups",
+      "MultiattackHint": "Select its abilities and clearly set how many times each one can be used. A shared pool remains available for free combinations.",
+      "AddGroup": "Add group",
+      "NewGroup": "Multiattack",
+      "GroupName": "Group name",
+      "Capacity": "Total attacks",
+      "Times": "Times",
+      "TimesHint": "Number of times this ability can be used in the Multiattack",
+      "DeleteGroup": "Delete group",
+      "Save": "Save configuration",
+      "Saved": "Monster HUD configuration saved.",
+      "GroupModes": {
+        "fixed": "Quantity per ability",
+        "shared": "Free choice (total pool)"
+      }
+    },
+    "HUD": {
+      "NPC": "NPC",
+      "Quick": "Quick actions",
+      "Configure": "Configure Monster HUD",
+      "Pin": "Pin or release this monster",
+      "Collapse": "Collapse or expand",
+      "ResetTurn": "Reset turn counters",
+      "Spells": "Spells",
+      "LegendaryActions": "Legendary actions remaining",
+      "LegendaryResistances": "Legendary resistances remaining",
+      "ResistSave": "Turn the latest failed save into a success",
+      "Drag": "Drag the HUD; double-click its header to reset the position",
+      "RevealName": "Reveal name",
+      "HideName": "Limit name"
+    },
+    "Warnings": {
+      "MultiattackSpent": "This Multiattack is already complete. Use is still allowed.",
+      "ActionSpent": "This ability appears depleted. Use is still allowed."
+    },
+    "Errors": {
+      "WrongSystem": "Khuzoe Monster HUD requires the D&D 5e system.",
+      "ActorUnavailable": "The Actor to configure is unavailable.",
+      "OwnerRequired": "You must own the Actor to configure its Monster HUD.",
+      "ActionFailed": "The action was not completed: {message}"
+    },
+    "Settings": {
+      "Enabled": {
+        "Name": "Enable Monster HUD",
+        "Hint": "Show the overlay when controlling an NPC or player-character token."
+      },
+      "FollowCombat": {
+        "Name": "Follow current combatant",
+        "Hint": "When no token is controlled, automatically show the NPC whose turn it is."
+      },
+      "AllowOwners": {
+        "Name": "Allow NPC owners to use the HUD",
+        "Hint": "Allow player owners of an NPC to use its overlay. Player characters are always available to their owners."
+      },
+      "Anchor": {
+        "Name": "Horizontal position",
+        "Hint": "Choose the overlay's anchor point.",
+        "Left": "Left",
+        "Center": "Center",
+        "Right": "Right"
+      },
+      "Scale": {
+        "Name": "Overlay scale",
+        "Hint": "Resize Monster HUD on your client."
+      }
+    }
+  }
+}

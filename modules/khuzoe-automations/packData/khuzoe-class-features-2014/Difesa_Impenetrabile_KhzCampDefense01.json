@@ -1,0 +1,114 @@
+{
+  "_id": "KhzCampDefense01",
+  "_key": "!items!KhzCampDefense01",
+  "name": "Difesa Impenetrabile",
+  "type": "feat",
+  "img": "icons/skills/melee/shield-block-gray-yellow.webp",
+  "system": {
+    "identifier": "difesa-impenetrabile",
+    "source": {
+      "rules": "2024",
+      "custom": "Cripta di Sangue"
+    },
+    "description": {
+      "value": "<p>Prima di fare il tuo primo attacco nel tuo turno, puoi scegliere di assumere una Posizione Guardinga. Fino all'inizio del tuo prossimo turno:</p><p>Gli attacchi contro di te hanno svantaggio se puoi vedere l'attaccante. Se la creatura avrebbe già avuto svantaggio, ottieni +2 CA contro quell'attacco.</p><p>I tuoi attacchi con armi da mischia basati sulla Forza hanno svantaggio e non possono beneficiare di vantaggio in alcun modo.</p>",
+      "chat": ""
+    },
+    "type": {
+      "value": "class"
+    },
+    "activities": {
+      "KhzGuardActivate": {
+        "_id": "KhzGuardActivate",
+        "type": "utility",
+        "name": "Posizione Guardinga",
+        "activation": {
+          "type": "special",
+          "value": null,
+          "override": true
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false
+          },
+          "spellSlot": false
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "target": {
+          "override": true,
+          "prompt": false,
+          "affects": {
+            "type": "self"
+          },
+          "template": {
+            "units": "ft"
+          }
+        },
+        "range": {
+          "units": "self",
+          "override": true
+        },
+        "roll": {
+          "formula": "",
+          "prompt": false,
+          "visible": false
+        },
+        "midiProperties": {
+          "confirmTargets": "never"
+        },
+        "uses": {
+          "max": "",
+          "spent": 0,
+          "recovery": []
+        }
+      }
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "properties": [],
+    "requirements": ""
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2024",
+            "identifier": "difesa-impenetrabile"
+          }
+        ]
+      }
+    },
+    "khuzoe-automations": {
+      "campaignFeature": "defense"
+    },
+    "midi-qol": {
+      "forceCEOff": true
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": []
+      }
+    }
+  }
+}

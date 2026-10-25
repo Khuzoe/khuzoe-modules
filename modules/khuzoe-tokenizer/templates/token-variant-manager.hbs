@@ -1,0 +1,66 @@
+<form class="ktz-token-variant-manager" autocomplete="off">
+  <div class="ktz-variant-manager-dropzone" data-variant-manager-dropzone>
+    <div class="ktz-variant-manager-dropcopy">
+      <i class="fas fa-cloud-upload-alt"></i>
+      <span>{{localize "khuzoe-tokenizer.labels.dropVariantImage"}}</span>
+    </div>
+    <button type="button" class="ktz-variant-manager-choose" data-action="variant-manager-choose" title="{{localize "khuzoe-tokenizer.buttons.addVariantImage"}}">
+      <i class="fas fa-folder-open"></i>
+    </button>
+  </div>
+
+  <div class="ktz-variant-manager-list">
+    <div class="ktz-variant-manager-row is-base">
+      <span class="ktz-variant-manager-preview">
+        {{#if baseToken.src}}
+        <img src="{{baseToken.src}}" alt="{{baseToken.name}}">
+        {{else}}
+        <i class="fas fa-user"></i>
+        {{/if}}
+      </span>
+      <span class="ktz-variant-manager-base-name">
+        <span>{{localize "khuzoe-tokenizer.labels.baseToken"}}</span>
+        <strong>{{actor.name}}</strong>
+      </span>
+      <span class="ktz-variant-manager-base-size">
+        <span>{{localize "khuzoe-tokenizer.labels.variantSize"}}</span>
+        <strong>{{baseToken.width}}x{{baseToken.height}}</strong>
+      </span>
+      <span class="ktz-variant-manager-base-lock"><i class="fas fa-lock"></i></span>
+    </div>
+
+    {{#each variants}}
+    <div class="ktz-variant-manager-row" data-variant-id="{{id}}">
+      <span class="ktz-variant-manager-preview"><img src="{{src}}" alt="{{name}}"></span>
+      <label class="ktz-variant-manager-name">
+        <span>{{localize "khuzoe-tokenizer.labels.variantName"}}</span>
+        <input type="text" value="{{name}}" data-variant-manager-field="name" data-variant-id="{{id}}" {{#if managed}}disabled title="Gestita dalla wiki"{{/if}}>
+      </label>
+      <label class="ktz-variant-manager-size">
+        <span>{{localize "khuzoe-tokenizer.labels.variantSize"}}</span>
+        <span class="ktz-variant-manager-size-input">
+          <input type="text" inputmode="decimal" value="{{size}}" title="{{localize 'khuzoe-tokenizer.labels.variantSizeHint'}}" data-variant-manager-field="size" data-variant-id="{{id}}" {{#if managed}}disabled{{/if}}>
+          <span>x{{size}}</span>
+        </span>
+      </label>
+      <label class="ktz-variant-manager-size">
+        <span>{{localize "khuzoe-tokenizer.labels.variantScale"}}</span>
+        <input type="text" inputmode="decimal" value="{{scale}}" placeholder="{{localize 'khuzoe-tokenizer.labels.inheritScale'}}" title="{{localize 'khuzoe-tokenizer.labels.variantScaleHint'}}" data-variant-manager-field="scale" data-variant-id="{{id}}" {{#if managed}}disabled{{/if}}>
+      </label>
+      <button type="button" class="ktz-variant-manager-delete" data-action="variant-manager-delete" data-variant-id="{{id}}" title="{{localize "khuzoe-tokenizer.buttons.deleteVariant"}}" {{#if managed}}disabled{{/if}}>
+        <i class="fas fa-trash"></i>
+      </button>
+      <div class="ktz-variant-avatar">
+        {{#if avatarSrc}}<img src="{{avatarSrc}}" alt="{{localize 'khuzoe-tokenizer.labels.variantAvatar'}}">{{/if}}
+        <span><strong>{{localize "khuzoe-tokenizer.labels.variantAvatar"}}</strong><small>{{#if avatarSrc}}{{localize "khuzoe-tokenizer.labels.tokenOnlyAvatar"}}{{else}}{{localize "khuzoe-tokenizer.labels.inheritAvatar"}}{{/if}}</small></span>
+        <button type="button" data-action="variant-avatar-choose" data-variant-id="{{id}}" {{#if managed}}disabled{{/if}}>{{#if avatarSrc}}{{localize "khuzoe-tokenizer.buttons.replaceAvatar"}}{{else}}{{localize "khuzoe-tokenizer.buttons.addAvatar"}}{{/if}}</button>
+        {{#if avatarSrc}}<button type="button" data-action="variant-avatar-remove" data-variant-id="{{id}}" {{#if managed}}disabled{{/if}}>{{localize "khuzoe-tokenizer.buttons.removeAvatar"}}</button>{{/if}}
+      </div>
+    </div>
+    {{else}}
+    <div class="ktz-variant-manager-empty">{{localize "khuzoe-tokenizer.labels.variantManagerEmpty"}}</div>
+    {{/each}}
+  </div>
+  <p class="ktz-variant-hint">{{localize "khuzoe-tokenizer.labels.variantScaleHint"}}</p>
+</form>
+

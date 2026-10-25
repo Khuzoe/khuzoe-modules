@@ -1,0 +1,121 @@
+{
+  "_id": "KhzArmorModel001",
+  "_key": "!items!KhzArmorModel001",
+  "name": "Armor Model",
+  "type": "feat",
+  "img": "icons/equipment/chest/breastplate-layered-steel.webp",
+  "system": {
+    "identifier": "armor-model",
+    "source": {
+      "rules": "2014",
+      "custom": "Khuzoe Automations — regole 2014"
+    },
+    "description": {
+      "value": "<p>Scelta Guardian/Infiltrator dopo un riposo, con strumenti da fabbro; selezione Intelligenza o caratteristica ordinaria per le armi dell'armatura.</p>",
+      "chat": ""
+    },
+    "type": {
+      "value": "class"
+    },
+    "activities": {
+      "KhzArmorerUse001": {
+        "_id": "KhzArmorerUse001",
+        "name": "Armor Model",
+        "type": "utility",
+        "activation": {
+          "type": "special",
+          "value": null,
+          "override": true
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false
+          },
+          "spellSlot": false
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "units": "self",
+          "override": true
+        },
+        "target": {
+          "override": true,
+          "prompt": false,
+          "affects": {
+            "type": "self"
+          },
+          "template": {
+            "units": "ft"
+          }
+        },
+        "roll": {
+          "formula": "",
+          "prompt": false,
+          "visible": false
+        },
+        "midiProperties": {
+          "confirmTargets": "never"
+        },
+        "uses": {
+          "max": "",
+          "spent": 0,
+          "recovery": []
+        }
+      }
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "properties": [],
+    "requirements": "Armorer 3"
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "armor-model"
+          }
+        ],
+        "skill": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "armor-model"
+          }
+        ]
+      }
+    },
+    "khuzoe-automations": {
+      "armorerFeature": "model"
+    },
+    "midi-qol": {
+      "forceCEOff": true
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": []
+      }
+    }
+  }
+}

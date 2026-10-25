@@ -1,0 +1,414 @@
+<div class="khz-aura-form">
+  <header class="khz-config-hero">
+    <div class="khz-config-hero__icon" aria-hidden="true">
+      <i class="fa-solid fa-sun"></i>
+    </div>
+    <div class="khz-config-hero__copy">
+      <span class="khz-eyebrow">{{localize "KHZ_AURAS.Config.Eyebrow"}}</span>
+      <h2>{{localize "KHZ_AURAS.Config.Heading"}}</h2>
+      <p>{{localize "KHZ_AURAS.Config.Intro"}}</p>
+    </div>
+    <button type="button" class="khz-button khz-button--primary" data-action="add-aura">
+      <i class="fa-solid fa-plus"></i>
+      {{localize "KHZ_AURAS.Config.AddAura"}}
+    </button>
+  </header>
+
+  <section class="khz-aura-list" aria-label="{{localize 'KHZ_AURAS.Config.Heading'}}">
+    {{#each auras as |aura|}}
+      <article
+        class="khz-aura-card {{#unless aura.enabled}}khz-aura-card--disabled{{/unless}}"
+        style="--khz-aura-color: {{aura.visual.color}}"
+      >
+        <header class="khz-aura-card__header">
+          <input type="hidden" name="{{aura.path}}.id" value="{{aura.id}}">
+
+          <label class="khz-master-toggle">
+            <input type="checkbox" name="{{aura.path}}.enabled" data-rerender="true" {{checked aura.enabled}}>
+            <span class="khz-toggle-track" aria-hidden="true"><span></span></span>
+            <span class="khz-master-toggle__copy">
+              <strong>{{localize "KHZ_AURAS.Config.Enabled"}}</strong>
+              <small>{{aura.statusLabel}}</small>
+            </span>
+          </label>
+
+          <label class="khz-name-field">
+            <span>{{localize "KHZ_AURAS.Config.Name"}}</span>
+            <input class="khz-aura-name" type="text" name="{{aura.path}}.name" value="{{aura.name}}">
+          </label>
+
+          <div class="khz-card-tools">
+            <button
+              type="button"
+              class="khz-icon-button khz-icon-button--accent"
+              data-action="activate-manual"
+              data-aura-index="{{aura.index}}"
+              data-tooltip="KHZ_AURAS.Config.ActivateManual"
+              aria-label="{{localize 'KHZ_AURAS.Config.ActivateManual'}}"
+              {{#unless aura.canManual}}disabled{{/unless}}
+            >
+              <i class="fa-solid fa-burst"></i>
+            </button>
+            <button
+              type="button"
+              class="khz-icon-button khz-icon-button--danger"
+              data-action="delete-aura"
+              data-aura-index="{{aura.index}}"
+              data-tooltip="KHZ_AURAS.Config.DeleteAura"
+              aria-label="{{localize 'KHZ_AURAS.Config.DeleteAura'}}"
+            >
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </header>
+
+        <div class="khz-aura-summary" aria-label="{{localize 'KHZ_AURAS.Config.Summary'}}">
+          <span><i class="fa-solid fa-ruler-combined"></i>{{aura.radiusBadge}}</span>
+          {{#unless aura.visualOnly}}
+            <span><i class="fa-solid fa-crosshairs"></i>{{aura.targetLabel}}</span>
+            <span><i class="fa-solid fa-clock"></i>{{aura.triggerBadge}}</span>
+            <span><i class="fa-solid fa-bolt"></i>{{aura.actionBadge}}</span>
+          {{else}}
+            <span class="khz-badge--visual"><i class="fa-solid fa-eye"></i>{{localize "KHZ_AURAS.Config.VisualOnly"}}</span>
+          {{/unless}}
+        </div>
+
+        <div class="khz-aura-card__body">
+          <section class="khz-config-panel">
+            <header class="khz-section-heading">
+              <span class="khz-section-heading__icon"><i class="fa-solid fa-bullseye"></i></span>
+              <div>
+                <h3>{{localize "KHZ_AURAS.Config.AreaHeading"}}</h3>
+                <p>{{localize "KHZ_AURAS.Config.AreaHint"}}</p>
+              </div>
+              <label class="khz-mode-toggle">
+                <input type="checkbox" name="{{aura.path}}.visualOnly" data-rerender="true" {{checked aura.visualOnly}}>
+                <span><i class="fa-solid fa-eye"></i>{{localize "KHZ_AURAS.Config.VisualOnly"}}</span>
+              </label>
+            </header>
+
+            <div class="khz-field-grid khz-field-grid--three">
+              <label class="khz-field">
+                <span><i class="fa-solid fa-ruler"></i>{{localize "KHZ_AURAS.Config.Radius"}}</span>
+                <input type="number" min="0" step="5" name="{{aura.path}}.area.distance" value="{{aura.area.distance}}">
+              </label>
+              <label class="khz-field" {{#if aura.visualOnly}}hidden{{/if}}>
+                <span><i class="fa-solid fa-users-viewfinder"></i>{{localize "KHZ_AURAS.Config.Targets"}}</span>
+                <select name="{{aura.path}}.targets.relation">
+                  {{selectOptions aura.targetChoices selected=aura.targets.relation}}
+                </select>
+              </label>
+              <label class="khz-field khz-color-field">
+                <span><i class="fa-solid fa-palette"></i>{{localize "KHZ_AURAS.Config.Color"}}</span>
+                <span class="khz-color-control">
+                  <input type="color" name="{{aura.path}}.visual.color" value="{{aura.visual.color}}" data-aura-color>
+                  <strong>{{aura.visual.color}}</strong>
+                </span>
+              </label>
+            </div>
+
+            {{#if aura.visualOnly}}
+              <p class="khz-inline-notice">
+                <i class="fa-solid fa-circle-info"></i>
+                {{localize "KHZ_AURAS.Config.VisualOnlyHint"}}
+              </p>
+            {{/if}}
+
+            <div class="khz-option-grid">
+              <label class="khz-option-card" {{#if aura.visualOnly}}hidden{{/if}}>
+                <input type="checkbox" name="{{aura.path}}.targets.includeSource" {{checked aura.targets.includeSource}}>
+                <span class="khz-option-card__check"><i class="fa-solid fa-check"></i></span>
+                <span><i class="fa-solid fa-user-plus"></i>{{localize "KHZ_AURAS.Config.IncludeSource"}}</span>
+              </label>
+              <label class="khz-option-card">
+                <input type="checkbox" name="{{aura.path}}.source.requiresConscious" {{checked aura.source.requiresConscious}}>
+                <span class="khz-option-card__check"><i class="fa-solid fa-check"></i></span>
+                <span><i class="fa-solid fa-brain"></i>{{localize "KHZ_AURAS.Config.RequiresConscious"}}</span>
+              </label>
+              <label class="khz-option-card" {{#if aura.visualOnly}}hidden{{/if}}>
+                <input type="checkbox" name="{{aura.path}}.area.walls" {{checked aura.area.walls}}>
+                <span class="khz-option-card__check"><i class="fa-solid fa-check"></i></span>
+                <span><i class="fa-solid fa-border-all"></i>{{localize "KHZ_AURAS.Config.Walls"}}</span>
+              </label>
+              <label class="khz-option-card" {{#if aura.visualOnly}}hidden{{/if}}>
+                <input type="checkbox" name="{{aura.path}}.area.elevation" {{checked aura.area.elevation}}>
+                <span class="khz-option-card__check"><i class="fa-solid fa-check"></i></span>
+                <span><i class="fa-solid fa-arrows-up-down"></i>{{localize "KHZ_AURAS.Config.Elevation"}}</span>
+              </label>
+              <label class="khz-option-card">
+                <input type="checkbox" name="{{aura.path}}.visual.visible" {{checked aura.visual.visible}}>
+                <span class="khz-option-card__check"><i class="fa-solid fa-check"></i></span>
+                <span><i class="fa-solid fa-eye"></i>{{localize "KHZ_AURAS.Config.Visible"}}</span>
+              </label>
+            </div>
+          </section>
+
+          <section class="khz-config-panel" {{#if aura.visualOnly}}hidden{{/if}}>
+            <header class="khz-section-heading khz-section-heading--split">
+              <span class="khz-section-heading__icon"><i class="fa-solid fa-clock"></i></span>
+              <div>
+                <h3>{{localize "KHZ_AURAS.Config.Triggers"}}</h3>
+                <p>{{localize "KHZ_AURAS.Config.TriggersHint"}}</p>
+              </div>
+              <label class="khz-field khz-field--compact">
+                <span>{{localize "KHZ_AURAS.Config.Frequency"}}</span>
+                <select name="{{aura.path}}.triggerFrequency">
+                  {{selectOptions aura.frequencyChoices selected=aura.triggerFrequency}}
+                </select>
+              </label>
+            </header>
+
+            <div class="khz-trigger-grid">
+              {{#each aura.triggerOptions as |trigger|}}
+                <label class="khz-trigger-chip">
+                  <input type="checkbox" name="{{trigger.name}}" data-rerender="true" {{checked trigger.enabled}}>
+                  <span><i class="{{trigger.icon}}"></i>{{trigger.label}}</span>
+                </label>
+              {{/each}}
+            </div>
+          </section>
+
+          <section class="khz-config-panel khz-actions-panel" {{#if aura.visualOnly}}hidden{{/if}}>
+            <header class="khz-section-heading khz-section-heading--split">
+              <span class="khz-section-heading__icon"><i class="fa-solid fa-bolt"></i></span>
+              <div>
+                <h3>{{localize "KHZ_AURAS.Config.Actions"}}</h3>
+                <p>{{localize "KHZ_AURAS.Config.ActionsHint"}}</p>
+              </div>
+              <button type="button" class="khz-button khz-button--soft" data-action="add-action" data-aura-index="{{aura.index}}">
+                <i class="fa-solid fa-plus"></i>
+                {{localize "KHZ_AURAS.Config.AddAction"}}
+              </button>
+            </header>
+
+            <div class="khz-action-list">
+              {{#each aura.actions as |action|}}
+                <article class="khz-action-card">
+                  <input type="hidden" name="{{action.path}}.id" value="{{action.id}}">
+                  <header class="khz-action-card__header">
+                    <span class="khz-action-card__icon"><i class="{{action.icon}}"></i></span>
+                    <div class="khz-action-card__title">
+                      <span>{{action.numberLabel}}</span>
+                      <strong>{{action.selectedTypeLabel}}</strong>
+                    </div>
+                    <label class="khz-field khz-action-type">
+                      <span>{{localize "KHZ_AURAS.Config.ActionType"}}</span>
+                      <select name="{{action.path}}.type" data-rerender="true">
+                        {{selectOptions action.typeChoices selected=action.type}}
+                      </select>
+                    </label>
+                    <button
+                      type="button"
+                      class="khz-icon-button khz-icon-button--danger"
+                      data-action="delete-action"
+                      data-aura-index="{{aura.index}}"
+                      data-action-index="{{action.index}}"
+                      data-tooltip="KHZ_AURAS.Config.RemoveAction"
+                      aria-label="{{localize 'KHZ_AURAS.Config.RemoveAction'}}"
+                      {{#unless action.canRemove}}disabled{{/unless}}
+                    >
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </header>
+
+                  <div class="khz-action-card__body">
+                    <div class="khz-field-grid khz-field-grid--three">
+                      {{#unless action.isEffect}}
+                        <label class="khz-field">
+                          <span><i class="fa-solid fa-dice-d20"></i>{{localize "KHZ_AURAS.Config.Formula"}}</span>
+                          <input type="text" name="{{action.path}}.formula" value="{{action.formula}}">
+                        </label>
+                        <label class="khz-field">
+                          <span><i class="fa-solid fa-dice"></i>{{localize "KHZ_AURAS.Config.RollMode"}}</span>
+                          <select name="{{action.path}}.rollMode">
+                            {{selectOptions action.rollModeChoices selected=action.rollMode}}
+                          </select>
+                        </label>
+                      {{else}}
+                        <input type="hidden" name="{{action.path}}.formula" value="{{action.formula}}">
+                        <input type="hidden" name="{{action.path}}.rollMode" value="{{action.rollMode}}">
+                      {{/unless}}
+                      {{#if action.isDamage}}
+                        <label class="khz-field">
+                          <span><i class="fa-solid fa-fire-flame-curved"></i>{{localize "KHZ_AURAS.Config.DamageType"}}</span>
+                          <select name="{{action.path}}.damageType">
+                            {{selectOptions action.damageTypeChoices selected=action.damageType}}
+                          </select>
+                        </label>
+                      {{else}}
+                        <input type="hidden" name="{{action.path}}.damageType" value="{{action.damageType}}">
+                      {{/if}}
+                    </div>
+
+                    {{#if action.hasSavingThrow}}
+                      <section class="khz-save-panel {{#unless action.save.enabled}}khz-save-panel--disabled{{/unless}}">
+                        <header class="khz-save-panel__header">
+                          <label class="khz-save-toggle">
+                            <input type="checkbox" name="{{action.path}}.save.enabled" data-rerender="true" {{checked action.save.enabled}}>
+                            <span class="khz-option-card__check"><i class="fa-solid fa-check"></i></span>
+                            <span>
+                              <strong>{{localize "KHZ_AURAS.Config.SavingThrow"}}</strong>
+                              <small>{{localize "KHZ_AURAS.Config.SavingThrowHint"}}</small>
+                            </span>
+                          </label>
+                        </header>
+
+                        <div class="khz-save-panel__body" {{#unless action.save.enabled}}hidden{{/unless}}>
+                          <div class="khz-field-grid khz-field-grid--three">
+                            <label class="khz-field">
+                              <span>{{localize "KHZ_AURAS.Config.SaveAbility"}}</span>
+                              <select name="{{action.path}}.save.ability">
+                                {{selectOptions action.abilityChoices selected=action.save.ability}}
+                              </select>
+                            </label>
+                            <label class="khz-field">
+                              <span>{{localize "KHZ_AURAS.Config.DC"}}</span>
+                              <input type="text" name="{{action.path}}.save.dc" value="{{action.save.dc}}">
+                            </label>
+                            {{#if action.isDamage}}
+                              <label class="khz-field">
+                                <span>{{localize "KHZ_AURAS.Config.OnSuccess"}}</span>
+                                <select name="{{action.path}}.save.onSuccess">
+                                  {{selectOptions action.saveResultChoices selected=action.save.onSuccess}}
+                                </select>
+                              </label>
+                            {{else}}
+                              <input type="hidden" name="{{action.path}}.save.onSuccess" value="{{action.save.onSuccess}}">
+                            {{/if}}
+                          </div>
+
+                          <label class="khz-feature-toggle">
+                            <input type="checkbox" name="{{action.path}}.save.immunityOnSuccess" {{checked action.save.immunityOnSuccess}}>
+                            <span class="khz-option-card__check"><i class="fa-solid fa-check"></i></span>
+                            <span>
+                              <strong>{{localize "KHZ_AURAS.Config.ImmunityOnSuccess"}}</strong>
+                              <small>{{localize "KHZ_AURAS.Config.ImmunityOnSuccessHint"}}</small>
+                            </span>
+                          </label>
+
+                          <div class="khz-failure-zone">
+                            <header>
+                              <span class="khz-failure-zone__icon"><i class="fa-solid fa-shield-halved"></i></span>
+                              <div>
+                                <h4>{{localize "KHZ_AURAS.Config.FailureEffects"}}</h4>
+                                <p>{{localize "KHZ_AURAS.Config.FailureEffectsHint"}}</p>
+                              </div>
+                            </header>
+
+                            <div class="khz-failure-layout">
+                              <div class="khz-effect-checklist" role="group" aria-label="{{localize 'KHZ_AURAS.Config.FailureEffects'}}">
+                                {{#each action.failureEffectOptions as |effect|}}
+                                  <label>
+                                    <input type="checkbox" name="{{action.path}}.save.failureEffects" value="{{effect.value}}" {{checked effect.selected}}>
+                                    <span class="khz-option-card__check"><i class="fa-solid fa-check"></i></span>
+                                    <span>{{effect.label}}</span>
+                                  </label>
+                                {{/each}}
+                              </div>
+
+                              <aside class="khz-effect-options">
+                                <label class="khz-field">
+                                  <span>{{localize "KHZ_AURAS.Config.EffectDurationRounds"}}</span>
+                                  <input type="number" min="0" max="999" step="1" name="{{action.path}}.save.effectDurationRounds" value="{{action.save.effectDurationRounds}}">
+                                  <small>{{localize "KHZ_AURAS.Config.EffectDurationHint"}}</small>
+                                </label>
+                                <label class="khz-feature-toggle khz-feature-toggle--compact">
+                                  <input type="checkbox" name="{{action.path}}.save.showFailureEffectIcon" {{checked action.save.showFailureEffectIcon}}>
+                                  <span class="khz-option-card__check"><i class="fa-solid fa-check"></i></span>
+                                  <span>{{localize "KHZ_AURAS.Config.ShowFailureEffectIcon"}}</span>
+                                </label>
+                              </aside>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+                    {{else}}
+                      {{#if action.save.enabled}}<input type="hidden" name="{{action.path}}.save.enabled" value="on">{{/if}}
+                      <input type="hidden" name="{{action.path}}.save.ability" value="{{action.save.ability}}">
+                      <input type="hidden" name="{{action.path}}.save.dc" value="{{action.save.dc}}">
+                      <input type="hidden" name="{{action.path}}.save.onSuccess" value="{{action.save.onSuccess}}">
+                      {{#if action.save.immunityOnSuccess}}<input type="hidden" name="{{action.path}}.save.immunityOnSuccess" value="on">{{/if}}
+                      {{#each action.save.failureEffects as |effect|}}
+                        <input type="hidden" name="{{action.path}}.save.failureEffects" value="{{effect}}">
+                      {{/each}}
+                      <input type="hidden" name="{{action.path}}.save.effectDurationRounds" value="{{action.save.effectDurationRounds}}">
+                      {{#if action.save.showFailureEffectIcon}}<input type="hidden" name="{{action.path}}.save.showFailureEffectIcon" value="on">{{/if}}
+                    {{/if}}
+                  </div>
+                </article>
+              {{/each}}
+            </div>
+          </section>
+
+          <details class="khz-advanced-panel">
+            <summary>
+              <span class="khz-section-heading__icon"><i class="fa-solid fa-sliders"></i></span>
+              <span>
+                <strong>{{localize "KHZ_AURAS.Config.Advanced"}}</strong>
+                <small>{{localize "KHZ_AURAS.Config.AdvancedHint"}}</small>
+              </span>
+              <i class="fa-solid fa-chevron-down khz-advanced-panel__chevron"></i>
+            </summary>
+
+            <div class="khz-advanced-panel__body">
+              <section>
+                <header class="khz-subheading">
+                  <h4><i class="fa-solid fa-palette"></i>{{localize "KHZ_AURAS.Config.AppearanceHeading"}}</h4>
+                  <p>{{localize "KHZ_AURAS.Config.AppearanceHint"}}</p>
+                </header>
+                <div class="khz-range-grid">
+                  <label class="khz-range-control">
+                    <span>{{localize "KHZ_AURAS.Config.Opacity"}}</span>
+                    <output data-scale="100" data-digits="0" data-suffix="%">{{aura.visualLabels.opacity}}</output>
+                    <input data-live-range type="range" min="0" max="0.5" step="0.01" name="{{aura.path}}.visual.opacity" value="{{aura.visual.opacity}}">
+                  </label>
+                  <label class="khz-range-control">
+                    <span>{{localize "KHZ_AURAS.Config.LineOpacity"}}</span>
+                    <output data-scale="100" data-digits="0" data-suffix="%">{{aura.visualLabels.lineOpacity}}</output>
+                    <input data-live-range type="range" min="0" max="1" step="0.01" name="{{aura.path}}.visual.lineOpacity" value="{{aura.visual.lineOpacity}}">
+                  </label>
+                  <label class="khz-range-control">
+                    <span>{{localize "KHZ_AURAS.Config.LineWidth"}}</span>
+                    <output data-scale="1" data-digits="2" data-suffix=" px">{{aura.visualLabels.lineWidth}}</output>
+                    <input data-live-range type="range" min="0" max="5" step="0.25" name="{{aura.path}}.visual.lineWidth" value="{{aura.visual.lineWidth}}">
+                  </label>
+                </div>
+              </section>
+
+              <section {{#if aura.visualOnly}}hidden{{/if}}>
+                <header class="khz-subheading">
+                  <h4><i class="fa-solid fa-layer-group"></i>{{localize "KHZ_AURAS.Config.StackingHeading"}}</h4>
+                  <p>{{localize "KHZ_AURAS.Config.StackingHint"}}</p>
+                </header>
+                <div class="khz-field-grid khz-field-grid--three">
+                  <label class="khz-field">
+                    <span>{{localize "KHZ_AURAS.Config.StackGroup"}}</span>
+                    <input type="text" name="{{aura.path}}.stacking.group" value="{{aura.stacking.group}}">
+                  </label>
+                  <label class="khz-field">
+                    <span>{{localize "KHZ_AURAS.Config.StackMode"}}</span>
+                    <select name="{{aura.path}}.stacking.mode">
+                      {{selectOptions aura.stackingChoices selected=aura.stacking.mode}}
+                    </select>
+                  </label>
+                  <label class="khz-field">
+                    <span>{{localize "KHZ_AURAS.Config.Priority"}}</span>
+                    <input type="number" name="{{aura.path}}.stacking.priority" value="{{aura.stacking.priority}}">
+                  </label>
+                </div>
+              </section>
+            </div>
+          </details>
+        </div>
+      </article>
+    {{/each}}
+  </section>
+
+  <footer class="khz-config-footer">
+    <span><i class="fa-solid fa-circle-info"></i>{{localize "KHZ_AURAS.Config.SaveHint"}}</span>
+    <button type="submit" class="khz-button khz-button--primary khz-save-button">
+      <i class="fa-solid fa-floppy-disk"></i>
+      {{localize "KHZ_AURAS.Config.Save"}}
+    </button>
+  </footer>
+</div>

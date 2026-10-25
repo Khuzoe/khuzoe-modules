@@ -1,0 +1,115 @@
+<div class="km-economy-form km-ui-v2">
+  <header class="km-economy-hero">
+    <div class="km-economy-hero-icon"><i class="fas fa-coins"></i></div>
+    <div>
+      <span class="km-eyebrow">{{localize "KM.Economy.Eyebrow"}}</span>
+      <h2>{{localize "KM.Economy.Heading"}}</h2>
+      <p>{{localize "KM.Economy.Intro"}}</p>
+    </div>
+    <div class="km-economy-statuses">
+      <span class="km-economy-sync {{#if sync.ok}}is-synced{{/if}}" title="{{sync.title}}"><i class="fas {{#if sync.ok}}fa-cloud-arrow-down{{else}}fa-triangle-exclamation{{/if}}"></i>{{sync.label}}</span>
+      <span class="km-economy-revision">registro v{{revision}}</span>
+    </div>
+  </header>
+  {{#unless sync.ok}}
+  {{#if sync.title}}
+  <div class="km-economy-sync-detail" role="status">
+    <i class="fas fa-circle-info"></i><span>{{sync.title}}</span>
+  </div>
+  {{/if}}
+  {{/unless}}
+
+  <div class="km-economy-validation {{#if validation.ok}}is-valid{{else}}is-invalid{{/if}}" role="status" aria-live="polite">
+    <i class="fas {{#if validation.ok}}fa-circle-check{{else}}fa-triangle-exclamation{{/if}}"></i><span>{{validation.message}}</span>
+  </div>
+
+  <div class="km-economy-groups">
+    {{#each groups}}
+    <section class="km-economy-group" data-group-card="{{id}}">
+      <header class="km-economy-group-head">
+        <label class="km-field">
+          <span>{{localize "KM.Economy.GroupName"}}</span>
+          <input type="text" value="{{name}}" maxlength="60" data-group-id="{{id}}" data-economy-field="group-name">
+        </label>
+        <label class="km-field">
+          <span>{{localize "KM.Economy.Conversion"}}</span>
+          <select data-group-id="{{id}}" data-economy-field="conversion-mode">
+            <option value="none" {{#unless automatic}}selected{{/unless}}>{{localize "KM.Economy.Independent"}}</option>
+            <option value="automatic" {{#if automatic}}selected{{/if}}>{{localize "KM.Economy.Automatic"}}</option>
+          </select>
+        </label>
+        {{#if currencies.length}}
+        <label class="km-field">
+          <span>{{localize "KM.Economy.BaseCurrency"}}</span>
+          <select data-group-id="{{id}}" data-economy-field="base-currency">
+            {{#each currencies}}
+            <option value="{{id}}" {{#if isBase}}selected{{/if}}>{{name}} ({{symbol}})</option>
+            {{/each}}
+          </select>
+        </label>
+        {{/if}}
+      </header>
+
+      {{#if conversionPreview.length}}
+      <div class="km-economy-conversion-preview" aria-label="{{localize 'KM.Economy.ConversionPreview'}}">
+        <span><i class="fas fa-arrow-right-arrow-left"></i> {{localize "KM.Economy.ConversionPreview"}}</span>
+        {{#each conversionPreview}}<code>{{label}}</code>{{/each}}
+      </div>
+      {{/if}}
+
+      <div class="km-economy-currencies">
+        {{#each currencies}}
+        <article class="km-economy-currency {{#if archived}}is-archived{{/if}}">
+          <div class="km-economy-currency-title">
+            <code>{{id}}</code>
+            {{#if archived}}<span>{{localize "KM.Economy.Archived"}}</span>{{/if}}
+          </div>
+          <label class="km-field">
+            <span>{{localize "KM.Economy.CurrencyName"}}</span>
+            <input type="text" value="{{name}}" maxlength="60" data-group-id="{{../id}}" data-currency-id="{{id}}" data-economy-field="currency-name">
+          </label>
+          <label class="km-field">
+            <span>{{localize "KM.Economy.Symbol"}}</span>
+            <input type="text" value="{{symbol}}" maxlength="16" data-group-id="{{../id}}" data-currency-id="{{id}}" data-economy-field="currency-symbol">
+          </label>
+          <label class="km-field">
+            <span>{{localize "KM.Economy.Factor"}}</span>
+            <input type="number" value="{{factor}}" min="0.0001" step="any" data-group-id="{{../id}}" data-currency-id="{{id}}" data-economy-field="currency-factor">
+          </label>
+          <label class="km-field">
+            <span>{{localize "KM.Economy.Precision"}}</span>
+            <input type="number" value="{{precision}}" min="0" max="4" step="1" data-group-id="{{../id}}" data-currency-id="{{id}}" data-economy-field="currency-precision">
+          </label>
+          <label class="km-field km-economy-path">
+            <span>{{localize "KM.Economy.StoragePath"}}</span>
+            <input type="text" value="{{storage.path}}" maxlength="120" data-group-id="{{../id}}" data-currency-id="{{id}}" data-economy-field="currency-path" readonly aria-readonly="true">
+          </label>
+          <button type="button" class="km-icon-button km-economy-toggle-currency" data-action="toggleCurrency" data-group-id="{{../id}}" data-currency-id="{{id}}"
+            title="{{#if archived}}{{localize 'KM.Economy.Restore'}}{{else}}{{localize 'KM.Economy.Archive'}}{{/if}}">
+            <i class="fas {{#if archived}}fa-rotate-left{{else}}fa-box-archive{{/if}}"></i>
+          </button>
+        </article>
+        {{else}}
+        <div class="km-economy-empty">{{localize "KM.Economy.EmptyGroup"}}</div>
+        {{/each}}
+      </div>
+
+      <button type="button" class="km-secondary-button km-economy-add-currency" data-action="addCurrency" data-group-id="{{id}}">
+        <i class="fas fa-plus"></i> {{localize "KM.Economy.AddCurrency"}}
+      </button>
+    </section>
+    {{/each}}
+  </div>
+
+  <footer class="km-config-footer">
+    <button type="button" class="km-secondary-button km-economy-sync-now" data-action="syncNow">
+      <i class="fas fa-cloud-arrow-down"></i> {{localize "KM.Economy.SyncNow"}}
+    </button>
+    <button type="button" class="km-secondary-button km-economy-add-group" data-action="addGroup">
+      <i class="fas fa-layer-group"></i> {{localize "KM.Economy.AddGroup"}}
+    </button>
+    <button type="submit" class="km-primary-button">
+      <i class="fas fa-floppy-disk"></i> {{localize "KM.Economy.Save"}}
+    </button>
+  </footer>
+</div>

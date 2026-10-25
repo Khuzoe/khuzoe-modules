@@ -1,0 +1,75 @@
+{
+  "_id": "KhzPalDivSmite01",
+  "name": "Divine Smite",
+  "type": "feat",
+  "img": "icons/magic/holy/projectiles-blades-salvo-yellow.webp",
+  "system": {
+    "description": {
+      "value": "<p>Quando colpisci una creatura con un attacco con arma da mischia, puoi spendere uno slot incantesimo per infliggere danni radianti aggiuntivi. Il danno è 2d8 per uno slot di 1° livello, più 1d8 per ogni livello superiore, fino a 5d8. Contro immondi e non morti infliggi 1d8 aggiuntivo.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Player's Handbook 2014",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "type": {
+      "value": "class",
+      "subtype": ""
+    },
+    "properties": [],
+    "requirements": "Paladin 2",
+    "prerequisites": {
+      "level": 2
+    },
+    "activities": {},
+    "identifier": "divine-smite",
+    "enchant": {}
+  },
+  "effects": [],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": false,
+      "magiceffect": false
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [],
+        "effect": []
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "divine-smite"
+          }
+        ]
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzPalDivSmite01"
+}

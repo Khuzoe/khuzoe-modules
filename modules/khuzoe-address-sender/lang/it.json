@@ -1,0 +1,14 @@
+{
+  "KHAS.Settings.Webhook.Name": "URL webhook Discord",
+  "KHAS.Settings.Webhook.Hint": "Incolla il webhook Discord al quale inviare automaticamente l'indirizzo del server.",
+  "KHAS.Settings.Port.Name": "Porta pubblica fissa",
+  "KHAS.Settings.Port.Hint": "Usa 0 per rilevare la porta corrente; altrimenti indica la porta pubblica da condividere.",
+  "KHAS.UI.Title": "Indirizzo server",
+  "KHAS.UI.Copy": "Copia",
+  "KHAS.UI.Send": "Invia",
+  "KHAS.Notifications.MissingWebhook": "Configura prima il webhook Discord nelle impostazioni del modulo.",
+  "KHAS.Notifications.Sent": "Indirizzo inviato su Discord!",
+  "KHAS.Notifications.SendFailed": "Invio a Discord fallito. Controlla il webhook e riprova.",
+  "KHAS.Notifications.Copied": "Indirizzo copiato negli appunti!",
+  "KHAS.Notifications.AddressFailed": "Impossibile recuperare l'indirizzo IP pubblico. Riprova tra poco."
+}

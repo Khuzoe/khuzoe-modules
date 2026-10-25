@@ -1,0 +1,17 @@
+{
+  "name": "khuzoe-auras",
+  "version": "0.5.4",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "npm run check:js && npm run check:data",
+    "check:js": "node --check scripts/actions.js && node --check scripts/chat-summary.js && node --check scripts/config.js && node --check scripts/constants.js && node --check scripts/distance.js && node --check scripts/engine.js && node --check scripts/foundry-compat.js && node --check scripts/ledger.js && node --check scripts/main.js && node --check scripts/movement.js && node --check scripts/permissions.js && node --check scripts/model.js && node --check scripts/registry.js && node --check scripts/renderer.js && node --check scripts/store.js && node --check scripts/targeting.js",
+    "check:data": "node tools/check.mjs",
+    "test": "node tests/run.mjs",
+    "test:native": "node tools/test-foundry-native.mjs",
+    "validate": "npm run check && npm test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "_id": "KhzNpcFeyAura001",
+  "name": "Aura Rinvigorente Espansa",
+  "type": "feat",
+  "img": "icons/magic/life/cross-area-circle-green-white.webp",
+  "system": {
+    "description": {
+      "value": "<p>Ogni creatura entro 15 ft. dallo Spirito è considerata come se si trovasse all'interno dell'Aura Rinvigorente di Na'Niss.</p><p>Se una creatura si trova contemporaneamente nell'aura di Na'Niss e in quella dello Spirito, l'effetto curativo passivo dell'aura è raddoppiato.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Homebrew",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014",
+      "revision": 1
+    },
+    "uses": {
+      "max": "",
+      "recovery": [],
+      "spent": 0
+    },
+    "type": {
+      "value": "",
+      "subtype": ""
+    },
+    "requirements": "Spirito Elementale Fatato",
+    "properties": [],
+    "activities": {},
+    "enchant": {},
+    "prerequisites": {
+      "level": null,
+      "repeatable": false,
+      "items": []
+    },
+    "identifier": "spirito-elementale-fatato-p-ogni-creatura-entro-1",
+    "advancement": {},
+    "cover": null,
+    "crewed": false
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "spirito-elementale-fatato-p-ogni-creatura-entro-1"
+          }
+        ]
+      }
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": []
+      }
+    }
+  },
+  "_key": "!items!KhzNpcFeyAura001"
+}

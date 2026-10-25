@@ -1,0 +1,14 @@
+{
+  "name": "khuzoe-dnd5e-extensions",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check scripts/config.mjs && node --check scripts/genie-vulnerability.mjs && node --check scripts/main.mjs && node --check scripts/settings.mjs",
+    "test": "node tests/run.mjs",
+    "validate": "npm run check && npm test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,192 @@
+{
+  "name": "Shapechange",
+  "type": "spell",
+  "img": "icons/magic/control/silhouette-grow-shrink-tan.webp",
+  "effects": [],
+  "flags": {
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.27.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "shapechange"
+          }
+        ]
+      }
+    },
+    "khuzoe-automations": {
+      "sourceIdentifier": "shapechange",
+      "activityIdentifiers": {
+        "shapechange": "KhzShapechangeA1"
+      }
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [],
+        "effect": []
+      }
+    }
+  },
+  "system": {
+    "description": {
+      "value": "<p>Trasforma una creatura bersagliata; senza bersagli, trasforma il lanciatore. Scegli la nuova forma tra gli actor visibili a chi lancia.</p><p>La forma fornisce corpo, punti ferita e capacità; conservi caratteristiche mentali, lingue, classi, talenti e incantesimi. Non vengono applicati limiti automatici di GS o tipo di creatura. Questa è una versione personalizzata di Shapechange.</p><p>Concentrazione, fino a 1 ora. Torni alla forma originale quando termina la concentrazione, scade la durata, raggiungi 0 PF o usi «Torna alla forma originale» nella scheda. I danni in eccesso si trasferiscono alla forma originale. Slot e utilizzi delle capacità originali spesi durante la trasformazione restano spesi.</p><p>Deve essere connesso un GM. Seleziona al massimo un bersaglio nella stessa scena; per scegliere un’altra forma occorre un nuovo lancio.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Khuzoe Automations",
+      "revision": 1,
+      "rules": "2014"
+    },
+    "activation": {
+      "type": "action",
+      "condition": "",
+      "value": 1
+    },
+    "duration": {
+      "value": "1",
+      "units": "hour"
+    },
+    "target": {
+      "affects": {
+        "type": "creature",
+        "count": "",
+        "choice": false,
+        "special": ""
+      },
+      "template": {
+        "units": "",
+        "contiguous": false,
+        "type": ""
+      }
+    },
+    "range": {
+      "units": "any",
+      "special": ""
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "ability": "",
+    "level": 9,
+    "school": "trs",
+    "materials": {
+      "value": "",
+      "consumed": false,
+      "cost": 0,
+      "supply": 0
+    },
+    "preparation": {
+      "mode": "prepared",
+      "prepared": false
+    },
+    "properties": [
+      "vocal",
+      "somatic",
+      "material",
+      "concentration",
+      "mgc"
+    ],
+    "activities": {
+      "KhzShapechangeA1": {
+        "_id": "KhzShapechangeA1",
+        "type": "utility",
+        "name": "Shapechange",
+        "img": "icons/magic/control/silhouette-grow-shrink-tan.webp",
+        "activation": {
+          "type": "action",
+          "value": 1,
+          "override": true,
+          "condition": ""
+        },
+        "consumption": {
+          "spellSlot": true,
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          }
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "hour",
+          "value": "1",
+          "concentration": true,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "units": "any",
+          "override": true,
+          "special": ""
+        },
+        "target": {
+          "override": true,
+          "prompt": false,
+          "affects": {
+            "type": "creature",
+            "count": "",
+            "choice": false,
+            "special": ""
+          },
+          "template": {
+            "type": "",
+            "units": "ft",
+            "contiguous": false,
+            "size": "",
+            "count": ""
+          }
+        },
+        "uses": {
+          "spent": 0,
+          "max": "",
+          "recovery": []
+        },
+        "sort": 0,
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "identifier": "shapechange",
+          "automationOnly": false,
+          "confirmTargets": "never",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "magicEffect": true,
+          "magicDamage": false
+        },
+        "flags": {
+          "cat": {
+            "hidden": false
+          }
+        },
+        "roll": {
+          "formula": "",
+          "name": "",
+          "prompt": false,
+          "visible": false
+        }
+      }
+    },
+    "identifier": "shapechange",
+    "sourceClass": ""
+  },
+  "folder": null,
+  "_id": "KhzShapechange01",
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzShapechange01"
+}

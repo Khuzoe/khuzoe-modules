@@ -1,0 +1,45 @@
+{
+  "id": "khuzoe-monster-hud",
+  "title": "Khuzoe Monster HUD",
+  "description": "Overlay minimale per usare rapidamente azioni, Multiattack, tiri salvezza, abilità, incantesimi e risorse leggendarie di NPC e personaggi D&D 5e.",
+  "version": "0.1.2",
+  "authors": [
+    {
+      "name": "Khuzoe"
+    }
+  ],
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14.367"
+  },
+  "relationships": {
+    "systems": [
+      {
+        "id": "dnd5e",
+        "type": "system",
+        "compatibility": {
+          "minimum": "5.3.0",
+          "verified": "5.3.3"
+        }
+      }
+    ]
+  },
+  "esmodules": [
+    "scripts/main.js"
+  ],
+  "styles": [
+    "styles/monster-hud.css"
+  ],
+  "languages": [
+    {
+      "lang": "it",
+      "name": "Italiano",
+      "path": "lang/it.json"
+    },
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ]
+}

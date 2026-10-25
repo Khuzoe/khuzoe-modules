@@ -1,0 +1,207 @@
+{
+  "_id": "KhzRKStormRune01",
+  "name": "Storm Rune",
+  "type": "feat",
+  "img": "icons/commodities/treasure/stone-cracked-lightning-blue.webp",
+  "system": {
+    "description": {
+      "value": "<p>Hai vantaggio alle prove di Arcana e non puoi essere sorpreso finché non sei incapacitated.</p><p>Come azione bonus entri in uno stato profetico per 1 minuto. Una volta per turno, come reazione, puoi imporre vantaggio o svantaggio a un tiro per colpire, tiro salvezza o prova di caratteristica effettuato entro 60 ft.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Tasha's Cauldron of Everything",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "uses": {
+      "max": "1",
+      "spent": 0,
+      "recovery": [
+        {
+          "period": "sr",
+          "type": "recoverAll"
+        }
+      ]
+    },
+    "type": {
+      "value": "class",
+      "subtype": ""
+    },
+    "properties": [],
+    "requirements": "Rune Knight 7",
+    "prerequisites": {
+      "level": 7
+    },
+    "activities": {
+      "KhzRKStormUse001": {
+        "_id": "KhzRKStormUse001",
+        "type": "utility",
+        "activation": {
+          "type": "bonus",
+          "value": 1,
+          "condition": "",
+          "override": true
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": false
+        },
+        "description": {
+          "chatFlavor": "Storm Rune"
+        },
+        "duration": {
+          "value": "1",
+          "units": "minute",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "value": null,
+          "units": "self",
+          "special": "",
+          "override": true
+        },
+        "target": {
+          "prompt": false,
+          "template": {
+            "count": "",
+            "contiguous": false,
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "units": "ft"
+          },
+          "affects": {
+            "count": "",
+            "type": "self",
+            "choice": false,
+            "special": ""
+          },
+          "override": true
+        },
+        "roll": {
+          "formula": "",
+          "name": "",
+          "prompt": false,
+          "visible": false
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": [],
+          "max": ""
+        },
+        "sort": 0,
+        "name": "Storm Rune",
+        "img": "",
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "flags": {},
+        "midiProperties": {}
+      }
+    },
+    "identifier": "storm-rune",
+    "enchant": {}
+  },
+  "effects": [
+    {
+      "_id": "KhzRKStormPass01",
+      "name": "Storm Rune: allerta",
+      "img": "icons/commodities/treasure/stone-cracked-lightning-blue.webp",
+      "type": "base",
+      "system": {
+        "changes": [
+          {
+            "key": "system.traits.ci.value",
+            "value": "surprised",
+            "priority": 20,
+            "type": "add"
+          }
+        ]
+      },
+      "disabled": false,
+      "duration": {
+        "value": null,
+        "units": "seconds",
+        "expired": false
+      },
+      "origin": null,
+      "tint": "#ffffff",
+      "transfer": true,
+      "statuses": [],
+      "description": "",
+      "showIcon": 0,
+      "flags": {
+        "core": {
+          "overlay": false
+        },
+        "dae": {
+          "transfer": true,
+          "stackable": "noneNameOnly",
+          "specialDuration": [],
+          "expiryMode": "delete",
+          "disableIncapacitated": true
+        }
+      },
+      "folder": null,
+      "sort": 0,
+      "_key": "!items.effects!KhzRKStormRune01.KhzRKStormPass01"
+    }
+  ],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": false,
+      "magiceffect": false
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [],
+        "effect": []
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "storm-rune"
+          }
+        ],
+        "skill": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "storm-rune"
+          }
+        ]
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzRKStormRune01"
+}

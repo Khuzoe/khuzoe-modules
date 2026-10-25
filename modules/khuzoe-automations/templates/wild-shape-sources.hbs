@@ -1,0 +1,72 @@
+<div class="khz-wild-shape-window khz-wild-shape-config">
+  <header class="khz-wild-shape-hero">
+    <div class="khz-wild-shape-hero__icon"><i class="fa-solid fa-books"></i></div>
+    <div>
+      <span class="khz-eyebrow">Configurazione</span>
+      <h2>{{#if item}}Sorgenti di {{item.name}}{{else}}Sorgenti predefinite del mondo{{/if}}</h2>
+      {{#if actor}}<p>Capacità di <strong>{{actor.name}}</strong>.</p>{{/if}}
+      <p>Le creature restano nei loro compendi o cartelle: il modulo legge la sorgente senza modificarla.</p>
+    </div>
+  </header>
+
+  {{#if item}}
+    {{#if legacyConfig}}
+      <p class="khz-wild-shape-legacy-note"><i class="fa-solid fa-circle-info"></i> Questa capacità sta usando la precedente configurazione dell'attore. Salvando, la configurazione verrà associata soltanto a questa abilità.</p>
+    {{/if}}
+    <label class="khz-switch-row">
+      <input type="checkbox" name="inherit" {{checked inherit}}>
+      <span><strong>Usa le sorgenti predefinite del mondo</strong><small>Disattiva per assegnare compendi differenti a questa capacità.</small></span>
+    </label>
+  {{/if}}
+
+  <fieldset data-actor-source-overrides>
+    <legend>Compendi di Attori</legend>
+    <div class="khz-source-list">
+      {{#each packs}}
+        <label><input type="checkbox" name="packs" value="{{id}}" {{checked selected}}> <span>{{label}}<small>{{id}}</small></span></label>
+      {{else}}
+        <p>Nessun compendio di Attori disponibile.</p>
+      {{/each}}
+    </div>
+  </fieldset>
+
+  <fieldset data-actor-source-overrides>
+    <legend>Cartelle di Attori del mondo</legend>
+    <div class="khz-source-list">
+      {{#each folders}}
+        <label><input type="checkbox" name="folders" value="{{id}}" {{checked selected}}> <span>{{label}}</span></label>
+      {{else}}
+        <p>Nessuna cartella di Attori disponibile.</p>
+      {{/each}}
+    </div>
+  </fieldset>
+
+  {{#if item}}
+    <fieldset>
+      <legend>Forme conosciute</legend>
+      <label class="khz-switch-row khz-switch-row--compact">
+        <input type="checkbox" name="knownOnly" {{checked knownOnly}}>
+        <span><strong>Mostra soltanto le forme conosciute</strong><small>Se disattivato, le stelle restano informative e non limitano il selettore.</small></span>
+      </label>
+      <label class="khz-wild-shape-search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="search" data-known-form-search placeholder="Cerca una forma…" autocomplete="off">
+      </label>
+      <div class="khz-source-list khz-known-form-list">
+        {{#each knownForms}}
+          <label data-known-form data-search="{{name}} {{sourceLabel}}">
+            <input type="checkbox" name="knownForms" value="{{uuid}}" {{checked selected}}>
+            <img src="{{img}}" alt="">
+            <span>{{name}}<small>CR {{cr}} · {{sourceLabel}}</small></span>
+          </label>
+        {{else}}
+          <p>Nessuna creatura trovata nelle sorgenti correnti.</p>
+        {{/each}}
+      </div>
+    </fieldset>
+  {{/if}}
+
+  <footer class="khz-wild-shape-footer">
+    <button type="submit" class="khz-primary"><i class="fa-solid fa-floppy-disk"></i> Salva</button>
+  </footer>
+</div>

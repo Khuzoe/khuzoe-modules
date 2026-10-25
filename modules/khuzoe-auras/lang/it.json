@@ -1,0 +1,177 @@
+{
+    "KHZ_AURAS":  {
+                      "Settings":  {
+                                       "ShowVisuals":  {
+                                                           "Name":  "Mostra le aure sul canvas",
+                                                           "Hint":  "Disegna il raggio delle aure attive. È un\u0027impostazione personale per ciascun client."
+                                                       },
+                                       "Debug":  {
+                                                     "Name":  "Diagnostica prestazioni",
+                                                     "Hint":  "Scrive nella console tempi, confronti di distanza e risultati elaborati."
+                                                 }
+                                   },
+                      "HUD":  {
+                                  "Configure":  "Configura aure"
+                              },
+                      "Config":  {
+                                     "Title":  "Aure di {token}",
+                                     "Eyebrow":  "Configurazione aura",
+                                     "Heading":  "Aure del token",
+                                     "Intro":  "Combina area, bersagli, trigger e azioni. Solo il GM attivo applica gli effetti.",
+                                     "StatusEnabled":  "Aura attiva",
+                                     "StatusDisabled":  "Aura disattivata",
+                                     "Summary":  "Riepilogo dell’aura",
+                                     "RadiusBadge":  "Raggio {distance}",
+                                     "TriggerBadge":  "{count} trigger",
+                                     "ActionBadge":  "{count} azioni",
+                                     "AddAura":  "Aggiungi aura",
+                                     "NewAura":  "Nuova aura",
+                                     "Enabled":  "Attiva",
+                                     "Name":  "Nome",
+                                     "Radius":  "Raggio (unità della scena)",
+                                     "Targets":  "Bersagli",
+                                     "Color":  "Colore",
+                                     "AreaHeading":  "Area e bersagli",
+                                     "AreaHint":  "Definisci chi raggiunge l’aura e come viene misurata sulla scena.",
+                                     "IncludeSource":  "Include il portatore",
+                                     "RequiresConscious":  "Richiede portatore cosciente",
+                                     "Walls":  "Bloccata dai muri",
+                                     "Elevation":  "Considera elevazione",
+                                     "Visible":  "Mostra sul canvas",
+                                     "VisualOnly":  "Solo visuale",
+                                     "VisualOnlyHint":  "Questa aura viene soltanto disegnata sul canvas: non calcola bersagli, non esegue azioni e non genera messaggi in chat.",
+                                     "Triggers":  "Trigger",
+                                     "TriggersHint":  "Scegli in quali momenti l’aura deve attivarsi.",
+                                     "Frequency":  "Frequenza anti-ripetizione",
+                                     "Actions":  "Azioni",
+                                     "ActionsHint":  "Configura ciò che accade a ogni bersaglio raggiunto.",
+                                     "ActionNumber":  "Azione {number}",
+                                     "ActionType":  "Tipo",
+                                     "Formula":  "Formula",
+                                     "RollMode":  "Tiro",
+                                     "DamageType":  "Tipo di danno",
+                                     "SavingThrow":  "Tiro salvezza",
+                                     "SavingThrowHint":  "Il bersaglio tira prima dell’applicazione di danni o effetti.",
+                                     "SaveAbility":  "Caratteristica",
+                                     "DC":  "CD",
+                                     "OnSuccess":  "Se superato",
+                                     "ImmunityOnSuccess":  "Se supera il TS diventa immune a questa aura",
+                                     "ImmunityOnSuccessHint":  "L’immunità riguarda solo questa aura e dura finché non viene disattivata o rimossa.",
+                                     "FailureEffects":  "Effetti in caso di fallimento",
+                                     "FailureEffectsHint":  "Seleziona tutte le condizioni o gli effetti da applicare quando il tiro salvezza fallisce.",
+                                     "EffectDurationRounds":  "Durata (round)",
+                                     "EffectDurationHint":  "Usa 0 per una durata indefinita.",
+                                     "ShowFailureEffectIcon":  "Mostra l’icona dell’effetto sul token",
+                                     "ConditionChoice":  "Condizione — {name}",
+                                     "ActorEffectChoice":  "Effetto del portatore — {name}",
+                                     "ItemEffectChoice":  "{item} — {name}",
+                                     "AddAction":  "Aggiungi azione",
+                                     "RemoveAction":  "Rimuovi azione",
+                                     "ActivateManual":  "Attiva manualmente",
+                                     "DeleteAura":  "Elimina aura",
+                                     "DeleteConfirm":  "Eliminare definitivamente “{name}”?",
+                                     "Advanced":  "Impostazioni avanzate",
+                                     "AdvancedHint":  "Aspetto visivo e gestione delle aure sovrapposte.",
+                                     "AppearanceHeading":  "Aspetto dell’aura",
+                                     "AppearanceHint":  "Regola riempimento e contorno senza modificare il funzionamento.",
+                                     "StackingHeading":  "Sovrapposizione",
+                                     "StackingHint":  "Decidi come interagiscono più aure appartenenti allo stesso gruppo.",
+                                     "StackGroup":  "Gruppo di sovrapposizione",
+                                     "StackMode":  "Combinazione",
+                                     "Priority":  "Priorità",
+                                     "Opacity":  "Opacità",
+                                     "LineOpacity":  "Opacità contorno",
+                                     "LineWidth":  "Spessore contorno",
+                                     "Save":  "Salva aure",
+                                     "SaveHint":  "Le modifiche vengono applicate dopo il salvataggio.",
+                                     "Saved":  "Configurazione delle aure salvata."
+                                 },
+                      "Triggers":  {
+                                       "sourceTurnStart":  "Inizio turno del portatore",
+                                       "sourceTurnEnd":  "Fine turno del portatore",
+                                       "affectedTurnStart":  "Inizio turno del bersaglio",
+                                       "affectedTurnEnd":  "Fine turno del bersaglio",
+                                       "roundStart":  "Inizio round",
+                                       "roundEnd":  "Fine round",
+                                       "enter":  "Ingresso nell\u0027aura",
+                                       "exit":  "Uscita dall\u0027aura",
+                                       "manual":  "Attivazione manuale"
+                                   },
+                      "Targets":  {
+                                      "ally":  "Alleati",
+                                      "enemy":  "Nemici",
+                                      "neutral":  "Neutrali",
+                                      "all":  "Tutti"
+                                  },
+                      "Frequencies":  {
+                                          "oncePerPhase":  "Una volta per fase",
+                                          "oncePerTurn":  "Una volta per turno",
+                                          "oncePerRound":  "Una volta per round",
+                                          "always":  "Sempre"
+                                      },
+                      "Stacking":  {
+                                       "stack":  "Somma tutte",
+                                       "highest":  "Solo priorità più alta",
+                                       "first":  "Solo la prima"
+                                   },
+                      "Actions":  {
+                                      "healing":  "Cura",
+                                      "damage":  "Danno",
+                                      "temphp":  "PF temporanei",
+                                      "effect":  "Effetto"
+                                  },
+                      "RollModes":  {
+                                        "perTarget":  "Uno per bersaglio",
+                                        "shared":  "Unico condiviso"
+                                    },
+                      "SaveResults":  {
+                                          "none":  "Nessun effetto",
+                                          "half":  "Metà danno"
+                                      },
+                      "Events":  {
+                                     "turnStart":  "Inizio turno",
+                                     "turnEnd":  "Fine turno",
+                                     "roundStart":  "Inizio round",
+                                     "roundEnd":  "Fine round",
+                                     "enter":  "Ingresso",
+                                     "exit":  "Uscita",
+                                     "manual":  "Manuale"
+                                 },
+                      "Chat":  {
+                                   "Title":  "Effetti delle aure",
+                                   "Source":  "Portatore",
+                                   "Healed":  "Recupera {amount} PF",
+                                   "NoHealing":  "Nessun PF recuperato",
+                                   "Damaged":  "Subisce {amount} danni",
+                                   "DamagedTyped":  "Subisce {amount} danni da {type}",
+                                   "NoDamage":  "Nessun danno effettivo",
+                                   "TemporarySet":  "PF temporanei: {value}",
+                                   "TemporaryKept":  "Mantiene {value} PF temporanei",
+                                   "Rolled":  "Tiro: {total}",
+                                   "SavingThrow":  "TS {ability}: {total} · CD {dc}",
+                                   "NoEffectsApplied":  "Nessun nuovo effetto applicato",
+                                   "EffectsFailed":  "Uno o più effetti non sono stati applicati. Consulta i dettagli sotto.",
+                                   "EffectApplied":  "applicato",
+                                   "EffectRefreshed":  "durata rinnovata",
+                                   "EffectImmune":  "bersaglio immune",
+                                   "EffectExisting":  "già attivo",
+                                   "EffectMissing":  "effetto non trovato",
+                                   "EffectFailed":  "applicazione fallita",
+                                   "NoHitPoints":  "Il bersaglio non possiede punti ferita.",
+                                   "FullHitPoints":  "Il bersaglio è già al massimo dei punti ferita.",
+                                   "SaveSuccess":  "superato",
+                                   "SaveFailure":  "fallito",
+                                   "SaveRequired":  "L’azione Effetto richiede un tiro salvezza configurato.",
+                                   "NoFailureEffects":  "Nessun effetto applicabile è configurato per il fallimento.",
+                                   "EffectsApplied":  "Effetti applicati",
+                                   "AuraImmunityGranted":  "Il bersaglio è ora immune a questa aura.",
+                                   "Error":  "Errore"
+                               },
+                      "Errors":  {
+                                     "Execution":  "Errore durante l\u0027esecuzione di un\u0027aura: {message}",
+                                     "GMOnly":  "Solo il GM attivo può eseguire manualmente un\u0027aura.",
+                                     "NoManualTrigger":  "Questa aura non possiede il trigger di attivazione manuale.",
+                                     "WrongSystem":  "Khuzoe Auras richiede il sistema D\u0026D 5e."
+                                 }
+                  }
+}

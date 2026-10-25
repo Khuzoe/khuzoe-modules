@@ -1,0 +1,124 @@
+{
+  "id": "khuzoe-automations",
+  "title": "Khuzoe Automations",
+  "description": "Automazioni D&D 5e per Foundry VTT v14 integrate con Coven's Automation Toolkit.",
+  "version": "0.27.2",
+  "library": false,
+  "socket": true,
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14.367",
+    "maximum": "14"
+  },
+  "authors": [
+    {
+      "name": "Khuzoe"
+    }
+  ],
+  "esmodules": [
+    "scripts/main.mjs"
+  ],
+  "styles": [
+    "styles/wild-shape.css",
+    "styles/rune-knight.css",
+    "styles/shapechange.css"
+  ],
+  "relationships": {
+    "systems": [
+      {
+        "id": "dnd5e",
+        "type": "system",
+        "compatibility": {
+          "minimum": "5.3.3",
+          "verified": "5.3.3",
+          "maximum": "5.9.9"
+        }
+      }
+    ],
+    "requires": [
+      {
+        "id": "cat",
+        "type": "module",
+        "compatibility": {
+          "minimum": "0.0.7"
+        }
+      },
+      {
+        "id": "midi-qol",
+        "type": "module",
+        "compatibility": {
+          "minimum": "13.0.17"
+        }
+      },
+      {
+        "id": "dae",
+        "type": "module",
+        "compatibility": {
+          "minimum": "13.0.4"
+        }
+      },
+      {
+        "id": "socketlib",
+        "type": "module"
+      }
+    ],
+    "recommends": [
+      {
+        "id": "khuzoe-auras",
+        "type": "module",
+        "reason": "Gestisce le visuali dell'Aura of Protection e le aure coordinate di Na'Niss e dello Spirito Elementale Fatato."
+      }
+    ]
+  },
+  "packs": [
+    {
+      "name": "KhuzoeSpells2014",
+      "label": "Khuzoe Automations — Incantesimi 2014",
+      "path": "packs/khuzoe-spells-2014-v17",
+      "type": "Item",
+      "module": "khuzoe-automations"
+    },
+    {
+      "name": "KhuzoeSpells2024",
+      "label": "Khuzoe Automations — Incantesimi 2024",
+      "path": "packs/khuzoe-spells-2024-v7",
+      "type": "Item",
+      "module": "khuzoe-automations"
+    },
+    {
+      "name": "KhuzoeClassFeatures2014",
+      "label": "Khuzoe Automations — Capacità di classe 2014",
+      "path": "packs/khuzoe-class-features-2014-v21",
+      "type": "Item",
+      "module": "khuzoe-automations"
+    },
+    {
+      "name": "KhuzoeSummons2014",
+      "label": "Khuzoe Automations — Evocazioni 2014",
+      "path": "packs/khuzoe-summons-2014-v7",
+      "type": "Actor",
+      "module": "khuzoe-automations"
+    },
+    {
+      "name": "KhuzoeNpcFeatures2014",
+      "label": "Khuzoe Automations — Capacità NPC 2014",
+      "path": "packs/khuzoe-npc-features-2014-v9",
+      "type": "Item",
+      "module": "khuzoe-automations"
+    }
+  ],
+  "packFolders": [
+    {
+      "name": "Khuzoe Automations",
+      "sorting": "a",
+      "color": "#c89b3c",
+      "packs": [
+        "KhuzoeSpells2014",
+        "KhuzoeSpells2024",
+        "KhuzoeClassFeatures2014",
+        "KhuzoeSummons2014",
+        "KhuzoeNpcFeatures2014"
+      ]
+    }
+  ]
+}

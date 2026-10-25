@@ -1,0 +1,16 @@
+{
+  "name": "khuzoe-monster-hud",
+  "version": "0.1.2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "npm run check:js && npm run check:data",
+    "check:js": "node --check scripts/action-service.js && node --check scripts/config-app.js && node --check scripts/constants.js && node --check scripts/foundry-compat.js && node --check scripts/hud.js && node --check scripts/main.js && node --check scripts/model.js && node --check scripts/multiattack-inference.js && node --check scripts/turn-tracker.js",
+    "check:data": "node tools/check.mjs",
+    "test": "node tests/run.mjs",
+    "validate": "npm run check && npm test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

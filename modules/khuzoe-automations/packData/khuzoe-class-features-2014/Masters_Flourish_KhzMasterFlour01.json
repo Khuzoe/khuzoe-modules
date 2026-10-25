@@ -1,0 +1,66 @@
+{
+  "_id": "KhzMasterFlour01",
+  "name": "Master's Flourish",
+  "type": "feat",
+  "img": "icons/skills/melee/maneuver-daggers-paired-orange.webp",
+  "system": {
+    "description": {
+      "value": "<p>Ogni volta che usi un'opzione di Blade Flourish, puoi tirare 1d6 e usarlo al posto di consumare un dado di Bardic Inspiration.</p><p>L'automazione Khuzoe rileva questa capacità da Blade Flourish: se rimangono usi di Bardic Inspiration, ti lascia scegliere tra il dado completo e il d6 gratuito; se gli usi sono esauriti, usa direttamente 1d6.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Xanathar's Guide to Everything",
+      "book": "",
+      "page": "16",
+      "license": "",
+      "rules": "2014"
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "type": {
+      "value": "class",
+      "subtype": ""
+    },
+    "properties": [],
+    "requirements": "College of Swords 14",
+    "prerequisites": {
+      "level": 14
+    },
+    "activities": {},
+    "identifier": "masters-flourish",
+    "enchant": {}
+  },
+  "effects": [],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": false,
+      "magiceffect": false
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [],
+        "effect": []
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      }
+    }
+  },
+  "folder": null,
+  "sort": 20,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzMasterFlour01"
+}

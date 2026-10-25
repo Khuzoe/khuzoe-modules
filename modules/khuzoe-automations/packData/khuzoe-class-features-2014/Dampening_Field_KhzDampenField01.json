@@ -1,0 +1,55 @@
+{
+  "_id": "KhzDampenField01",
+  "_key": "!items!KhzDampenField01",
+  "name": "Dampening Field",
+  "type": "feat",
+  "img": "icons/magic/perception/silhouette-stealth-shadow.webp",
+  "system": {
+    "identifier": "dampening-field",
+    "source": {
+      "rules": "2014",
+      "custom": "Khuzoe Automations — regole 2014"
+    },
+    "description": {
+      "value": "<p>Vantaggio a Furtività soltanto con Infiltrator indossato; cancella normalmente lo svantaggio dell'armatura.</p>",
+      "chat": ""
+    },
+    "type": {
+      "value": "class"
+    },
+    "activities": {},
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "properties": [],
+    "requirements": "Armorer 3"
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {}
+    },
+    "khuzoe-automations": {
+      "armorerFeature": "dampening"
+    },
+    "midi-qol": {
+      "forceCEOff": true
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": []
+      }
+    }
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "_id": "KhzArcaneArmor01",
+  "_key": "!items!KhzArcaneArmor01",
+  "name": "Arcane Armor",
+  "type": "feat",
+  "img": "icons/equipment/chest/breastplate-layered-steel.webp",
+  "system": {
+    "identifier": "arcane-armor",
+    "source": {
+      "rules": "2014",
+      "custom": "Khuzoe Automations — regole 2014"
+    },
+    "description": {
+      "value": "<p>Associa un'armatura indossata; i benefici del modello richiedono quell'armatura. La rimozione fa perdere i PF temporanei del Defensive Field.</p>",
+      "chat": ""
+    },
+    "type": {
+      "value": "class"
+    },
+    "activities": {
+      "KhzArmorerUse001": {
+        "_id": "KhzArmorerUse001",
+        "name": "Arcane Armor",
+        "type": "utility",
+        "activation": {
+          "type": "action",
+          "value": 1,
+          "override": true
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false
+          },
+          "spellSlot": false
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "units": "self",
+          "override": true
+        },
+        "target": {
+          "override": true,
+          "prompt": false,
+          "affects": {
+            "type": "self"
+          },
+          "template": {
+            "units": "ft"
+          }
+        },
+        "roll": {
+          "formula": "",
+          "prompt": false,
+          "visible": false
+        },
+        "midiProperties": {
+          "confirmTargets": "never"
+        },
+        "uses": {
+          "max": "",
+          "spent": 0,
+          "recovery": []
+        }
+      }
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "properties": [],
+    "requirements": "Armorer 3"
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "arcane-armor"
+          }
+        ]
+      }
+    },
+    "khuzoe-automations": {
+      "armorerFeature": "armor"
+    },
+    "midi-qol": {
+      "forceCEOff": true
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": []
+      }
+    }
+  }
+}

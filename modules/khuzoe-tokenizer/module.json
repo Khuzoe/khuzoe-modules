@@ -1,0 +1,36 @@
+{
+    "id":  "khuzoe-tokenizer",
+    "title":  "Khuzoe Tokenizer",
+    "description":  "Editor WebP per immagini utente, avatar, token con varianti e scala visiva, oggetti, capacità e incantesimi.",
+    "version":  "1.2.0",
+    "authors":  [
+                    {
+                        "name":  "Khuzoe"
+                    }
+                ],
+    "compatibility":  {
+                          "minimum":  "14",
+                          "verified":  "14.367"
+                      },
+    "esmodules":  [
+                       "scripts/main.js"
+                   ],
+    "socket":  true,
+    "styles":  [
+                   "styles/khuzoe-tokenizer.css",
+                   "styles/item-image.css",
+                   "styles/v14.css"
+               ],
+    "languages":  [
+                      {
+                          "lang":  "it",
+                          "name":  "Italiano",
+                          "path":  "lang/it.json"
+                      },
+                      {
+                          "lang":  "en",
+                          "name":  "English",
+                          "path":  "lang/en.json"
+                      }
+                  ]
+}

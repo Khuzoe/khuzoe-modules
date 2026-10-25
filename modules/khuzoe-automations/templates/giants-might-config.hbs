@@ -1,0 +1,40 @@
+<div class="khz-giants-might-window">
+  <header>
+    <div class="khz-giants-might-icon"><i class="fa-solid fa-up-right-and-down-left-from-center"></i></div>
+    <div>
+      <span>RUNE KNIGHT</span>
+      <h2>Progressione di taglia</h2>
+      <p>{{itemName}}{{#if actorName}} di <strong>{{actorName}}</strong>{{/if}}</p>
+    </div>
+  </header>
+
+  <p class="khz-giants-might-note">
+    Giant's Might aumenta la taglia fino al valore scelto, ma non rimpicciolisce mai il personaggio.
+    Le modifiche si applicano dalla prossima attivazione.
+  </p>
+
+  <div class="khz-giants-might-fields">
+    <label>
+      <span><strong>Taglia iniziale</strong><small>Usata normalmente da Giant's Might.</small></span>
+      <select name="baseSize">
+        {{#each baseSizes}}
+          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </label>
+
+    <label>
+      <span><strong>Taglia al livello 18</strong><small>Usata quando l'attore possiede Runic Juggernaut.</small></span>
+      <select name="juggernautSize">
+        {{#each juggernautSizes}}
+          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </label>
+  </div>
+
+  <footer>
+    <button type="button" data-action="resetDefaults"><i class="fa-solid fa-rotate-left"></i> Valori ufficiali</button>
+    <button type="submit" class="khz-primary"><i class="fa-solid fa-floppy-disk"></i> Salva</button>
+  </footer>
+</div>

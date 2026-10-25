@@ -1,0 +1,66 @@
+{
+  "_id": "KhzRKGreatStat01",
+  "name": "Great Stature",
+  "type": "feat",
+  "img": "icons/magic/control/buff-strength-muscle-damage-red.webp",
+  "system": {
+    "description": {
+      "value": "<p>Quando usi Giant's Might, il danno extra diventa 1d8.</p><p>La crescita permanente della statura prevista dalla capacità è narrativa e non modifica la taglia meccanica dell'attore.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Tasha's Cauldron of Everything",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "type": {
+      "value": "class",
+      "subtype": ""
+    },
+    "properties": [],
+    "requirements": "Rune Knight 10",
+    "prerequisites": {
+      "level": 10
+    },
+    "activities": {},
+    "identifier": "great-stature",
+    "enchant": {}
+  },
+  "effects": [],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": false,
+      "magiceffect": false
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [],
+        "effect": []
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzRKGreatStat01"
+}

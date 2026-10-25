@@ -1,0 +1,44 @@
+.window-header > button.khz-automation-control {
+  --khz-status-color: #b4bac4;
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 30px;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  min-height: 0;
+  padding: 0;
+  margin: 0 3px;
+  border: 1px solid var(--khz-status-color);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, .35);
+  color: var(--khz-status-color);
+  font-size: 14px;
+  cursor: pointer;
+}
+.window-header > .khz-automation-control[data-khuzoe-state="missing"] { --khz-status-color: #ff7474; }
+.window-header > .khz-automation-control[data-khuzoe-state="outdated"] { --khz-status-color: #ffd166; }
+.window-header > .khz-automation-control[data-khuzoe-state="current"] { --khz-status-color: #72dfa0; }
+.window-header > .khz-automation-control:hover:not(:disabled),
+.window-header > .khz-automation-control:focus-visible {
+  background: rgba(0, 0, 0, .65);
+  box-shadow: 0 0 5px var(--khz-status-color);
+  outline: 1px solid var(--khz-status-color);
+  outline-offset: 2px;
+}
+.window-header > .khz-automation-control:disabled { cursor: default; opacity: .75; }
+.khz-automation-control .khz-automation-status {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--khz-status-color);
+  color: #15191f;
+  font: bold 10px/1 sans-serif;
+}

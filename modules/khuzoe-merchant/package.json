@@ -1,0 +1,9 @@
+{
+  "name": "khuzoe-merchant",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/module.test.mjs && node tests/ground-loot.test.mjs && node tests/libwrapper-integration.test.mjs",
+    "check": "node tests/module.test.mjs && node tests/ground-loot.test.mjs && node tests/libwrapper-integration.test.mjs"
+  }
+}

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Genie damage">
+  <defs>
+    <linearGradient id="bg" x1="8" y1="56" x2="56" y2="8" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4d256f"/>
+      <stop offset="1" stop-color="#b67af1"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="17" y1="47" x2="47" y2="23" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#d08a20"/>
+      <stop offset=".55" stop-color="#ffd978"/>
+      <stop offset="1" stop-color="#fff1ad"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="30" fill="url(#bg)" stroke="#f1cf75" stroke-width="2"/>
+  <path d="M18 39c1 7 7 12 15 12 7 0 13-4 15-10-6 2-12 2-18 0-4-1-8-2-12-2Z" fill="url(#gold)" stroke="#6e3e0f" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M16 36c7-1 13 0 19 2 5 2 10 1 14-1l-3 6c-8 3-15 2-22 0-4-1-7-3-8-7Z" fill="#f8c65d" stroke="#6e3e0f" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M17 36c-5 0-8 2-8 5 0 4 6 5 10 2" fill="none" stroke="#f7cd69" stroke-width="4" stroke-linecap="round"/>
+  <path d="M48 36c4-3 6-6 6-9-4 1-8 1-12-1" fill="none" stroke="#f7cd69" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M31 35c-7-8 8-10 1-18-4-5 4-8 8-5-4 3-2 5 1 8 6 7-3 12-10 15Z" fill="#f4e9ff" opacity=".95"/>
+  <path d="M34 29c4-5-2-7 1-11 1-2 3-3 5-4-2 3 2 5 2 8 0 4-4 6-8 7Z" fill="#d7b2ff"/>
+</svg>

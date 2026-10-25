@@ -1,0 +1,288 @@
+{
+  "_id": "KhzNpcElaMelee01",
+  "name": "Psychic Strike (Melee)",
+  "type": "weapon",
+  "system": {
+    "source": {
+      "custom": "",
+      "book": "ToB3",
+      "page": "405",
+      "license": "",
+      "rules": "2014",
+      "revision": 1
+    },
+    "description": {
+      "value": "<div class=\"rd__b  rd__b--3\"><p><i>Melee  or Ranged Spell Attack:</i> [[/r 1d20+8]]{+8} to hit, reach 5 ft., one target. <i>Hit:</i> 18 ([[/damage 4d6 + 4 type=psychic]]) damage.</p></div>",
+      "chat": ""
+    },
+    "range": {
+      "value": 5,
+      "long": null,
+      "units": "ft",
+      "reach": null
+    },
+    "proficient": 1,
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "type": {
+      "value": "natural",
+      "baseItem": ""
+    },
+    "properties": [],
+    "activities": {
+      "HDEAUKMmdpNlHkB9": {
+        "_id": "HDEAUKMmdpNlHkB9",
+        "type": "attack",
+        "name": "",
+        "activation": {
+          "type": "action",
+          "value": 1,
+          "override": false
+        },
+        "target": {
+          "prompt": true,
+          "template": {
+            "contiguous": false,
+            "units": "ft",
+            "stationary": false
+          },
+          "affects": {
+            "choice": false
+          },
+          "override": false
+        },
+        "attack": {
+          "flat": false,
+          "type": {
+            "value": "melee",
+            "classification": "spell"
+          },
+          "ability": "cha",
+          "bonus": "",
+          "critical": {
+            "threshold": null
+          }
+        },
+        "damage": {
+          "parts": [
+            {
+              "types": [
+                "psychic"
+              ],
+              "number": 4,
+              "denomination": 6,
+              "bonus": "@mod",
+              "scaling": {
+                "mode": "",
+                "number": 1
+              },
+              "custom": {
+                "enabled": false
+              }
+            }
+          ],
+          "critical": {},
+          "includeBase": true
+        },
+        "sort": 0,
+        "consumption": {
+          "scaling": {
+            "allowed": false
+          },
+          "spellSlot": true,
+          "targets": []
+        },
+        "description": {},
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": false
+        },
+        "effects": [],
+        "range": {
+          "units": "ft",
+          "override": true,
+          "value": "5"
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": []
+        },
+        "useConditionText": "",
+        "useConditionReason": "",
+        "effectConditionText": "",
+        "macroData": {
+          "name": "",
+          "command": ""
+        },
+        "ignoreTraits": {
+          "idi": false,
+          "idr": false,
+          "idv": false,
+          "ida": false,
+          "idm": false
+        },
+        "midiProperties": {
+          "ignoreTraits": [],
+          "triggeredActivityId": "none",
+          "triggeredActivityConditionText": "",
+          "triggeredActivityTargets": "targets",
+          "triggeredActivityRollAs": "self",
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "automationOnly": false,
+          "otherActivityCompatible": true,
+          "identifier": "",
+          "displayActivityName": false,
+          "rollMode": "default",
+          "chooseEffects": false,
+          "toggleEffect": false,
+          "ignoreFullCover": false,
+          "triggeredActivityConsume": true,
+          "triggeredActivityConfigure": true,
+          "autoConsume": false,
+          "forceConsumeDialog": "default",
+          "forceRollDialog": "default",
+          "forceDamageDialog": "default",
+          "otherActivityAsParentType": true,
+          "removeChatButtons": "default",
+          "magicEffect": false,
+          "magicDamage": false,
+          "noConcentrationCheck": false,
+          "skipConcentrationCheck": false,
+          "autoCEEffects": "default"
+        },
+        "isOverTimeFlag": false,
+        "overTimeProperties": {
+          "saveRemoves": true,
+          "preRemoveConditionText": "",
+          "postRemoveConditionText": "",
+          "rollAs": "target"
+        },
+        "otherActivityId": "",
+        "attackMode": "oneHanded",
+        "ammunition": "",
+        "otherActivityUuid": "",
+        "img": null,
+        "flags": {},
+        "visibility": {
+          "level": {},
+          "requireAttunement": false,
+          "requireIdentification": false,
+          "requireMagic": false
+        },
+        "regionBehavior": {
+          "enabled": false,
+          "dispositionFilter": -1,
+          "excludeSource": true,
+          "oncePerTurn": true,
+          "wallRestriction": "none",
+          "regionVisibility": 2,
+          "attachToken": "default",
+          "rules": []
+        },
+        "regionLight": {
+          "enabled": false,
+          "dim": 0,
+          "bright": 0,
+          "color": null,
+          "alpha": 0.5,
+          "luminosity": 0.5,
+          "animationType": "",
+          "animationSpeed": 5,
+          "animationIntensity": 5
+        },
+        "otherActivityAsParentType": true,
+        "attackRollPerTarget": "default",
+        "fumbleThreshold": 1
+      }
+    },
+    "identifier": "psychic-strike-melee",
+    "identified": true,
+    "unidentified": {
+      "description": ""
+    },
+    "container": null,
+    "quantity": 1,
+    "weight": {
+      "value": 0,
+      "units": "lb"
+    },
+    "price": {
+      "value": 0,
+      "denomination": "gp"
+    },
+    "rarity": "",
+    "attunement": "",
+    "attuned": false,
+    "equipped": true,
+    "cover": null,
+    "ammunition": {},
+    "armor": {
+      "value": null
+    },
+    "damage": {
+      "base": {
+        "number": null,
+        "denomination": 0,
+        "types": [],
+        "custom": {
+          "enabled": false
+        },
+        "scaling": {
+          "number": 1
+        },
+        "bonus": ""
+      },
+      "versatile": {
+        "number": null,
+        "denomination": null,
+        "types": [],
+        "custom": {
+          "enabled": false
+        },
+        "scaling": {
+          "number": 1
+        }
+      }
+    },
+    "mastery": "",
+    "crew": {
+      "value": []
+    }
+  },
+  "ownership": {
+    "default": 0
+  },
+  "img": "icons/magic/control/hypnosis-mesmerism-eye.webp",
+  "flags": {
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "psychic-strike-melee"
+          }
+        ]
+      }
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": []
+      }
+    }
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "_key": "!items!KhzNpcElaMelee01"
+}

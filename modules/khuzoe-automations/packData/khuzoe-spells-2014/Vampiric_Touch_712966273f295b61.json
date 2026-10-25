@@ -1,0 +1,340 @@
+{
+  "type": "spell",
+  "system": {
+    "description": {
+      "value": "<p>Mantiene l'attacco in mischia con incantesimo per un minuto di concentrazione. Gli attacchi successivi non consumano altri slot. Cura metà del danno necrotico effettivamente inflitto, arrotondata per difetto, non il danno teorico prima delle resistenze.</p>",
+      "chat": ""
+    },
+    "source": {
+      "book": "Player's Handbook",
+      "page": "285",
+      "license": "",
+      "custom": "Khuzoe Automations",
+      "revision": 1,
+      "rules": "2014"
+    },
+    "activation": {
+      "type": "action",
+      "condition": "",
+      "value": 1
+    },
+    "duration": {
+      "value": "1",
+      "units": "minute"
+    },
+    "target": {
+      "affects": {
+        "type": "self",
+        "count": "",
+        "choice": false,
+        "special": ""
+      },
+      "template": {
+        "units": "",
+        "contiguous": false,
+        "type": ""
+      }
+    },
+    "range": {
+      "units": "self",
+      "special": ""
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "ability": "",
+    "level": 3,
+    "school": "nec",
+    "properties": [
+      "vocal",
+      "somatic",
+      "concentration"
+    ],
+    "materials": {
+      "value": "",
+      "consumed": false,
+      "cost": 0,
+      "supply": 0
+    },
+    "preparation": {
+      "mode": "prepared",
+      "prepared": false
+    },
+    "activities": {
+      "f34f1f10f0198214": {
+        "_id": "f34f1f10f0198214",
+        "type": "attack",
+        "name": "Vampiric Touch",
+        "img": "icons/magic/unholy/hand-claw-fog-green.webp",
+        "activation": {
+          "type": "action",
+          "value": 1,
+          "override": true,
+          "condition": ""
+        },
+        "consumption": {
+          "spellSlot": true,
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          }
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "minute",
+          "value": "1",
+          "concentration": true,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "units": "ft",
+          "value": "5",
+          "override": true,
+          "special": ""
+        },
+        "target": {
+          "override": true,
+          "prompt": true,
+          "affects": {
+            "type": "creature",
+            "count": "1",
+            "choice": false,
+            "special": ""
+          },
+          "template": {
+            "type": "",
+            "units": "ft",
+            "contiguous": false,
+            "size": "",
+            "count": ""
+          }
+        },
+        "uses": {
+          "spent": 0,
+          "max": "",
+          "recovery": []
+        },
+        "sort": 0,
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "identifier": "vampiricTouch",
+          "automationOnly": false,
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "magicEffect": true,
+          "magicDamage": true
+        },
+        "flags": {
+          "cat": {
+            "hidden": false
+          }
+        },
+        "damage": {
+          "parts": [
+            {
+              "number": 3,
+              "denomination": 6,
+              "bonus": "",
+              "types": [
+                "necrotic"
+              ],
+              "custom": {
+                "enabled": false,
+                "formula": ""
+              },
+              "scaling": {
+                "mode": "whole",
+                "number": 1,
+                "formula": ""
+              }
+            }
+          ],
+          "includeBase": false,
+          "critical": {
+            "bonus": ""
+          }
+        },
+        "attack": {
+          "ability": "",
+          "bonus": "",
+          "flat": false,
+          "critical": {
+            "threshold": null
+          },
+          "type": {
+            "value": "melee",
+            "classification": "spell"
+          }
+        }
+      },
+      "b524f24c2e8aaa90": {
+        "_id": "b524f24c2e8aaa90",
+        "type": "attack",
+        "name": "Tocco vampirico — Attacco",
+        "img": "icons/magic/unholy/hand-claw-fog-green.webp",
+        "activation": {
+          "type": "action",
+          "value": 1,
+          "override": true,
+          "condition": ""
+        },
+        "consumption": {
+          "targets": [],
+          "spellSlot": false,
+          "scaling": {
+            "allowed": false
+          }
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "units": "ft",
+          "value": "5",
+          "override": true,
+          "special": ""
+        },
+        "target": {
+          "override": true,
+          "prompt": true,
+          "affects": {
+            "type": "creature",
+            "count": "1",
+            "choice": false,
+            "special": ""
+          },
+          "template": {
+            "type": "",
+            "units": "ft",
+            "contiguous": false,
+            "size": "",
+            "count": ""
+          }
+        },
+        "uses": {
+          "spent": 0,
+          "max": "",
+          "recovery": []
+        },
+        "sort": 0,
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "identifier": "vampiricTouchAttack",
+          "automationOnly": false,
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "magicEffect": true,
+          "magicDamage": true
+        },
+        "flags": {
+          "cat": {
+            "hidden": true
+          }
+        },
+        "damage": {
+          "parts": [
+            {
+              "number": 3,
+              "denomination": 6,
+              "bonus": "",
+              "types": [
+                "necrotic"
+              ],
+              "custom": {
+                "enabled": false,
+                "formula": ""
+              },
+              "scaling": {
+                "mode": "whole",
+                "number": 1,
+                "formula": ""
+              }
+            }
+          ],
+          "includeBase": false,
+          "critical": {
+            "bonus": ""
+          }
+        },
+        "attack": {
+          "ability": "",
+          "bonus": "",
+          "flat": false,
+          "critical": {
+            "threshold": null
+          },
+          "type": {
+            "value": "melee",
+            "classification": "spell"
+          }
+        }
+      }
+    },
+    "identifier": "vampiric-touch",
+    "sourceClass": ""
+  },
+  "name": "Vampiric Touch",
+  "flags": {
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "vampiric-touch"
+          }
+        ]
+      }
+    },
+    "khuzoe-automations": {
+      "sourceIdentifier": "vampiricTouch",
+      "activityIdentifiers": {
+        "vampiricTouch": "f34f1f10f0198214",
+        "vampiricTouchAttack": "b524f24c2e8aaa90"
+      }
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [],
+        "effect": []
+      }
+    }
+  },
+  "effects": [],
+  "img": "icons/magic/unholy/hand-claw-fog-green.webp",
+  "folder": null,
+  "_id": "712966273f295b61",
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!712966273f295b61"
+}

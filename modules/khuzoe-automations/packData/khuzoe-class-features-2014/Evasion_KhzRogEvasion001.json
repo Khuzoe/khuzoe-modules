@@ -1,0 +1,111 @@
+{
+  "_id": "KhzRogEvasion001",
+  "name": "Evasion",
+  "type": "feat",
+  "img": "icons/magic/defensive/illusion-evasion-echo-purple.webp",
+  "system": {
+    "description": {
+      "value": "<p>Quando un effetto ti consente un tiro salvezza di Destrezza per dimezzare i danni, non subisci danni se riesci e subisci soltanto metà danni se fallisci.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Player's Handbook 2014",
+      "book": "",
+      "page": "",
+      "license": "",
+      "rules": "2014"
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "type": {
+      "value": "class",
+      "subtype": ""
+    },
+    "properties": [],
+    "requirements": "Rogue 7",
+    "prerequisites": {
+      "level": 7
+    },
+    "activities": {},
+    "identifier": "evasion",
+    "enchant": {}
+  },
+  "effects": [
+    {
+      "_id": "KhzRogEvasionEf1",
+      "name": "Evasion",
+      "img": "icons/magic/defensive/illusion-evasion-echo-purple.webp",
+      "type": "base",
+      "system": {
+        "changes": [
+          {
+            "key": "flags.midi-qol.superSaver.dex",
+            "value": "activity.damage.onSave === 'half'",
+            "priority": 20,
+            "type": "override"
+          }
+        ]
+      },
+      "disabled": false,
+      "duration": {
+        "value": null,
+        "units": "seconds",
+        "expired": false
+      },
+      "origin": null,
+      "tint": "#ffffff",
+      "transfer": true,
+      "statuses": [],
+      "description": "",
+      "showIcon": 0,
+      "flags": {
+        "core": {
+          "overlay": false
+        },
+        "dae": {
+          "transfer": true,
+          "stackable": "noneNameOnly",
+          "specialDuration": [],
+          "expiryMode": "delete",
+          "disableIncapacitated": false
+        }
+      },
+      "folder": null,
+      "_key": "!items.effects!KhzRogEvasion001.KhzRogEvasionEf1"
+    }
+  ],
+  "flags": {
+    "midi-qol": {
+      "removeAttackDamageButtons": "default",
+      "forceCEOff": true
+    },
+    "midiProperties": {
+      "confirmTargets": "default",
+      "magicdam": false,
+      "magiceffect": false
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [],
+        "effect": [
+          "KhzRogEvasionEf1"
+        ]
+      }
+    },
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.26.0"
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzRogEvasion001"
+}
