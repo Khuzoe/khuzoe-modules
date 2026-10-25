@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
 namespace KhuzoeUpdater
 {
@@ -24,15 +26,79 @@ namespace KhuzoeUpdater
             }
         }
     }
+    internal static class Theme
+    {
+        public static readonly Color Background = Color.FromArgb(18, 17, 20);
+        public static readonly Color Surface = Color.FromArgb(26, 25, 29);
+        public static readonly Color Border = Color.FromArgb(47, 44, 49);
+        public static readonly Color Text = Color.FromArgb(240, 235, 224);
+        public static readonly Color Muted = Color.FromArgb(164, 158, 150);
+        public static readonly Color Gold = Color.FromArgb(218, 187, 118);
+        public static GraphicsPath Rounded(Rectangle rectangle, int radius)
+        {
+            int diameter = radius * 2;
+            var path = new GraphicsPath();
+            path.AddArc(rectangle.X, rectangle.Y, diameter, diameter, 180, 90);
+            path.AddArc(rectangle.Right - diameter, rectangle.Y, diameter, diameter, 270, 90);
+            path.AddArc(rectangle.Right - diameter, rectangle.Bottom - diameter, diameter, diameter, 0, 90);
+            path.AddArc(rectangle.X, rectangle.Bottom - diameter, diameter, diameter, 90, 90);
+            path.CloseFigure();
+            return path;
+        }
+    }
+    internal sealed class SurfacePanel : Panel
+    {
+        public SurfacePanel() { DoubleBuffered = true; BackColor = Theme.Surface; }
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            using (var background = new SolidBrush(Parent == null ? Theme.Background : Parent.BackColor)) e.Graphics.FillRectangle(background, ClientRectangle);
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            using (var shape = Theme.Rounded(new Rectangle(0, 0, Width - 1, Height - 1), 12))
+            using (var brush = new SolidBrush(BackColor))
+            using (var pen = new Pen(Theme.Border))
+            { e.Graphics.FillPath(brush, shape); e.Graphics.DrawPath(pen, shape); }
+        }
+    }
+    internal sealed class WebButton : Button
+    {
+        public bool Primary { get; set; }
+        bool hovered;
+        public WebButton()
+        {
+            SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            FlatStyle = FlatStyle.Flat; FlatAppearance.BorderSize = 0; Cursor = Cursors.Hand;
+            Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+        }
+        protected override void OnMouseEnter(EventArgs e) { hovered = true; Invalidate(); base.OnMouseEnter(e); }
+        protected override void OnMouseLeave(EventArgs e) { hovered = false; Invalidate(); base.OnMouseLeave(e); }
+        protected override void OnEnabledChanged(EventArgs e) { base.OnEnabledChanged(e); Invalidate(); }
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            using (var background = new SolidBrush(Parent == null ? Theme.Background : Parent.BackColor)) e.Graphics.FillRectangle(background, ClientRectangle);
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            Color fill = !Enabled ? Color.FromArgb(43, 40, 43) : Primary ? (hovered ? Color.FromArgb(235, 205, 140) : Theme.Gold) : (hovered ? Color.FromArgb(43, 40, 45) : Theme.Surface);
+            Color ink = !Enabled ? Color.FromArgb(126, 120, 116) : Primary ? Theme.Background : Theme.Text;
+            using (var shape = Theme.Rounded(new Rectangle(0, 0, Width - 1, Height - 1), 8))
+            using (var brush = new SolidBrush(fill))
+            using (var pen = new Pen(Primary ? fill : Theme.Border))
+            { e.Graphics.FillPath(brush, shape); e.Graphics.DrawPath(pen, shape); }
+            TextRenderer.DrawText(e.Graphics, Text, Font, ClientRectangle, ink, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+            if (Focused && ShowFocusCues) ControlPaint.DrawFocusRectangle(e.Graphics, Rectangle.Inflate(ClientRectangle, -5, -5), ink, fill);
+        }
+    }
     public sealed class MainForm : Form
     {
         readonly Label folder = new Label();
         readonly Label message = new Label();
-        readonly Button choose = new Button();
-        readonly Button refresh = new Button();
-        readonly Button update = new Button();
+        readonly WebButton choose = new WebButton();
+        readonly WebButton refresh = new WebButton();
+        readonly WebButton update = new WebButton { Primary = true };
         readonly DataGridView grid = new DataGridView();
         readonly ProgressBar bar = new ProgressBar();
+        readonly Label summary = new Label();
+        readonly Panel empty = new Panel();
+        readonly Label emptyTitle = new Label();
+        readonly Label emptyText = new Label();
         List<ModuleStatus> rows = new List<ModuleStatus>();
         Installation installation;
         bool busy;
@@ -41,62 +107,94 @@ namespace KhuzoeUpdater
         {
             Text = "Khuzoe Updater";
             Font = new Font("Segoe UI", 10F);
-            BackColor = Color.FromArgb(247, 248, 251);
-            ForeColor = Color.FromArgb(30, 38, 51);
-            ClientSize = new Size(820, 540);
-            MinimumSize = new Size(740, 510);
+            BackColor = Theme.Background;
+            ForeColor = Theme.Text;
+            ClientSize = new Size(960, 770);
+            MinimumSize = new Size(820, 640);
             StartPosition = FormStartPosition.CenterScreen;
             AutoScaleMode = AutoScaleMode.Dpi;
-            var layout = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(24), ColumnCount = 1, RowCount = 7 };
-            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 46));
-            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 36));
-            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 52));
+            var layout = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(32, 24, 32, 24), ColumnCount = 1, RowCount = 7 };
+            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 84));
+            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 104));
+            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 64));
             layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
-            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 8));
-            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));
-            var title = new Label { Text = "Khuzoe Updater", Font = new Font("Segoe UI", 21F, FontStyle.Bold), Dock = DockStyle.Fill };
-            layout.Controls.Add(title, 0, 0);
-            layout.Controls.Add(new Label { Text = "Gli aggiornamenti dei tuoi moduli, in un solo posto.", Dock = DockStyle.Fill, ForeColor = Color.DimGray }, 0, 1);
-            var folderRow = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2 };
+            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 46));
+            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 4));
+            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 64));
+            var header = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 1, Margin = Padding.Empty };
+            header.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            header.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 64));
+            header.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            header.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 80));
+            var monogram = new SurfacePanel { Size = new Size(48, 48), Anchor = AnchorStyles.Top | AnchorStyles.Left, Margin = new Padding(0, 5, 0, 0) };
+            monogram.Controls.Add(new Label { Text = "K", ForeColor = Theme.Gold, Font = new Font("Georgia", 23F), Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter, BackColor = Color.Transparent });
+            header.Controls.Add(monogram, 0, 0);
+            header.Controls.Add(new Label { Text = "Khuzoe Updater", Font = new Font("Segoe UI", 23F, FontStyle.Bold), Dock = DockStyle.Fill, TextAlign = ContentAlignment.TopLeft, Padding = new Padding(0, 3, 0, 0) }, 1, 0);
+            header.Controls.Add(new Label { Text = "v" + BuildConfig.Version, Font = new Font("Segoe UI", 9F), ForeColor = Theme.Muted, Dock = DockStyle.Fill, TextAlign = ContentAlignment.TopRight, Padding = new Padding(0, 16, 0, 0) }, 2, 0);
+            layout.Controls.Add(header, 0, 0);
+            var folderCard = new SurfacePanel { Dock = DockStyle.Fill, Padding = new Padding(22, 14, 22, 14), Margin = Padding.Empty };
+            var folderRow = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 2, BackColor = Theme.Surface };
             folderRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            folderRow.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 125));
-            folder.Dock = DockStyle.Fill; folder.AutoEllipsis = true; folder.TextAlign = ContentAlignment.MiddleLeft;
-            choose.Text = "Scegli cartella"; choose.Dock = DockStyle.Fill; choose.Margin = new Padding(8, 5, 0, 7);
+            folderRow.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 144));
+            folderRow.RowStyles.Add(new RowStyle(SizeType.Absolute, 26));
+            folderRow.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            folderRow.Controls.Add(new Label { Text = "INSTALLAZIONE FOUNDRY", ForeColor = Theme.Muted, Font = new Font("Segoe UI", 8F, FontStyle.Bold), Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft }, 0, 0);
+            folder.Dock = DockStyle.Fill; folder.AutoEllipsis = true; folder.TextAlign = ContentAlignment.TopLeft; folder.Padding = new Padding(0, 5, 12, 0);
+            choose.Text = "Scegli cartella"; choose.Dock = DockStyle.Fill; choose.Margin = new Padding(8, 15, 0, 15);
             choose.Click += async (s, e) => await ChooseFolder();
-            folderRow.Controls.Add(folder, 0, 0); folderRow.Controls.Add(choose, 1, 0);
-            layout.Controls.Add(folderRow, 0, 2);
+            folderRow.Controls.Add(folder, 0, 1); folderRow.Controls.Add(choose, 1, 0); folderRow.SetRowSpan(choose, 2);
+            folderCard.Controls.Add(folderRow);
+            layout.Controls.Add(folderCard, 0, 1);
+            var section = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, Margin = Padding.Empty, Padding = new Padding(0, 20, 0, 6) };
+            section.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50)); section.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            section.Controls.Add(new Label { Text = "Moduli", Font = new Font("Segoe UI", 15F, FontStyle.Bold), Dock = DockStyle.Fill }, 0, 0);
+            summary.Dock = DockStyle.Fill; summary.TextAlign = ContentAlignment.MiddleRight; summary.ForeColor = Theme.Muted; summary.Font = new Font("Segoe UI", 9F);
+            section.Controls.Add(summary, 1, 0); layout.Controls.Add(section, 0, 2);
+            var tableCard = new SurfacePanel { Dock = DockStyle.Fill, Padding = new Padding(16, 8, 16, 8), Margin = Padding.Empty };
             grid.Dock = DockStyle.Fill; grid.ReadOnly = true; grid.AllowUserToAddRows = false; grid.AllowUserToDeleteRows = false;
             grid.AllowUserToResizeRows = false; grid.RowHeadersVisible = false; grid.MultiSelect = false;
-            grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect; grid.BackgroundColor = Color.White;
-            grid.BorderStyle = BorderStyle.None; grid.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
-            grid.DefaultCellStyle.Padding = new Padding(6); grid.DefaultCellStyle.SelectionBackColor = Color.FromArgb(232, 237, 246);
-            grid.DefaultCellStyle.SelectionForeColor = ForeColor; grid.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(249, 250, 252);
+            grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect; grid.BackgroundColor = Theme.Surface;
+            grid.BorderStyle = BorderStyle.None; grid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            grid.GridColor = Color.FromArgb(40, 37, 43); grid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            grid.DefaultCellStyle.Padding = new Padding(12, 0, 8, 0); grid.DefaultCellStyle.BackColor = Theme.Surface;
+            grid.DefaultCellStyle.SelectionBackColor = Color.FromArgb(38, 34, 40); grid.DefaultCellStyle.SelectionForeColor = Theme.Text;
+            grid.RowTemplate.Height = 52; grid.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
             grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             grid.EnableHeadersVisualStyles = false;
-            grid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(232, 237, 244);
-            grid.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(30, 38, 51);
-            grid.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            grid.ColumnHeadersHeight = 34;
-            grid.DefaultCellStyle.ForeColor = Color.FromArgb(30, 38, 51);
+            grid.ColumnHeadersDefaultCellStyle.BackColor = Theme.Surface;
+            grid.ColumnHeadersDefaultCellStyle.ForeColor = Theme.Muted;
+            grid.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
+            grid.ColumnHeadersDefaultCellStyle.Padding = new Padding(12, 0, 0, 0);
+            grid.ColumnHeadersHeight = 42; grid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            grid.DefaultCellStyle.ForeColor = Theme.Text; grid.ShowCellErrors = false; grid.ShowRowErrors = false;
             grid.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Modulo", FillWeight = 42 });
             grid.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Installato", FillWeight = 17 });
             grid.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Disponibile", FillWeight = 17 });
             grid.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Stato", FillWeight = 24 });
+            foreach (DataGridViewColumn column in grid.Columns) column.SortMode = DataGridViewColumnSortMode.NotSortable;
+            grid.Columns[1].DefaultCellStyle.Font = new Font("Consolas", 10F); grid.Columns[1].DefaultCellStyle.ForeColor = Theme.Muted;
+            grid.Columns[2].DefaultCellStyle.Font = new Font("Consolas", 10F);
+            grid.CellPainting += PaintStatus;
             grid.CellDoubleClick += (s, e) => { if (e.RowIndex >= 0 && e.RowIndex < rows.Count && !String.IsNullOrEmpty(rows[e.RowIndex].Detail)) MessageBox.Show(this, rows[e.RowIndex].Detail, rows[e.RowIndex].Release.title); };
-            layout.Controls.Add(grid, 0, 3);
-            message.Dock = DockStyle.Fill; message.TextAlign = ContentAlignment.MiddleLeft; message.AutoEllipsis = true;
+            empty.Dock = DockStyle.Fill; empty.BackColor = Theme.Surface; empty.Padding = new Padding(20);
+            emptyTitle.Text = "Scegli la cartella di Foundry"; emptyTitle.Font = new Font("Segoe UI", 16F, FontStyle.Bold); emptyTitle.AutoSize = false; emptyTitle.TextAlign = ContentAlignment.MiddleCenter;
+            emptyText.Text = "La scelta verrà ricordata."; emptyText.ForeColor = Theme.Muted; emptyText.TextAlign = ContentAlignment.MiddleCenter;
+            empty.Controls.Add(emptyTitle); empty.Controls.Add(emptyText);
+            empty.Resize += (s, e) => { emptyTitle.SetBounds(0, Math.Max(0, empty.Height / 2 - 38), empty.Width, 36); emptyText.SetBounds(0, empty.Height / 2 + 2, empty.Width, 28); };
+            tableCard.Controls.Add(grid); tableCard.Controls.Add(empty); empty.BringToFront();
+            layout.Controls.Add(tableCard, 0, 3);
+            message.Dock = DockStyle.Fill; message.TextAlign = ContentAlignment.MiddleLeft; message.AutoEllipsis = true; message.ForeColor = Theme.Muted; message.Font = new Font("Segoe UI", 9F);
             layout.Controls.Add(message, 0, 4);
-            bar.Dock = DockStyle.Fill; bar.Style = ProgressBarStyle.Marquee; bar.MarqueeAnimationSpeed = 0;
+            bar.Dock = DockStyle.Fill; bar.Style = ProgressBarStyle.Marquee; bar.MarqueeAnimationSpeed = 0; bar.Visible = false;
             layout.Controls.Add(bar, 0, 5);
-            var bottom = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3 };
+            var bottom = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, Margin = Padding.Empty };
             bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 145));
             bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 145));
-            bottom.Controls.Add(new Label { Text = "v" + BuildConfig.Version + " · Chiudi Foundry prima di aggiornare.", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, ForeColor = Color.DimGray, Font = new Font("Segoe UI", 8F) }, 0, 0);
-            refresh.Text = "Ricontrolla"; refresh.Dock = DockStyle.Fill; refresh.Margin = new Padding(5, 9, 5, 0);
-            update.Text = "Aggiorna"; update.Dock = DockStyle.Fill; update.Margin = new Padding(5, 9, 0, 0);
-            update.BackColor = Color.FromArgb(47, 79, 134); update.ForeColor = Color.White; update.FlatStyle = FlatStyle.Flat;
+            bottom.Controls.Add(new Label { Text = "Chiudi Foundry prima di aggiornare.", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, ForeColor = Theme.Muted, Font = new Font("Segoe UI", 9F) }, 0, 0);
+            refresh.Text = "Ricontrolla"; refresh.Dock = DockStyle.Fill; refresh.Margin = new Padding(5, 12, 8, 4);
+            update.Text = "Aggiorna"; update.Dock = DockStyle.Fill; update.Margin = new Padding(5, 12, 0, 4);
             refresh.Click += async (s, e) => await Check();
             update.Click += async (s, e) => await Apply();
             bottom.Controls.Add(refresh, 1, 0); bottom.Controls.Add(update, 2, 0);
@@ -105,9 +203,34 @@ namespace KhuzoeUpdater
             Shown += async (s, e) => await Startup();
             FormClosing += (s, e) => { if (busy) { e.Cancel = true; MessageBox.Show(this, "Attendi la fine dell'operazione.", Text); } };
             folder.Text = "Nessuna cartella selezionata";
-            message.Text = "Scegli la cartella principale di Foundry.";
+            message.Text = "";
             refresh.Enabled = false; update.Enabled = false;
-            update.BackColor = Color.FromArgb(220, 225, 234);
+        }
+        [DllImport("dwmapi.dll")]
+        static extern int DwmSetWindowAttribute(IntPtr window, int attribute, ref int value, int size);
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            int dark = 1;
+            DwmSetWindowAttribute(Handle, 20, ref dark, sizeof(int));
+        }
+        void PaintStatus(object sender, DataGridViewCellPaintingEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.ColumnIndex != 3 || e.RowIndex >= rows.Count) return;
+            e.PaintBackground(e.ClipBounds, true);
+            var row = rows[e.RowIndex];
+            Color ink = row.CanUpdate ? Theme.Gold : row.Status == "Errore" ? Color.FromArgb(235, 148, 146) : Color.FromArgb(143, 202, 167);
+            Color fill = row.CanUpdate ? Color.FromArgb(52, 43, 30) : row.Status == "Errore" ? Color.FromArgb(56, 33, 37) : Color.FromArgb(30, 45, 39);
+            using (var font = new Font("Segoe UI", 8.5F))
+            {
+                int width = Math.Min(e.CellBounds.Width - 18, TextRenderer.MeasureText(row.Status, font).Width + 26);
+                var bounds = new Rectangle(e.CellBounds.X + 10, e.CellBounds.Y + (e.CellBounds.Height - 28) / 2, width, 28);
+                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                using (var shape = Theme.Rounded(bounds, 7))
+                using (var brush = new SolidBrush(fill)) e.Graphics.FillPath(brush, shape);
+                TextRenderer.DrawText(e.Graphics, row.Status, font, bounds, ink, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+            }
+            e.Handled = true;
         }
         async Task Startup()
         {
@@ -119,6 +242,7 @@ namespace KhuzoeUpdater
                 if (!Directory.Exists(saved.ModulesPath)) throw new IOException("La cartella salvata non è disponibile. Scegli di nuovo la cartella Foundry.");
                 installation = new Installation { SelectedPath = saved.SelectedPath, ModulesPath = saved.ModulesPath, FoundryVersion = Paths.DetectVersion(saved.SelectedPath, saved.ModulesPath) };
                 folder.Text = saved.ModulesPath;
+                choose.Text = "Cambia";
                 await Check();
             }
             catch (Exception ex) { ShowError(ex); }
@@ -136,7 +260,7 @@ namespace KhuzoeUpdater
                     Installation selected = candidates.Count == 1 ? candidates[0] : SelectInstallation(candidates);
                     if (selected == null) return;
                     Settings.Save(new Preferences { SelectedPath = selected.SelectedPath, ModulesPath = selected.ModulesPath });
-                    installation = selected; folder.Text = selected.ModulesPath;
+                    installation = selected; folder.Text = selected.ModulesPath; choose.Text = "Cambia";
                     await Check();
                 }
                 catch (Exception ex) { ShowError(ex); }
@@ -158,23 +282,31 @@ namespace KhuzoeUpdater
         {
             busy = value; choose.Enabled = !value; refresh.Enabled = !value && installation != null;
             update.Enabled = !value && rows.Any(r => r.CanUpdate); bar.MarqueeAnimationSpeed = value ? 25 : 0;
-            update.BackColor = update.Enabled ? Color.FromArgb(47, 79, 134) : Color.FromArgb(220, 225, 234);
+            bar.Visible = value;
+            if (!value && rows.Count > 0) summary.Text = rows.Count + " installati";
         }
         void Render()
         {
             grid.Rows.Clear();
+            empty.Visible = rows.Count == 0;
+            if (empty.Visible && installation != null)
+            {
+                emptyTitle.Text = busy ? "Controllo degli aggiornamenti…" : "Nessun modulo da mostrare";
+                emptyText.Text = busy ? "" : "Controlla la cartella selezionata o riprova.";
+            }
             foreach (var row in rows)
             {
                 int index = grid.Rows.Add(row.Release.title, row.LocalVersion ?? "?", row.Release.version, row.Status);
-                grid.Rows[index].Cells[3].Style.ForeColor = row.CanUpdate ? Color.FromArgb(36, 92, 166) : row.Status == "Errore" ? Color.Firebrick : Color.FromArgb(37, 113, 73);
                 foreach (DataGridViewCell cell in grid.Rows[index].Cells) cell.ToolTipText = row.Detail ?? row.Status;
             }
             grid.ClearSelection();
+            grid.CurrentCell = null;
         }
         async Task Check()
         {
             if (installation == null || busy) return;
             Busy(true); update.Enabled = false; rows.Clear(); Render();
+            summary.Text = "Verifica in corso";
             message.Text = "Controllo degli aggiornamenti…";
             try
             {
