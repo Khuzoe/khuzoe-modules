@@ -1,6 +1,6 @@
 # Khuzoe Updater
 
-App Windows per aggiornare soltanto i moduli Khuzoe già installati in Foundry. Prima versione semplice: scegli la cartella una volta, vedi **Da aggiornare**, premi **Aggiorna**.
+App Windows per installare e aggiornare i moduli Khuzoe in Foundry. Scegli la cartella una volta: **Aggiorna** aggiorna quelli già presenti; **Installa**, accanto a un modulo mancante, scarica l'ultima versione pubblicata.
 
 ## Per i DM
 
@@ -8,13 +8,16 @@ App Windows per aggiornare soltanto i moduli Khuzoe già installati in Foundry. 
 2. Apri `KhuzoeUpdater.exe` (lascia accanto il file `.exe.config`).
 3. Premi **Scegli cartella** e seleziona la cartella principale di Foundry, quella contenente l'app e/o la cartella dati. Se rileva più cartelle moduli, seleziona quella corretta.
 4. L'app ricorda il percorso e controlla gli aggiornamenti a ogni apertura.
-5. Chiudi completamente Foundry, poi premi **Aggiorna**.
+5. Chiudi completamente Foundry, poi premi **Aggiorna** per aggiornare i moduli presenti oppure **Installa** sulla riga di un modulo mancante.
+6. Per usare un modulo appena installato, riapri il mondo e abilitalo in **Gestione moduli** di Foundry.
 
 Windows 10 con .NET Framework 4.8 o Windows 11; nessuna installazione di Node, Python o SDK. Il componente .NET Framework è già incluso nelle versioni recenti di Windows. Nessun account GitHub o password Foundry per i DM.
 
 Le impostazioni vengono salvate in `%LOCALAPPDATA%\KhuzoeUpdater\settings.json`. Il programma va eseguito sul computer che ospita i moduli. Per installazioni Windows normali cerca anche la cartella dati standard; la cartella principale dell'app serve a riconoscere la versione Foundry. Se i dati sono separati dall'app e la versione non è individuabile, l'aggiornamento viene bloccato con una spiegazione.
 
-Aggiorna soltanto i moduli presenti nel catalogo e già installati; rispetta i file di blocco aggiornamento di Foundry (`<id>.lock`). Mantiene le versioni locali più recenti. Verifica Foundry, sistema e dipendenze obbligatorie; non installa o aggiorna dipendenze esterne. Non ci sono profili, avvio automatico di Foundry, cronologia o interfaccia di ripristino. Gli aggiornamenti sostituiscono il contenuto del singolo modulo; le personalizzazioni fatte dentro la sua cartella vengono sostituite come in una normale reinstallazione. Mondi, sistemi e altri moduli non vengono aggiornati.
+Mostra tutti i moduli del catalogo. I mancanti hanno stato **Da installare**, versione locale **—** e un pulsante **Installa** quando compatibili. Non vengono installati automaticamente dal pulsante **Aggiorna**. L'installazione del singolo modulo include soltanto le sue dipendenze Khuzoe necessarie, installate prima del modulo richiesto; quelle già compatibili vengono mantenute. Le dipendenze esterne vengono controllate ma non installate o aggiornate. Una cartella che compare dopo il controllo non viene sovrascritta da una nuova installazione.
+
+Rispetta i file di blocco aggiornamento di Foundry (`<id>.lock`) e mantiene le versioni locali più recenti. Verifica Foundry, sistema e dipendenze obbligatorie. Non ci sono profili, avvio automatico di Foundry, cronologia o interfaccia di ripristino. Gli aggiornamenti sostituiscono il contenuto del singolo modulo; le personalizzazioni fatte dentro la sua cartella vengono sostituite come in una normale reinstallazione. Mondi, sistemi e altri moduli non vengono aggiornati.
 
 Prima di cambiare file scarica, verifica ed estrae tutti i pacchetti necessari. Il controllo SHA-256 verifica che i byte corrispondano al catalogo. Le cartelle temporanee sono nella cartella `modules` per poter spostare i file sullo stesso disco; vengono eliminate dopo l'operazione. Durante la sostituzione viene mantenuta una copia temporanea del singolo modulo, ripristinata solo se lo spostamento immediato fallisce. Non è un backup storico né un ripristino di un gruppo di moduli in caso di spegnimento del PC. Se un gruppo si interrompe, i moduli già installati restano aggiornati e quelli rimanenti possono essere ritentati. Non avviare Foundry durante l'aggiornamento.
 

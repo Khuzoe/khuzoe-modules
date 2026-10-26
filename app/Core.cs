@@ -46,6 +46,7 @@ namespace KhuzoeUpdater
         public string Status { get; set; }
         public string Detail { get; set; }
         public bool CanUpdate { get; set; }
+        public bool IsInstalled { get; set; }
         public string DirectoryPath { get; set; }
     }
     public sealed class Preferences
@@ -179,7 +180,11 @@ namespace KhuzoeUpdater
             {
                 if (!Directory.Exists(guess)) continue;
                 NoLinks(guess);
-                if (!Directory.GetDirectories(guess).Any(d => File.Exists(Path.Combine(d, "module.json")))) continue;
+                bool hasModules = Directory.GetDirectories(guess).Any(d => File.Exists(Path.Combine(d, "module.json")));
+                string dataRoot = Path.GetDirectoryName(guess), userRoot = Path.GetDirectoryName(dataRoot);
+                bool emptyFoundry = userRoot != null && File.Exists(Path.Combine(userRoot, "Config", "options.json")) &&
+                    (Directory.Exists(Path.Combine(dataRoot, "systems")) || Directory.Exists(Path.Combine(dataRoot, "worlds")));
+                if (!hasModules && !emptyFoundry) continue;
                 found.Add(new Installation { SelectedPath = selected, ModulesPath = Full(guess), FoundryVersion = DetectVersion(selected, guess) });
             }
             return found.OrderBy(f => f.ModulesPath, StringComparer.OrdinalIgnoreCase).ToList();
@@ -330,21 +335,30 @@ namespace KhuzoeUpdater
             foreach (var release in catalog.modules)
             {
                 string path = Paths.Child(install.ModulesPath, release.id);
-                if (!Directory.Exists(path)) continue;
-                var row = new ModuleStatus { Release = release, DirectoryPath = path, Status = "Errore" };
+                var row = new ModuleStatus { Release = release, DirectoryPath = path, Status = "Errore", IsInstalled = Directory.Exists(path) };
                 try
                 {
-                    var local = Json.FileRead<Dictionary<string, object>>(Path.Combine(path, "module.json"));
-                    if (Json.Str(local, "id") != release.id) throw new InvalidDataException("Identificatore locale diverso dal modulo previsto.");
-                    row.LocalVersion = Json.Str(local, "version");
-                    int comparison = Versioning.Compare(row.LocalVersion, release.version);
-                    row.Status = "Aggiornato";
-                    if (comparison > 0) row.Detail = "Versione locale più recente: viene mantenuta.";
-                    else if (comparison < 0)
+                    if (!row.IsInstalled)
                     {
-                        row.Detail = File.Exists(Path.Combine(path, release.id + ".lock")) ? "Modulo bloccato in Foundry. Sbloccalo prima di aggiornare." : CompatibilityError(install, release);
+                        if (File.Exists(path)) throw new IOException("Il percorso del modulo è occupato da un file. Nessun file verrà sostituito.");
+                        row.Detail = CompatibilityError(install, release);
                         row.CanUpdate = row.Detail == null;
-                        row.Status = row.CanUpdate ? "Da aggiornare" : "Errore";
+                        row.Status = row.CanUpdate ? "Da installare" : "Errore";
+                    }
+                    else
+                    {
+                        var local = Json.FileRead<Dictionary<string, object>>(Path.Combine(path, "module.json"));
+                        if (Json.Str(local, "id") != release.id) throw new InvalidDataException("Identificatore locale diverso dal modulo previsto.");
+                        row.LocalVersion = Json.Str(local, "version");
+                        int comparison = Versioning.Compare(row.LocalVersion, release.version);
+                        row.Status = "Aggiornato";
+                        if (comparison > 0) row.Detail = "Versione locale più recente: viene mantenuta.";
+                        else if (comparison < 0)
+                        {
+                            row.Detail = File.Exists(Path.Combine(path, release.id + ".lock")) ? "Modulo bloccato in Foundry. Sbloccalo prima di aggiornare." : CompatibilityError(install, release);
+                            row.CanUpdate = row.Detail == null;
+                            row.Status = row.CanUpdate ? "Da aggiornare" : "Errore";
+                        }
                     }
                 }
                 catch (Exception ex) { row.Detail = ex.Message; }
@@ -365,6 +379,41 @@ namespace KhuzoeUpdater
                 }
             } while (changed);
             return rows;
+        }
+        public static List<ModuleStatus> BuildPlan(Installation install, List<ModuleStatus> rows, IEnumerable<ModuleStatus> requested)
+        {
+            var targets = requested.ToList();
+            var requestedIds = new HashSet<string>(targets.Select(r => r.Release.id), StringComparer.Ordinal);
+            var added = new HashSet<string>(StringComparer.Ordinal);
+            var visiting = new HashSet<string>(StringComparer.Ordinal);
+            var plan = new List<ModuleStatus>();
+            Action<ModuleStatus> add = null;
+            add = row =>
+            {
+                if (added.Contains(row.Release.id)) return;
+                if (!rows.Contains(row) || !row.CanUpdate) throw new IOException("Il modulo non è installabile: " + row.Release.title + ". " + row.Detail);
+                if (!visiting.Add(row.Release.id)) throw new IOException("Dipendenze circolari tra i moduli selezionati.");
+                foreach (var requirement in Json.Array(row.Release.relationships, "requires"))
+                {
+                    string id = Json.Str(requirement, "id");
+                    var dependency = rows.FirstOrDefault(r => r.Release.id == id);
+                    if (dependency == null) continue; // External requirements are checked below, never installed here.
+                    if (requestedIds.Contains(id) || !Versioning.Compatible(dependency.LocalVersion, Json.Map(requirement, "compatibility")))
+                    {
+                        if (!Versioning.Compatible(dependency.Release.version, Json.Map(requirement, "compatibility")))
+                            throw new IOException("La versione pubblicata della dipendenza " + id + " non è compatibile.");
+                        add(dependency);
+                    }
+                }
+                visiting.Remove(row.Release.id); added.Add(row.Release.id); plan.Add(row);
+            };
+            foreach (var target in targets) add(target);
+            foreach (var row in plan)
+            {
+                string error = DependencyError(install, row.Release, plan);
+                if (error != null) throw new IOException(error);
+            }
+            return plan;
         }
         static string CompatibilityError(Installation install, Release release)
         {
@@ -477,6 +526,12 @@ namespace KhuzoeUpdater
         public static void Replace(string modulesRoot, string staged, ModuleStatus row)
         {
             string destination = Paths.Child(modulesRoot, row.Release.id);
+            if (!row.IsInstalled)
+            {
+                if (Directory.Exists(destination) || File.Exists(destination)) throw new IOException("Il percorso del modulo ora esiste già. Ricontrolla prima di installare; nessun file è stato sostituito.");
+                Directory.Move(staged, destination);
+                return;
+            }
             if (!Directory.Exists(destination)) throw new IOException("Il modulo non è più installato: aggiornamento annullato.");
             if (File.Exists(Path.Combine(destination, row.Release.id + ".lock"))) throw new IOException("Il modulo è stato bloccato in Foundry. Aggiorna l'elenco.");
             string existing = Json.Str(Json.FileRead<Dictionary<string, object>>(Path.Combine(destination, "module.json")), "version");
@@ -494,15 +549,16 @@ namespace KhuzoeUpdater
             catch (IOException) { /* Installed successfully; leave the temporary old copy if Windows holds it. */ }
             catch (UnauthorizedAccessException) { }
         }
-        public static async Task Apply(Installation install, List<ModuleStatus> rows, Action<string> progress)
+        public static async Task Apply(Installation install, List<ModuleStatus> rows, Action<string> progress, IEnumerable<ModuleStatus> requested = null)
         {
+            var plan = Planner.BuildPlan(install, rows, requested ?? rows.Where(r => r.IsInstalled && r.CanUpdate));
+            if (plan.Count == 0) return;
             RunningFoundry.EnsureClosed();
             Paths.NoLinks(install.ModulesPath);
             string work = Paths.Child(install.ModulesPath, ".khuzoe-update-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(work);
             try
             {
-                var plan = rows.Where(r => r.CanUpdate).ToList();
                 foreach (var row in plan)
                 {
                     progress("Scaricamento: " + row.Release.title);
@@ -519,6 +575,7 @@ namespace KhuzoeUpdater
                     progress("Installazione: " + row.Release.title);
                     Replace(install.ModulesPath, Paths.Child(work, row.Release.id), row);
                     row.LocalVersion = row.Release.version;
+                    row.IsInstalled = true;
                     row.CanUpdate = false;
                     row.Status = "Aggiornato";
                 }
