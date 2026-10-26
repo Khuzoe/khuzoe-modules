@@ -279,7 +279,7 @@ const utilsSource = await readFile(new URL("../scripts/utils.js", import.meta.ur
 const productionSource = await readFile(new URL("../scripts/production.js", import.meta.url), "utf8");
 const productionDataSource = await readFile(new URL("../scripts/production-data.js", import.meta.url), "utf8");
 const foundryCompatSource = await readFile(new URL("../scripts/foundry-compat.js", import.meta.url), "utf8");
-assert.equal(moduleManifest.version, "1.21.2", "the container preview release has the expected module version");
+assert.equal(moduleManifest.version, "1.21.3", "the calendar production release has the expected module version");
 assert.equal(moduleManifest.compatibility.minimum, "14", "the module only activates on the supported Foundry major");
 assert.equal(moduleManifest.compatibility.verified, "14.367", "the portable Foundry build is recorded as verified");
 assert.equal("maximum" in moduleManifest.compatibility, false, "future v14 maintenance builds are not blocked by a maximum cap");

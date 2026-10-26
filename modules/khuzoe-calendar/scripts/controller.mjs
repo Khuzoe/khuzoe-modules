@@ -1,7 +1,9 @@
 import { MODULE_ID, clone, clockSeconds, secondsClock, validateDefinition, units } from "./calendar-math.mjs";
 import { NativeCalendarBridge, compatibilityNotices } from "./native-calendar.mjs";
+import { RealtimeClock } from "./realtime-clock.mjs";
 
-export const POLL_MS = 60000, CLOCK_BATCH_MS = 30000, MAX_RETRY_MS = 300000;
+export const POLL_MS = 15 * 60 * 1000, CLOCK_BATCH_MS = 15 * 60 * 1000;
+export const RETRY_BASE_MS = 60000, MAX_RETRY_MS = 300000;
 
 export class CalendarController {
   constructor(timers = globalThis, now = () => Date.now()) {
@@ -9,44 +11,57 @@ export class CalendarController {
     this.bridge = new NativeCalendarBridge(); this.queue = Promise.resolve();
     this.timers = timers; this.now = now; this.lastReadAt = -Infinity;
     this.retryAfter = 0; this.failures = 0; this.dirtySince = null;
+    this.contextEpoch = 0; this.accessDenied = false;
+    this.realtime = new RealtimeClock(this);
   }
   get client() { return game.modules.get("cripta-wiki-sync")?.api?.calendar; }
   get context() { return this.client?.getContext() || {}; }
   get binding() { return game.settings.get(MODULE_ID, "binding") || {}; }
   get linked() { return this.binding.enabled && this.binding.campaignId === this.context.campaignId; }
-  get leader() {
+  get coordinatorId() {
     const owner = game.users.get(this.binding.ownerId);
-    return game.user.isGM && (owner?.active && owner.isGM ? owner.id : game.users.activeGM?.id) === game.user.id;
+    return owner?.active && owner.isGM ? owner.id : game.users.activeGM?.id;
   }
+  get leader() { return game.user.isGM && this.coordinatorId === game.user.id; }
   get writable() { return Boolean(this.context.remoteWrites && this.data?.permissions?.canEdit); }
   get isGM() { return Boolean(game.user.isGM); }
+  get widgetVisible() { return Boolean(game.settings.get(MODULE_ID, "showClock")); }
+  get readingVisible() { return Boolean(this.isOpen?.() || (!this.linked && this.widgetVisible)); }
   get canNote() { return Boolean(this.context.remoteWrites && this.data?.permissions?.canCreateNote); }
+  get canControlClock() {
+    return Boolean(this.isGM && this.linked && this.context.localPullWrites && this.context.remoteWrites
+      && !this.accessDenied && (this.data ? this.writable : true)
+      && CONFIG.time.worldCalendarClass?.khuzoeCalendar);
+  }
+  captureContext() { return JSON.stringify([this.context.campaignId, this.context.authenticated, this.context.identityVersion, this.contextEpoch]); }
+  assertContext(origin) {
+    if (origin !== this.captureContext()) throw new Error("La campagna o l'account wiki sono cambiati. Il testo è ancora qui: riapri il calendario corretto prima di salvare.");
+  }
   get clock() {
     if (this.linked) return secondsClock(this.binding.definition, Math.floor(game.time.worldTime + this.binding.offset));
     return this.data?.calendar.clock;
   }
   get definition() { return this.linked ? this.binding.definition : this.data?.calendar.definition; }
-  emit() { Hooks.callAll(`${MODULE_ID}.change`, this); }
-  serial(action) {
-    const run = this.queue.then(async () => { this.busy = true; this.emit(); try { return await action(); } finally { this.busy = false; this.emit(); } });
+  emit(clockOnly = false) { Hooks.callAll(`${MODULE_ID}.${clockOnly ? "tick" : "change"}`, this); }
+  serial(action, { quiet = false } = {}) {
+    const run = this.queue.then(async () => { if (!quiet) { this.busy = true; this.emit(); } try { return await action(); } finally { if (!quiet) { this.busy = false; this.emit(); } } });
     this.queue = run.catch(() => {});
     return run;
   }
   consume(payload) {
     validateDefinition(payload.calendar.definition);
     clockSeconds(payload.calendar.definition, payload.calendar.clock);
-    this.data = payload; this.error = "";
-    // Count the interval from the request start: network latency must not make
-    // a one-minute interval skip every other tick and become two minutes.
+    this.data = payload; this.error = ""; this.accessDenied = false;
+    // Count from request start so network latency cannot skip the next interval.
     this.lastReadAt = this.responseStartedAt ?? this.now();
     this.retryAfter = 0; this.failures = 0;
   }
   async request(path = "", body) {
     if (!this.client) throw new Error("Aggiorna Khuzoe Wiki Sync: manca il collegamento al calendario.");
-    const campaign = this.context.campaignId;
+    const origin = this.captureContext();
     const startedAt = this.now();
     const result = await this.client.request(path, body);
-    if (this.context.campaignId !== campaign) throw new Error("La campagna è cambiata. Riapri il calendario.");
+    this.assertContext(origin);
     this.responseStartedAt = startedAt;
     return result;
   }
@@ -60,37 +75,56 @@ export class CalendarController {
     this.emit();
   }
   async saveBinding(value) { await game.settings.set(MODULE_ID, "binding", value); this.applyBinding(); }
+  ensureVisibleData() {
+    if (this.context.campaignId && this.readingVisible && !this.data) return this.refresh({ flushClock: false, background: true });
+    return Promise.resolve();
+  }
   async start() {
     this.applyBinding();
+    await this.realtime.initialize();
     this.wasLeader = Boolean(this.linked && this.leader);
-    if (this.wasLeader || this.isOpen?.()) await this.refresh({ flushClock: false });
+    if (this.context.campaignId && (this.wasLeader || this.readingVisible)) await this.refresh({ flushClock: false });
     this.timers.clearInterval(this.timer);
     this.timer = this.timers.setInterval(() => this.poll(), POLL_MS);
   }
   stop() {
+    this.realtime.stop();
     this.timers.clearInterval(this.timer);
     this.timers.clearTimeout(this.clockTimer);
     this.timers.clearTimeout(this.hintTimer);
   }
   poll() {
-    if (!this.leader || (!this.linked && !this.isOpen?.()) || this.now() - this.lastReadAt < POLL_MS) return;
+    // Linked players already receive native world-time updates. An unlinked
+    // visible widget instead reads the wiki on the same 15-minute cadence.
+    if (!this.context.campaignId || !(this.linked ? this.leader : this.readingVisible) || this.now() - this.lastReadAt < POLL_MS) return;
     return this.refresh({ flushClock: false, background: true });
   }
   onUsersChanged() {
     const leader = Boolean(this.linked && this.leader);
     const elected = leader && !this.wasLeader;
+    const changed = leader !== this.wasLeader;
+    if (changed && !leader) this.realtime.sessionId = crypto.randomUUID();
+    if (changed) this.realtime.reset();
     this.wasLeader = leader;
+    this.realtime.arm();
+    this.emit(!changed);
     this.scheduleClock();
     if (elected) void this.refresh({ flushClock: false, background: true });
   }
   onContextChanged() {
+    const runningHere = this.realtime.state.running && this.realtime.state.driverId === game.user.id && this.realtime.state.sessionId === this.realtime.sessionId;
+    this.contextEpoch++; this.accessDenied = false;
+    // A running timer cannot silently acquire the new account's authority.
+    this.realtime.sessionId = crypto.randomUUID(); this.realtime.reset();
+    this.realtime.arm();
+    const paused = runningHere && this.isGM ? this.realtime.set({ running: false }) : Promise.resolve();
     this.data = null; this.lastReadAt = -Infinity; this.retryAfter = 0;
     this.applyBinding(); this.scheduleClock();
     const reload = () => {
-      if ((this.linked && this.leader) || this.isOpen?.()) return this.refresh({ flushClock: false });
+      if (this.context.campaignId && ((this.linked && this.leader) || this.readingVisible)) return this.refresh({ flushClock: false });
     };
     // An old-account request may be in flight; read with the new identity after it.
-    return this.refreshing ? this.refreshing.then(reload) : reload();
+    return Promise.all([this.refreshing, paused]).then(reload);
   }
   get localTimeChanged() {
     return this.linked && Math.floor(game.time.worldTime + this.binding.offset) !== this.binding.ackSeconds;
@@ -105,6 +139,9 @@ export class CalendarController {
     const due = immediate ? this.now() : Math.max(this.dirtySince + CLOCK_BATCH_MS, this.retryAfter);
     this.clockTimer = this.timers.setTimeout(() => {
       this.clockTimer = null;
+      // A periodic read can fail just before this batch becomes due. Preserve
+      // the retry instead of consuming the timer during the network backoff.
+      if (!immediate && this.now() < this.retryAfter) { this.scheduleClock(); return; }
       return this.refresh({ flushClock: immediate, background: !immediate });
     }, Math.max(0, due - this.now()));
   }
@@ -118,10 +155,10 @@ export class CalendarController {
     this.scheduleHint();
   }
   scheduleHint() {
-    if (!this.hintPending || !this.isOpen?.() || globalThis.document?.hidden || this.hintTimer != null) return;
+    if (!this.hintPending || !this.readingVisible || globalThis.document?.hidden || this.hintTimer != null) return;
     this.hintTimer = this.timers.setTimeout(async () => {
       this.hintTimer = null;
-      if (!this.hintPending || !this.isOpen?.() || globalThis.document?.hidden) return;
+      if (!this.hintPending || !this.readingVisible || globalThis.document?.hidden) return;
       // A hint received during a GET must trigger a later read, not join the old one.
       if (this.refreshing) { await this.refreshing; this.scheduleHint(); return; }
       this.hintPending = false;
@@ -148,8 +185,8 @@ export class CalendarController {
         if (this.leader && previous && previous !== JSON.stringify([this.data.calendar.definition, this.data.calendar.events])) this.announceChange();
       } catch (error) {
         this.error = error.message;
-        this.retryAfter = this.now() + Math.min(MAX_RETRY_MS, POLL_MS * 2 ** Math.min(this.failures++, 3));
-        if ([401, 403].includes(error.status)) this.data = null;
+        this.retryAfter = this.now() + Math.min(MAX_RETRY_MS, RETRY_BASE_MS * 2 ** Math.min(this.failures++, 3));
+        if ([401, 403].includes(error.status)) { this.data = null; this.accessDenied = true; }
       }
     }).finally(() => { this.refreshing = null; this.scheduleClock(); });
     return this.refreshing;
@@ -162,8 +199,17 @@ export class CalendarController {
     const blocking = compatibilityNotices(this.data.calendar.definition).find(item => item.blocking);
     if (blocking) throw new Error(blocking.text);
   }
+  requireLocalClockAccess() {
+    if (!this.canControlClock) throw new Error("Servono un GM, un calendario collegato e un account wiki autorizzato in modalità Bidirezionale.");
+  }
+  controlRealtime(options) {
+    const origin = this.captureContext();
+    return this.serial(async () => { this.assertContext(origin); await this.realtime.set(options); });
+  }
   link() {
+    const origin = this.captureContext();
     return this.serial(async () => {
+      this.assertContext(origin);
       this.consume(await this.request()); this.requireClockAccess();
       if (this.binding.enabled) throw new Error("Il calendario è già collegato. Usa le opzioni di riallineamento se necessario.");
       if (this.data.source === "default") throw new Error("Configura e salva prima il calendario della campagna sulla wiki.");
@@ -175,8 +221,11 @@ export class CalendarController {
     });
   }
   unlink() {
+    const origin = this.captureContext();
     return this.serial(async () => {
+      this.assertContext(origin);
       if (!game.user.isGM) throw new Error("Solo il GM può scollegare il calendario.");
+      await this.realtime.set({ running: false });
       await this.saveBinding({ enabled: false }); this.conflict = "";
     });
   }
@@ -244,12 +293,14 @@ export class CalendarController {
     }
   }
   onWorldTime(_time, _delta, options = {}) {
-    this.emit();
+    this.emit(true);
     if (!this.linked || !this.leader || options.khuzoeCalendarRemote) return;
     this.scheduleClock(Boolean(options.khuzoeCalendarImmediate));
   }
   resolve(which) {
+    const origin = this.captureContext();
     return this.serial(async () => {
+      this.assertContext(origin);
       this.consume(await this.request()); this.requireClockAccess();
       const binding = this.binding;
       if (!this.linked) throw new Error("Collega prima il calendario.");
@@ -268,16 +319,18 @@ export class CalendarController {
     });
   }
   advance(amount, unit) {
+    const origin = this.captureContext();
     return this.serial(async () => {
-      this.requireClockAccess();
+      this.assertContext(origin); this.requireLocalClockAccess();
       if (!this.linked || this.conflict || this.binding.pending || this.binding.incoming) throw new Error("Completa prima il collegamento o risolvi l'aggiornamento in sospeso.");
       const factor = units(this.binding.definition)[unit];
       if (!factor || !Number.isSafeInteger(amount * factor)) throw new Error("Avanzamento non valido.");
       await game.time.advance(amount * factor, { khuzoeCalendarImmediate: true });
-    }).then(() => this.leader ? this.refresh() : undefined);
+    }).then(() => this.leader && this.now() >= this.retryAfter ? this.refresh() : undefined);
   }
-  setClock(clock, expectedRevision) {
+  setClock(clock, expectedRevision, origin = this.captureContext()) {
     return this.serial(async () => {
+      this.assertContext(origin);
       this.requireClockAccess();
       if (!this.linked || this.conflict || this.binding.pending || this.binding.incoming) throw new Error("Completa prima l'allineamento dell'orologio.");
       this.consume(await this.request());
@@ -287,14 +340,16 @@ export class CalendarController {
       await game.time.set(target, { khuzoeCalendarImmediate: true });
     }).then(() => this.leader ? this.refresh() : undefined);
   }
-  saveEvent(event, expectedRevision = 0, operationId = crypto.randomUUID(), expectedDefinitionRevision = this.data.calendar.definition.revision) {
+  saveEvent(event, expectedRevision = 0, operationId = crypto.randomUUID(), expectedDefinitionRevision = this.data.calendar.definition.revision, origin = this.captureContext()) {
     return this.serial(async () => {
+      this.assertContext(origin);
       const result = await this.request("events/upsert", { event, expectedRevision, operationId, expectedDefinitionRevision });
       this.consume(result); this.announceChange(); return result;
     });
   }
-  archiveEvent(event) {
+  archiveEvent(event, origin = this.captureContext()) {
     return this.serial(async () => {
+      this.assertContext(origin);
       this.consume(await this.request("events/archive", { eventId: event.id, expectedRevision: event.revision, operationId: crypto.randomUUID() }));
       this.announceChange();
     });

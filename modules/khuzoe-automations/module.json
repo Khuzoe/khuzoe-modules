@@ -2,7 +2,7 @@
   "id": "khuzoe-automations",
   "title": "Khuzoe Automations",
   "description": "Automazioni D&D 5e per Foundry VTT v14 integrate con Coven's Automation Toolkit.",
-  "version": "0.27.2",
+  "version": "0.28.1",
   "library": false,
   "socket": true,
   "compatibility": {
@@ -74,7 +74,7 @@
     {
       "name": "KhuzoeSpells2014",
       "label": "Khuzoe Automations — Incantesimi 2014",
-      "path": "packs/khuzoe-spells-2014-v17",
+      "path": "packs/khuzoe-spells-2014-v18",
       "type": "Item",
       "module": "khuzoe-automations"
     },

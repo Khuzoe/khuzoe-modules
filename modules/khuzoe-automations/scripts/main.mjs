@@ -14,7 +14,7 @@ import {applySpellSightRules, restrictGaseousActions, breakCharmOnHarm, enhanceS
 import {expandedFlameMotion, resolveWardingBondTransfers} from "./expanded-spells-2014.mjs";
 import {registerSpellTerrainType, registerPersistentSpellAreas, moveSpellAreas} from "./persistent-spell-areas.mjs";
 import {reserveResources, refundResources} from "./resource-transactions.mjs";
-import {runSyntheticActivityData, runSyntheticActivity, khuzoeRegistrationApi} from "./activity-compat.mjs";
+import {runSyntheticActivityData, runSyntheticActivity, khuzoeRegistrationApi, markSnapshotActivityAborted} from "./activity-compat.mjs";
 import {updateDocumentSafely} from "./cat-compat.mjs";
 import {prepareTemporaryHPUpdate, preserveTemporaryDamageSource, rememberTemporaryDamage} from "./temporary-hp.mjs";
 import {
@@ -103,6 +103,7 @@ import {
 } from "./expanded-spells-2014.mjs";
 import {SPECIAL_SPELL_AUTOMATIONS, registerSpecialSpells2014} from "./special-spells-2014.mjs";
 import {SHAPECHANGE_AUTOMATION, registerShapechange} from "./shapechange.mjs";
+import {CROWN_OF_STARS_AUTOMATION, registerCrownOfStars} from "./crown-of-stars.mjs";
 import {
   DAMAGE_BOND_AUTOMATIONS,
   enhanceDamageBondMedkit,
@@ -218,6 +219,7 @@ const SUPPORTED_AUTOMATIONS = new Map([
     {version: automation.version, uuid: automation.uuid}
   ]),
   ["2014:shapechange", {version: SHAPECHANGE_AUTOMATION.version, uuid: SHAPECHANGE_AUTOMATION.uuid}],
+  ["2014:crown-of-stars", {version: CROWN_OF_STARS_AUTOMATION.version, uuid: CROWN_OF_STARS_AUTOMATION.uuid}],
   ...DAMAGE_BOND_AUTOMATIONS.map(automation => [
     `${automation.rules}:${automation.identifier}`,
     {version: automation.version, uuid: automation.uuid}
@@ -1234,6 +1236,9 @@ function registerAutomations() {
     const shapechange = registerShapechange(api);
     macroResults.push(...shapechange.macros);
     automationResults.push(...shapechange.automations);
+    const crownOfStars = registerCrownOfStars(api);
+    macroResults.push(...crownOfStars.macros);
+    automationResults.push(...crownOfStars.automations);
 
     const damageBond = registerDamageBond(api);
     macroResults.push(...damageBond.macros);
@@ -1383,6 +1388,7 @@ Hooks.on("closeActorSheet", app => automationToolbar.close(app));
 // Inspiration conserviamo usi spesi, formula del massimo e recupero già
 // configurato dall'attore (incluso Font of Inspiration).
 Hooks.on("preUpdateItem", prepareKhuzoeAutomationItemUpdate);
+Hooks.on("midi-qol.preAbort", markSnapshotActivityAborted);
 Hooks.on("preUpdateActor", prepareTemporaryHPUpdate);
 Hooks.on("dnd5e.preApplyDamage", preserveTemporaryDamageSource);
 Hooks.on("dnd5e.preUseActivity", restrictRageSpellcasting);

@@ -1,4 +1,4 @@
-import { MODULE_ID, clone, clockSeconds, esc } from "./calendar-math.mjs";
+import { MODULE_ID, clone, clockSeconds, esc, dateKey, formatTime } from "./calendar-math.mjs";
 import { renderCalendar, renderEventEditor, dateFields } from "./view.mjs";
 import { ClockWidget } from "./clock-widget.mjs";
 
@@ -40,6 +40,7 @@ export class CalendarWindow extends Base {
     const clock = controller.clock;
     if (clock && (!this.view.monthId || !controller.definition.months.some(m => m.id === this.view.monthId))) this.view = { year: clock.date.year, monthId: clock.date.monthId, selected: clone(clock.date) };
     if (clock && this.view.selected) { try { clockSeconds(controller.definition, { date: this.view.selected }); } catch (_) { this.view.selected = clone(clock.date); } }
+    this.clockDate = clock && dateKey(clock.date);
     return { ...context, content: renderCalendar(controller, this.view) };
   }
   async _onRender(context, options) {
@@ -49,6 +50,16 @@ export class CalendarWindow extends Base {
       if (!target || target.disabled) return;
       try { await this.act(target.dataset); } catch (error) { report(error); }
     });
+    this.element.querySelectorAll("details[data-expand]").forEach(panel => panel.addEventListener("toggle", () => { this.view[panel.dataset.expand] = panel.open; }));
+    this.element.querySelector('[data-browse-month]')?.addEventListener("change", event => this.browse(event.target.value, this.view.year));
+    this.element.querySelector('[data-browse-year]')?.addEventListener("change", event => {
+      if (event.target.reportValidity()) this.browse(this.view.monthId, Number(event.target.value));
+    });
+  }
+  browse(monthId, year) {
+    if (!controller.definition.months.some(month => month.id === monthId) || !Number.isInteger(year) || Math.abs(year) > 99999999) return;
+    this.view = { ...this.view, year, monthId, selected: { year, monthId, day: 1 } };
+    this.render();
   }
   async act({ action, day, id, amount, unit }) {
     switch (action) {
@@ -57,13 +68,14 @@ export class CalendarWindow extends Base {
       case "wiki": return openWiki();
       case "previous": case "next": {
         const months = controller.definition.months;
+        let year = this.view.year;
         let index = months.findIndex(m => m.id === this.view.monthId) + (action === "next" ? 1 : -1);
-        if (index < 0) { index = months.length - 1; this.view.year--; }
-        else if (index >= months.length) { index = 0; this.view.year++; }
-        this.view.monthId = months[index].id; break;
+        if (index < 0) { index = months.length - 1; year--; }
+        else if (index >= months.length) { index = 0; year++; }
+        return this.browse(months[index].id, year);
       }
       case "day": this.view.selected = { year: this.view.year, monthId: this.view.monthId, day: Number(day) }; break;
-      case "today": this.view = { year: controller.clock.date.year, monthId: controller.clock.date.monthId, selected: clone(controller.clock.date) }; break;
+      case "today": this.view = { ...this.view, year: controller.clock.date.year, monthId: controller.clock.date.monthId, selected: clone(controller.clock.date) }; break;
       case "new": new EventWindow({ date: this.view.selected || controller.clock.date }).render({ force: true }); return;
       case "event": {
         const entry = controller.data.calendar.events.find(e => e.id === id);
@@ -95,6 +107,7 @@ export class EventWindow extends Base {
     super();
     this.entry = clone(event || { id: `event-${crypto.randomUUID()}`, revision: 0, title: "", description: "", kind: controller.writable ? "event" : "note", visibility: controller.writable ? "dm" : "owner", status: "scheduled", allDay: true, start: { date: clone(date), time: null }, end: null, tags: [], refs: [] });
     this.definition = clone(controller.data.calendar.definition);
+    this.origin = controller.captureContext();
     this.dirty = false;
   }
   async _prepareContext(options) { return { ...await super._prepareContext(options), content: renderEventEditor(controller, this.entry) }; }
@@ -115,7 +128,7 @@ export class EventWindow extends Base {
     this.element.addEventListener("change", toggles); toggles();
     this.element.querySelector('[data-action="archive"]')?.addEventListener("click", async () => {
       if (await confirm("Archivia evento", `<p>Archiviare “${esc(this.entry.title)}”? L'evento resterà nei dati della wiki.</p>`)) {
-        try { await controller.archiveEvent(this.entry); this.dirty = false; await this.close(); } catch (error) { this.showError(error); }
+        try { await controller.archiveEvent(this.entry, this.origin); this.dirty = false; await this.close(); } catch (error) { this.showError(error); }
       }
     });
   }
@@ -130,16 +143,18 @@ export class EventWindow extends Base {
     const submit = form.querySelector('[type="submit"]');
     submit.disabled = true;
     try {
+      controller.assertContext(this.origin);
+      if (!controller.data) throw new Error("Calendario non disponibile. Il testo è conservato: riprova quando la connessione torna disponibile.");
       if (JSON.stringify(this.definition) !== JSON.stringify(controller.data.calendar.definition)) throw new Error("La struttura del calendario è cambiata. Conserva il testo e riapri l'evento per scegliere una data valida.");
       const values = formData.object;
-      const moment = (prefix) => ({ date: { year: Number(values[`${prefix}Year`]), monthId: values[`${prefix}Month`], day: Number(values[`${prefix}Day`]) }, time: values.allDay ? null : { hour: Number(values[`${prefix}Hour`]), minute: Number(values[`${prefix}Minute`]), second: 0 } });
+      const moment = (prefix) => ({ date: { year: Number(values[`${prefix}Year`]), monthId: values[`${prefix}Month`], day: Number(values[`${prefix}Day`]) }, time: values.allDay ? null : { hour: Number(values[`${prefix}Hour`]), minute: Number(values[`${prefix}Minute`]), second: Number(values[`${prefix}Second`] ?? this.entry[prefix]?.time?.second ?? 0) } });
       const entry = { ...this.entry, title: values.title.trim(), description: values.description, kind: values.kind, visibility: values.visibility, allDay: Boolean(values.allDay), status: values.status, tags: values.tags.split(",").map(t => t.trim()).filter(Boolean), start: moment("start"), end: values.hasEnd ? moment("end") : null };
       if (!entry.title) throw new Error("Inserisci un titolo.");
       const start = clockSeconds(this.definition, entry.start);
       if (entry.end && clockSeconds(this.definition, entry.end) < start) throw new Error("La fine non può precedere l'inizio.");
       const signature = JSON.stringify(entry);
       if (this.lastSignature !== signature) { this.operationId = crypto.randomUUID(); this.lastSignature = signature; }
-      await controller.saveEvent(entry, this.entry.revision, this.operationId, this.definition.revision);
+      await controller.saveEvent(entry, this.entry.revision, this.operationId, this.definition.revision, this.origin);
       this.dirty = false; await this.close();
     } catch (error) { this.showError(error); }
     finally { this.saving = false; if (submit.isConnected) submit.disabled = false; }
@@ -154,7 +169,7 @@ export class EventWindow extends Base {
 class ClockWindow extends Base {
   static DEFAULT_OPTIONS = { classes: ["khuzoe-calendar", "kc-editor"], tag: "form", window: { title: "Imposta data e ora" }, position: { width: 490, height: "auto" }, form: { handler: ClockWindow.submit, closeOnSubmit: true } };
   static PARTS = parts;
-  constructor() { super(); this.clock = clone(controller.clock); this.revision = controller.data.calendar.clock.revision; this.definition = clone(controller.definition); }
+  constructor() { super(); this.clock = clone(controller.clock); this.revision = controller.data.calendar.clock.revision; this.definition = clone(controller.definition); this.origin = controller.captureContext(); }
   async _prepareContext(options) { return { ...await super._prepareContext(options), content: `<p class="kc-note">Questa azione fa avanzare o arretrare il tempo di gioco. Influisce sulle normali scadenze degli effetti.</p>${dateFields(this.definition, "clock", this.clock)}<footer class="kc-form-actions"><button type="submit" class="kc-primary">Imposta data</button></footer>` }; }
   async _onRender(context, options) {
     await super._onRender(context, options);
@@ -163,13 +178,20 @@ class ClockWindow extends Base {
   }
   static async submit(_event, _form, data) {
     const v = data.object;
+    controller.assertContext(this.origin);
     if (JSON.stringify(this.definition) !== JSON.stringify(controller.definition)) throw new Error("La struttura del calendario è cambiata. Riapri la finestra.");
-    await controller.setClock({ date: { year: Number(v.clockYear), monthId: v.clockMonth, day: Number(v.clockDay) }, time: { hour: Number(v.clockHour), minute: Number(v.clockMinute), second: 0 } }, this.revision);
+    await controller.setClock({ date: { year: Number(v.clockYear), monthId: v.clockMonth, day: Number(v.clockDay) }, time: { hour: Number(v.clockHour), minute: Number(v.clockMinute), second: Number(v.clockSecond ?? this.clock.time?.second ?? 0) } }, this.revision, this.origin);
   }
 }
 
-export function updateViews() {
-  if (calendarApp?.rendered) calendarApp.render();
+export function updateViews(clockOnly = false) {
+  if (calendarApp?.rendered) {
+    if (!clockOnly || !controller.clock || calendarApp.clockDate !== dateKey(controller.clock.date)) calendarApp.render();
+    else {
+      const time = calendarApp.element.querySelector(".kc-current-time");
+      if (time) time.textContent = formatTime(controller.clock.time);
+    }
+  }
   clockWidget ||= new ClockWidget(controller, {
     open: openCalendar, report,
     readPosition: () => game.settings.get(MODULE_ID, "clockPosition"),

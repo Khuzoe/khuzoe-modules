@@ -377,6 +377,7 @@ await purifyingMacro({workflow: purifyingWorkflow(5), document: purifyingStrike}
 assert.equal(purifyingSaveCalls, 1);
 assert.equal(purifyingSaveArguments[0].ability, "con");
 assert.equal(purifyingSaveArguments[1].target, 16);
+assert.equal(purifyingSaveArguments[1].configure, true, "Il proprietario del bersaglio deve poter tirare il TS");
 assert.equal(purifyingSaveArguments[2].create, true);
 assert.ok(purifyingMessages.some(message => message.content.includes("TS Costituzione CD 16")));
 assert.equal(purifyingRemoteUpdates, 4, "Due cure e due aggiornamenti dei contatori persistenti");

@@ -6,7 +6,7 @@ import {adjustAppliedDamage, appliedDamageAmount, damageDealt} from "./damage-ad
 import {distanceInScene} from "./movement-compat.mjs";
 import {weaponCantripAttack} from "./weapon-cantrips.mjs";
 import {healActor} from "./healing.mjs";
-import {runSyntheticActivityData, runSyntheticActivity} from "./activity-compat.mjs";
+import {runSyntheticActivityData, runSyntheticActivity, runSnapshotActivityData} from "./activity-compat.mjs";
 import {updateDocumentSafely} from "./cat-compat.mjs";
 
 const MODULE_ID = "khuzoe-automations";
@@ -181,6 +181,17 @@ function actorLevel(actor, spell) {
   return Number.isFinite(fromCat) && fromCat >= 0 ? fromCat : 0;
 }
 
+const boomingMovementDice = level => 1 + [5, 11, 17].filter(threshold => level >= threshold).length;
+
+function savedBoomingMovementDice(effect, spell) {
+  const saved = effect.flags?.[MODULE_ID]?.boomingBlade;
+  if (Number.isFinite(saved?.casterLevel) && saved.casterLevel >= 0) return boomingMovementDice(saved.casterLevel);
+  // Earlier Khuzoe effects already saved the dice; retain their cast-time value.
+  const dice = Number(saved?.dice);
+  if (Number.isInteger(dice) && dice >= 1 && dice <= 4) return dice;
+  return boomingMovementDice(actorLevel(spell.actor, spell));
+}
+
 function itemActivity(item, id) {
   return item?.system?.activities?.get?.(id)
     ?? values(item?.system?.activities).find(activity => activity?.id === id || activity?._id === id);
@@ -283,7 +294,7 @@ export async function useBoomingBlade({workflow, document, item}) {
   if (!spell || !actor || workflow?.activity?.id !== SPELL_2014_ACTIVITY_IDS.boomingCast || targets.length !== 1) return;
 
   const level = actorLevel(actor, spell);
-  const initialDice = Math.floor((level + 1) / 6);
+  const initialDice = boomingMovementDice(level) - 1;
   const attack = await weaponCantripAttack(workflow, spell, {dice: initialDice, damageType: "thunder"});
   if (!attack) {
     ui.notifications.warn(`${spell.name}: CAT non ha restituito il workflow dell'attacco.`);
@@ -308,7 +319,7 @@ export async function useBoomingBlade({workflow, document, item}) {
         macros: {move: [macroReference(SPELL_2014_EFFECT_IDS.boomingMoved)]}
       },
       dae: {stackable: "noneNameOnly", specialDuration: ["turnStartSource"], expiryMode: "delete"},
-      [MODULE_ID]: {boomingBlade: {dice: movementDice}}
+      [MODULE_ID]: {boomingBlade: {dice: movementDice, casterLevel: level}}
     }
   }]);
 
@@ -333,12 +344,9 @@ export async function triggerBoomingBladeMovement({document, token, options, tel
   const activity = itemActivity(spell, SPELL_2014_ACTIVITY_IDS.boomingMoved);
   if (!spell || !activity) return;
   const activityData = activity.toObject();
-  const dice = Number(document.flags?.[MODULE_ID]?.boomingBlade?.dice ?? 1);
+  const dice = savedBoomingMovementDice(document, spell);
   if (!setDamageFormula(activityData, `${dice}d8`)) return;
-  const result = await runSyntheticActivityData(activityData, spell, [movedToken], {
-    consumeUsage: false,
-    consumeResources: false,
-    spellSlot: false,
+  const result = await runSnapshotActivityData(activityData, spell, [movedToken], {
     userId: ownerUserId(spell.actor)
   });
   if (!result || result.aborted) return false;

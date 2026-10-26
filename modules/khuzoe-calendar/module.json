@@ -2,7 +2,7 @@
   "id": "khuzoe-calendar",
   "title": "Khuzoe Calendar",
   "description": "Il calendario della campagna, condiviso tra Foundry e la wiki: data, ora, eventi e note personali.",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "compatibility": { "minimum": "14", "verified": "14.367" },
   "authors": [{ "name": "Khuzoe" }],
   "esmodules": ["scripts/main.mjs"],

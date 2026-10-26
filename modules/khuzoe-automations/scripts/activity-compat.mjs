@@ -36,6 +36,41 @@ export function runSyntheticActivityData(data, item, targets = [], options = {})
   );
 }
 
+/** Midi 14's remote activity call carries only a UUID. Send a transient Item
+ * snapshot when the owner must receive modified activity data (e.g. saved dice). */
+export async function runSnapshotActivityData(data, item, targets = [], {userId} = {}) {
+  userId ??= globalThis.cat.utils.queryUtils.firstOwner(item.actor, true) ?? game.user.id;
+  if (userId === game.user.id) return runSyntheticActivityData(data, item, targets, {userId});
+  const itemData = runnableItemData(item);
+  const activityData = clone(data);
+  activityData.flags ??= {};
+  activityData.flags.cat = {...activityData.flags.cat, hidden: false};
+  activityData.midiProperties = {...activityData.midiProperties, automationOnly: false};
+  itemData.system.activities[activityData._id] = activityData;
+  // completeItemUse reconstructs this temporary Item on the receiving client;
+  // activityId selects only the snapshot, without casting the parent spell again.
+  const result = await globalThis.MidiQOL.socket().executeAsUser("completeItemUse", userId, {
+    itemData, actorUuid: item.actor.uuid,
+    config: {
+      consumeUsage: false, consume: {resources: false, spellSlot: false, action: false},
+      midiOptions: {
+        asUser: userId, activityId: activityData._id, workflowData: true,
+        targetUuids: targets.map(target => (target.document ?? target).uuid), configureDialog: false,
+        workflowOptions: {autoFastDamage: true, autoRollDamage: "always", autoRollAttack: true,
+          targetConfirmation: "none", khuzoeInternalActivity: true, khuzoeActivitySnapshot: true}
+      }
+    },
+    dialog: {configure: false}, message: {}
+  });
+  // getSafeMacroData omits `aborted` but retains workflowOptions.
+  if (result?.workflowOptions?.khuzoeActivitySnapshotAborted) return {...result, aborted: true};
+  return result;
+}
+
+export function markSnapshotActivityAborted(workflow) {
+  if (workflow?.workflowOptions?.khuzoeActivitySnapshot) workflow.workflowOptions.khuzoeActivitySnapshotAborted = true;
+}
+
 export function runSyntheticActivity(activity, targets = [], options = {}) {
   const item = runnableItem(activity?.item);
   const runnable = item?.system?.activities?.get?.(activity.id ?? activity._id) ?? activity;

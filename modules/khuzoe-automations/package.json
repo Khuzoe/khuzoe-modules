@@ -1,7 +1,7 @@
 {
   "name": "khuzoe-automations",
   "private": true,
-  "version": "0.27.2",
+  "version": "0.28.1",
   "type": "module",
   "scripts": {
     "generate:rune-knight": "node tools/generate-rune-knight-items.mjs",
@@ -16,10 +16,11 @@
     "generate:spells-2014": "node tools/generate-spells-2014.mjs && node tools/import-expanded-spells-2014.mjs && node tools/generate-special-spells-2014.mjs",
     "build:packs": "node tools/build-packs.mjs",
     "test:cat-integration": "node tools/test-dance-cat-integration.mjs",
-    "test": "node tools/test-registration.mjs && node tools/test-pack-integrity.mjs && node tools/test-cat-compat.mjs && node tools/test-sword-bard.mjs && node tools/test-rune-knight.mjs && node tools/test-wild-shape.mjs && node tools/test-rage.mjs && node tools/test-create-bonfire.mjs && node tools/test-wall-of-fire.mjs && node tools/test-combat-actions-2014.mjs && node tools/test-keeper-giants-strength.mjs && node tools/test-paladin.mjs && node tools/test-aura-geometry.mjs && node tools/test-circular-auras.mjs && node tools/test-wizard.mjs && node tools/test-rogue.mjs && node tools/test-goliath.mjs && node tools/test-spells-2014.mjs && node tools/test-expanded-spells-2014.mjs && node tools/test-special-spells-2014.mjs && node tools/test-damage-bond.mjs && node tools/test-homebrew-npcs.mjs && node tools/test-remediation.mjs && node tools/test-runtime-contracts.mjs && node tools/test-remediation-lifecycle.mjs && node tools/test-logical-events.mjs && node tools/test-spell-overtime.mjs && node tools/test-npc-concurrency.mjs && node tools/test-automation-toolbar.mjs && node tools/test-shield-expiry.mjs && node tools/test-campaign-features.mjs && node tools/test-campaign-cat-integration.mjs && node tools/test-arcane-ward.mjs && node tools/test-armorer.mjs && node tools/test-ward-armorer-integration.mjs && node tools/test-npc-rules.mjs && node tools/test-shapechange.mjs",
+    "test": "node tools/test-registration.mjs && node tools/test-pack-integrity.mjs && node tools/test-cat-compat.mjs && node tools/test-sword-bard.mjs && node tools/test-rune-knight.mjs && node tools/test-wild-shape.mjs && node tools/test-rage.mjs && node tools/test-create-bonfire.mjs && node tools/test-wall-of-fire.mjs && node tools/test-combat-actions-2014.mjs && node tools/test-keeper-giants-strength.mjs && node tools/test-paladin.mjs && node tools/test-aura-geometry.mjs && node tools/test-circular-auras.mjs && node tools/test-wizard.mjs && node tools/test-rogue.mjs && node tools/test-goliath.mjs && node tools/test-spells-2014.mjs && node tools/test-expanded-spells-2014.mjs && node tools/test-special-spells-2014.mjs && node tools/test-damage-bond.mjs && node tools/test-homebrew-npcs.mjs && node tools/test-remediation.mjs && node tools/test-runtime-contracts.mjs && node tools/test-remediation-lifecycle.mjs && node tools/test-logical-events.mjs && node tools/test-spell-overtime.mjs && node tools/test-npc-concurrency.mjs && node tools/test-automation-toolbar.mjs && node tools/test-shield-expiry.mjs && node tools/test-campaign-features.mjs && node tools/test-campaign-cat-integration.mjs && node tools/test-arcane-ward.mjs && node tools/test-armorer.mjs && node tools/test-ward-armorer-integration.mjs && node tools/test-npc-rules.mjs && node tools/test-shapechange.mjs && node tools/test-npc-save-routing.mjs && node tools/test-crown-of-stars.mjs && node tools/test-booming-blade-scaling.mjs",
     "normalize:packs": "node tools/normalize-pack-data.mjs",
     "generate:campaign-features": "node tools/generate-campaign-features.mjs",
-    "generate:ward-armorer": "node tools/generate-ward-armorer.mjs"
+    "generate:ward-armorer": "node tools/generate-ward-armorer.mjs",
+    "generate:crown-of-stars": "node tools/generate-crown-of-stars.mjs"
   },
   "devDependencies": {
     "@foundryvtt/foundryvtt-cli": "1.0.2"

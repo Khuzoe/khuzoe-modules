@@ -7,6 +7,7 @@ import {
   productionFormulaIsSafe,
   productionClock,
   productionIntervalSeconds,
+  productionTimeUnits,
   productionSchedule,
   selectProductionRules
 } from "./production-data.js";
@@ -244,9 +245,10 @@ export function productionNextLabel(source = {}) {
   if (production.lastProcessedAt === null) return localize("KM.Production.StartsOnSave");
   const schedule = productionSchedule(production);
   const remaining = Math.max(0, schedule.nextAt - productionClock(production.timeBasis));
-  const days = Math.floor(remaining / 86400);
-  const hours = Math.floor((remaining % 86400) / 3600);
-  const minutes = Math.max(1, Math.ceil((remaining % 3600) / 60));
+  const units = productionTimeUnits(production.timeBasis);
+  const days = Math.floor(remaining / units.day);
+  const hours = Math.floor((remaining % units.day) / units.hour);
+  const minutes = Math.max(1, Math.ceil((remaining % units.hour) / units.minute));
   if (days > 0) return localize("KM.Production.NextDays", { days, hours });
   if (hours > 0) return localize("KM.Production.NextHours", { hours, minutes });
   return localize("KM.Production.NextMinutes", { minutes });

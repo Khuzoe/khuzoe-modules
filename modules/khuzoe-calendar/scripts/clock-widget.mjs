@@ -1,4 +1,4 @@
-import { MODULE_ID, formatDate, formatTime } from "./calendar-math.mjs";
+import { MODULE_ID, formatDate, formatTime, esc } from "./calendar-math.mjs";
 
 const STEPS = [
   { amount: -1, unit: "hour", label: "−1 h", title: "Indietro di un'ora" },
@@ -27,10 +27,22 @@ export class ClockWidget {
     const c = this.controller;
     if (!c.isGM) return "Solo il GM può modificare il tempo.";
     if (!c.linked) return "Apri il calendario e collegalo a Foundry.";
-    if (!c.writable || !c.context.localPullWrites) return "Servono un account wiki autorizzato e Wiki Sync in modalità Bidirezionale.";
+    if (!(c.canControlClock ?? c.writable) || !c.context.localPullWrites) return "Servono un account wiki autorizzato e Wiki Sync in modalità Bidirezionale.";
     if (c.conflict || c.binding.pending || c.binding.incoming) return "Apri il calendario per completare l'allineamento.";
     if (c.busy || this.advancing) return "Aggiornamento in corso…";
     return "";
+  }
+  get steps() {
+    const configured = this.controller.definition?.timeSystem?.quickSteps;
+    return configured?.length ? configured.filter(step => ["minute", "hour", "day"].includes(step.unit) && Number.isFinite(step.amount)).map(step => ({
+      ...step, label: `${step.amount > 0 ? "+" : ""}${step.amount} ${{ minute: "m", hour: "h", day: "g" }[step.unit]}`,
+      title: `${step.amount > 0 ? "+" : ""}${step.amount} ${{ minute: "minuti", hour: "ore", day: "giorni" }[step.unit]}`
+    })) : STEPS;
+  }
+  renderSteps() {
+    this.controls.innerHTML = this.steps.map((step, index) => `<button type="button" data-step="${index}" aria-label="${esc(step.title)}">${esc(step.label)}</button>`).join("");
+    this.controls.querySelectorAll('[data-step]').forEach(button => button.addEventListener("click", () => this.advance(Number(button.dataset.step))));
+    this.stepsSignature = JSON.stringify(this.steps);
   }
   create() {
     const root = this.document.createElement("section");
@@ -43,13 +55,13 @@ export class ClockWidget {
       <button type="button" class="kc-hud-open" title="Apri calendario" aria-label="Apri calendario">
         <span class="kc-hud-date"></span><span class="kc-hud-time"></span><span class="kc-hud-status"></span>
       </button>
-    </div><div class="kc-hud-controls" role="group" aria-label="Avanza o arretra il tempo">${STEPS.map((step, index) => `<button type="button" data-step="${index}" aria-label="${step.title}" title="${step.title}"><span aria-hidden="true">${step.amount < 0 ? "‹" : "›"}</span>${step.label}</button>`).join("")}</div>`;
+    </div><div class="kc-hud-controls" role="group" aria-label="Avanza o arretra il tempo"></div>`;
     this.root = root;
     this.grip = root.querySelector(".kc-hud-grip");
     this.controls = root.querySelector(".kc-hud-controls");
     this.date = root.querySelector(".kc-hud-date"); this.time = root.querySelector(".kc-hud-time"); this.status = root.querySelector(".kc-hud-status");
     root.querySelector(".kc-hud-open").addEventListener("click", () => this.open());
-    root.querySelectorAll("[data-step]").forEach(button => button.addEventListener("click", () => this.advance(Number(button.dataset.step))));
+    this.renderSteps();
     this.grip.addEventListener("pointerdown", event => this.startDrag(event));
     this.grip.addEventListener("pointermove", event => this.moveDrag(event));
     this.grip.addEventListener("pointerup", event => this.endDrag(event));
@@ -67,13 +79,16 @@ export class ClockWidget {
     const c = this.controller, clock = c.clock, def = c.definition;
     this.date.textContent = clock && def ? formatDate(def, clock.date) : "Calendario della campagna";
     this.date.title = this.date.textContent;
-    this.time.textContent = clock && def ? formatTime(clock.time) : "Apri calendario";
-    this.status.textContent = c.error || c.conflict ? "Da allineare" : c.busy || this.advancing ? "Aggiornamento…" : c.linked ? "Foundry ↔ Wiki" : "Calendario wiki";
-    this.controls.hidden = !c.isGM;
+    this.time.textContent = clock && def ? formatTime(clock.time) : c.busy ? "Caricamento…" : !c.context.campaignId ? "Seleziona campagna" : "Data non disponibile";
+    this.status.textContent = c.error || c.conflict ? "Da allineare" : c.busy || this.advancing ? "Aggiornamento…" : c.linked ? "Collegato a Foundry" : "Calendario wiki";
+    if (!clock && c.error) this.status.textContent = "Apri per vedere il problema";
+    this.status.title = c.error || c.conflict || this.status.textContent;
+    this.controls.hidden = !c.isGM || !c.linked;
+    if (JSON.stringify(this.steps) !== this.stepsSignature) this.renderSteps();
     const reason = this.blockedReason;
     this.root.querySelectorAll("[data-step]").forEach(button => {
       button.disabled = Boolean(reason);
-      button.title = reason || STEPS[Number(button.dataset.step)].title;
+      button.title = reason || this.steps[Number(button.dataset.step)]?.title;
     });
     // Preserve the drag handle and keyboard focus during world-time updates.
     if (!this.drag) this.place(this.position);
@@ -128,9 +143,9 @@ export class ClockWidget {
     this.saveQueue = this.saveQueue.then(() => this.savePosition(position)).catch(this.report);
   }
   async advance(index) {
-    if (this.blockedReason || !STEPS[index]) return;
+    if (this.blockedReason || !this.steps[index]) return;
     this.advancing = true; this.update();
-    try { await this.controller.advance(STEPS[index].amount, STEPS[index].unit); }
+    try { await this.controller.advance(this.steps[index].amount, this.steps[index].unit); }
     catch (error) { this.report(error); }
     finally { this.advancing = false; if (this.root) this.update(); }
   }

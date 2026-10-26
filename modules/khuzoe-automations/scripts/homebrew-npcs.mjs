@@ -9,6 +9,7 @@ import {withDocumentLock} from "./operation-locks.mjs";
 import {reserveResources, refundResources} from "./resource-transactions.mjs";
 import {applyResolvedDamage} from "./resolved-damage.mjs";
 import {updateDocumentSafely} from "./cat-compat.mjs";
+import {rollTargetSavingThrow as savingThrow} from "./target-saves.mjs";
 
 const MODULE_ID = "khuzoe-automations";
 const MODULE_TITLE = "Khuzoe Automations";
@@ -456,18 +457,6 @@ async function rollFormula(formula, actor) {
     ? RollClass.create(formula, actor?.getRollData?.() ?? {})
     : new RollClass(formula, actor?.getRollData?.() ?? {});
   return roll.evaluate({allowInteractive: false});
-}
-
-async function savingThrow(target, ability, dc) {
-  const rolls = await target.actor.rollSavingThrow(
-    {ability},
-    {configure: false, target: dc},
-    {create: true}
-  );
-  const roll = rolls?.[0];
-  if (!roll) return null;
-  const total = Number(roll.total ?? 0);
-  return {roll, total, success: total >= dc, margin: dc - total};
 }
 
 function macroReference(effectIdentifier) {

@@ -1,0 +1,313 @@
+{
+  "_id": "KhzCrownStars001",
+  "name": "Crown of Stars",
+  "type": "spell",
+  "img": "icons/magic/light/explosion-star-large-blue-yellow.webp",
+  "system": {
+    "identifier": "crown-of-stars",
+    "description": {
+      "value": "<p>Crei sette stelle che orbitano intorno alla testa per 1 ora, senza concentrazione. Con uno slot di 8° livello ne crei nove; con uno di 9° ne crei undici.</p><p>Come azione bonus, scagli una stella contro una creatura o un oggetto entro 120 ft (36,576 m). Effettua un attacco con incantesimo a distanza: se colpisci, infliggi 4d12 danni radianti. La stella viene consumata anche se manchi.</p><p>Con almeno quattro stelle: luce intensa entro 30 ft e fioca fino a 60 ft. Con una, due o tre: solo luce fioca entro 30 ft. L'incantesimo termina quando consumi l'ultima stella o scade la durata.</p><p><strong>Automazione:</strong> usa «Crea la corona», poi «Scaglia una stella». Gli utilizzi dell'attività indicano le stelle rimaste e non si recuperano con i riposi. Un nuovo lancio sostituisce la corona precedente. Mantieni attivo il consumo degli utilizzi quando scagli una stella.</p>",
+      "chat": ""
+    },
+    "source": {
+      "custom": "Xanathar's Guide to Everything",
+      "rules": "2014",
+      "revision": 1
+    },
+    "ability": "",
+    "level": 7,
+    "school": "evo",
+    "method": "spell",
+    "prepared": 0,
+    "sourceItem": "",
+    "activation": {
+      "type": "action",
+      "value": 1,
+      "condition": ""
+    },
+    "duration": {
+      "value": "1",
+      "units": "hour"
+    },
+    "range": {
+      "units": "self",
+      "special": ""
+    },
+    "target": {
+      "affects": {
+        "type": "self",
+        "count": "1",
+        "choice": false,
+        "special": ""
+      },
+      "template": {
+        "type": "",
+        "units": "ft",
+        "contiguous": false,
+        "size": "",
+        "count": ""
+      }
+    },
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "properties": [
+      "vocal",
+      "somatic",
+      "mgc"
+    ],
+    "materials": {
+      "value": "",
+      "consumed": false,
+      "cost": 0,
+      "supply": 0
+    },
+    "activities": {
+      "3633a9ddab7eba27": {
+        "_id": "3633a9ddab7eba27",
+        "type": "utility",
+        "name": "Crea la corona",
+        "img": "",
+        "activation": {
+          "type": "action",
+          "value": 1,
+          "override": true,
+          "condition": ""
+        },
+        "consumption": {
+          "spellSlot": true,
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          }
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "hour",
+          "value": "1",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "units": "self",
+          "override": true,
+          "special": ""
+        },
+        "target": {
+          "override": true,
+          "prompt": false,
+          "affects": {
+            "type": "self",
+            "count": "1",
+            "choice": false,
+            "special": ""
+          },
+          "template": {
+            "type": "",
+            "units": "ft",
+            "contiguous": false,
+            "size": "",
+            "count": ""
+          }
+        },
+        "uses": {
+          "spent": 0,
+          "max": "",
+          "recovery": []
+        },
+        "sort": 0,
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "identifier": "crownOfStars",
+          "automationOnly": false,
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "magicEffect": true,
+          "magicDamage": false
+        },
+        "flags": {
+          "cat": {
+            "hidden": false
+          }
+        },
+        "roll": {
+          "formula": "",
+          "name": "",
+          "prompt": false,
+          "visible": false
+        }
+      },
+      "ad4eaf3ad1b01cce": {
+        "_id": "ad4eaf3ad1b01cce",
+        "type": "attack",
+        "name": "Scaglia una stella",
+        "img": "",
+        "activation": {
+          "type": "bonus",
+          "value": 1,
+          "override": true,
+          "condition": ""
+        },
+        "consumption": {
+          "spellSlot": false,
+          "targets": [
+            {
+              "type": "activityUses",
+              "value": "1",
+              "target": "",
+              "scaling": {}
+            }
+          ],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          }
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "units": "ft",
+          "value": "120",
+          "override": true,
+          "special": ""
+        },
+        "target": {
+          "override": true,
+          "prompt": true,
+          "affects": {
+            "type": "creatureOrObject",
+            "count": "1",
+            "choice": false,
+            "special": ""
+          },
+          "template": {
+            "type": "",
+            "units": "ft",
+            "contiguous": false,
+            "size": "",
+            "count": ""
+          }
+        },
+        "uses": {
+          "spent": 0,
+          "max": "0",
+          "recovery": []
+        },
+        "sort": 0,
+        "visibility": {
+          "level": {
+            "min": null,
+            "max": null
+          }
+        },
+        "midiProperties": {
+          "identifier": "crownOfStarsMote",
+          "automationOnly": false,
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "magicEffect": true,
+          "magicDamage": true
+        },
+        "flags": {
+          "cat": {
+            "hidden": true
+          }
+        },
+        "damage": {
+          "parts": [
+            {
+              "number": 4,
+              "denomination": 12,
+              "bonus": "",
+              "types": [
+                "radiant"
+              ],
+              "custom": {
+                "enabled": false,
+                "formula": ""
+              },
+              "scaling": {
+                "mode": "",
+                "number": null,
+                "formula": ""
+              }
+            }
+          ],
+          "includeBase": false,
+          "critical": {
+            "bonus": ""
+          }
+        },
+        "attack": {
+          "ability": "",
+          "bonus": "",
+          "flat": false,
+          "critical": {
+            "threshold": null
+          },
+          "type": {
+            "value": "ranged",
+            "classification": "spell"
+          }
+        }
+      }
+    }
+  },
+  "effects": [],
+  "flags": {
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.28.0"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2014",
+            "identifier": "crown-of-stars"
+          }
+        ]
+      }
+    },
+    "khuzoe-automations": {
+      "sourceIdentifier": "crown-of-stars",
+      "activityIdentifiers": {
+        "crownOfStars": "3633a9ddab7eba27",
+        "crownOfStarsMote": "ad4eaf3ad1b01cce"
+      }
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": [],
+        "effect": []
+      }
+    }
+  },
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_key": "!items!KhzCrownStars001"
+}

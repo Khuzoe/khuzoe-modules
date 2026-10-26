@@ -3,12 +3,14 @@ export const FOLLOW_UP_ACTIVITIES = new Set([
   "farStepTeleport", "fireShieldDismiss", "flameBladeScimitar", "flameBladeEvoke",
   "hexMove", "huntersMarkMove", "investitureOfFlameFire", "investitureOfIceCone",
   "investitureOfStoneEarthquake", "wardingBondDismiss", "auraOfVitalityHeal",
-  "heatMetalPulse", "holyWeaponDismiss", "vampiricTouchAttack"
+  "heatMetalPulse", "holyWeaponDismiss", "vampiricTouchAttack", "crownOfStarsMote"
 ]);
 
 /** Applied to generated data only; no migration of world Items. */
 export function normalizeAutomationData(item) {
-  if (item?.flags?.cat?.automation?.source === "khuzoe-automations") item.flags.cat.automation.version = RELEASE_VERSION;
+  if (item?.flags?.cat?.automation?.source === "khuzoe-automations") {
+    item.flags.cat.automation.version = item.system?.identifier === "crown-of-stars" ? "0.28.0" : RELEASE_VERSION;
+  }
   if (!item?.system?.activities) return item;
   const identifier = item.system.identifier;
   if (identifier === "create-bonfire") {
@@ -34,6 +36,7 @@ export function normalizeAutomationData(item) {
     if (followUp) {
       activity.midiProperties.automationOnly = false;
       activity.consumption = {targets: [], spellSlot: false, scaling: {allowed: false}};
+      if (key === "crownOfStarsMote") activity.consumption.targets = [{type: "activityUses", value: "1", target: "", scaling: {}}];
       activity.duration = {units: "inst", concentration: false, override: true};
     } else if (activity.flags?.cat?.hidden) {
       activity.midiProperties.automationOnly = true;

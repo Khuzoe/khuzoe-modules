@@ -242,3 +242,11 @@ Le schede Actor e Item del sistema sono integrate tramite `renderApplicationV2` 
 ## Licenza
 
 MIT. Consulta `LICENSE`.
+
+## Calendari personalizzati (1.21.3)
+
+Le produzioni basate sul tempo del mondo usano la durata del giorno del calendario nativo Foundry, compreso Khuzoe Calendar: con un giorno da 40 ore, un ciclo giornaliero dura 40 ore. Anche la stima del prossimo ciclo usa le stesse unità. Le produzioni basate sul tempo reale restano su giorni da 24 ore. Senza calendario personalizzato il comportamento precedente rimane invariato.
+
+L'aggiornamento non attiva produzioni né modifica inventari o configurazioni esistenti. Al successivo controllo di produzione, l'intervallo viene interpretato con il calendario attivo e l'ultimo istante già registrato; restano validi il limite dei recuperi e la protezione dai salti indietro.
+
+Verifica: `node --test tests/production-calendar.test.mjs tests/module.test.mjs`.

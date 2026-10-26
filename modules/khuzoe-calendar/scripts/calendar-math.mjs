@@ -55,7 +55,7 @@ export function shiftDate(definition, date, days) { return secondsClock(definiti
 export function dateKey(date) { return `${date.year}/${date.monthId}/${date.day}`; }
 export function weekday(definition, date) { return mod(Math.floor(clockSeconds(definition, { date }) / units(definition).day) + (definition.firstWeekdayIndex || 0), definition.weekdays.length); }
 export function formatDate(definition, date) { return `${date.day} ${definition.months.find((month) => month.id === date.monthId)?.name || date.monthId} ${date.year}${definition.epochName ? ` ${definition.epochName}` : ""}`; }
-export function formatTime(time) { return `${String(time.hour).padStart(2, "0")}:${String(time.minute).padStart(2, "0")}`; }
+export function formatTime(time, seconds = false) { return `${String(time.hour).padStart(2, "0")}:${String(time.minute).padStart(2, "0")}${seconds ? `:${String(time.second ?? 0).padStart(2, "0")}` : ""}`; }
 export function eventsForDate(events, definition, date) {
   const start = clockSeconds(definition, { date }), end = start + units(definition).day;
   return events.filter((event) => {

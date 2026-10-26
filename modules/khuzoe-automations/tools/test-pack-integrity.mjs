@@ -108,7 +108,7 @@ for (const [directory, packName] of packDirectories) {
   }
 }
 
-assert.equal(documents.length, 168, "Numero inatteso di documenti Item Khuzoe");
+assert.equal(documents.length, 169, "Numero inatteso di documenti Item Khuzoe");
 assert.equal(automations.length, documents.length, "Ogni Item deve avere una sola automazione registrata");
 
 const automationKeys = new Set();

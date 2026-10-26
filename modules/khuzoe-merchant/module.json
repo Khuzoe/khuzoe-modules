@@ -2,7 +2,7 @@
   "id": "khuzoe-merchant",
   "title": "Khuzoe Merchant",
   "description": "Negozi per NPC, oggetti raccoglibili, contenitori condivisi e produzione periodica, con trasferimenti convalidati dal GM.",
-  "version": "1.21.2",
+  "version": "1.21.3",
   "compatibility": {
     "minimum": "14",
     "verified": "14.367"

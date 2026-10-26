@@ -157,14 +157,23 @@ export function productionClock(timeBasis = "world") {
   return Number.isFinite(worldTime) ? worldTime : 0;
 }
 
+export function productionTimeUnits(timeBasis = "world") {
+  const days = timeBasis === "world" ? globalThis.game?.time?.calendar?.days : null;
+  const positive = (value, fallback) => Number.isFinite(value) && value > 0 ? value : fallback;
+  const minute = positive(days?.secondsPerMinute, 60);
+  const hour = minute * positive(days?.minutesPerHour, 60);
+  return { minute, hour, day: hour * positive(days?.hoursPerDay, 24) };
+}
+
 export function productionIntervalSeconds(source = {}) {
-  return normalizeProduction(source).intervalDays * PRODUCTION_SECONDS_PER_DAY;
+  const production = normalizeProduction(source);
+  return production.intervalDays * productionTimeUnits(production.timeBasis).day;
 }
 
 export function productionSchedule(source = {}, now = undefined) {
   const production = normalizeProduction(source);
   const current = Number.isFinite(Number(now)) ? Number(now) : productionClock(production.timeBasis);
-  const interval = production.intervalDays * PRODUCTION_SECONDS_PER_DAY;
+  const interval = productionIntervalSeconds(production);
   const anchor = production.lastProcessedAt;
   if (!production.enabled || anchor === null) {
     return {

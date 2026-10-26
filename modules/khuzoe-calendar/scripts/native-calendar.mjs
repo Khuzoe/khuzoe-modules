@@ -5,6 +5,11 @@ import { calendarConfig, clone, units } from "./calendar-math.mjs";
 export function createCalendarClass(Base, offset = 0) {
   return class KhuzoeCalendarData extends Base {
     static khuzoeCalendar = true;
+    static formatApproximateDate(calendar, components, options) {
+      if (calendar.seasons?.values?.length && Base.formatApproximateDate) return Base.formatApproximateDate(calendar, components, options);
+      const month = calendar.months.values[components.month];
+      return `${components.dayOfMonth + 1} ${game.i18n?.localize?.(month.name) ?? month.name} ${components.year + calendar.years.yearZero}`;
+    }
     timeToComponents(time = 0) {
       const result = super.timeToComponents(time + offset);
       result.dayOfWeek = ((result.dayOfWeek % this.days.values.length) + this.days.values.length) % this.days.values.length;
@@ -29,6 +34,8 @@ export function createCalendarClass(Base, offset = 0) {
       return super.timeToComponents(to - from);
     }
     format(time = game.time.worldTime, formatter = "timestamp", options = {}) {
+      const resolved = typeof formatter === "function" ? formatter : CONFIG.time.formatters?.[formatter];
+      if (["approximateDate", "formatApproximateDate"].includes(formatter) || (resolved && resolved === Base.formatApproximateDate)) formatter = this.constructor.formatApproximateDate;
       // Core passes durations as seconds to formatDuration/formatAgo.
       if (typeof time === "number" && (["duration", "formatDuration", "ago", "formatAgo"].includes(formatter) || formatter === this.constructor.formatDuration || formatter === this.constructor.formatAgo)) return super.format(super.timeToComponents(time), formatter, options);
       return super.format(time, formatter, options);
@@ -73,8 +80,9 @@ export function compatibilityNotices(definition, modules = game.modules) {
   const active = (id) => modules.get(id)?.active;
   const notices = [];
   for (const id of ["foundryvtt-simple-calendar", "foundryvtt-simple-calendar-reborn", "calendaria", "simple-timekeeping", "seasons-and-stars"]) if (active(id)) notices.push({ blocking: true, text: `${modules.get(id).title || id} è attivo: scegli un solo gestore del calendario prima di collegare l'orologio.` });
+  if (active("smalltime") && (definition.timeSystem.hoursPerDay !== 24 || definition.timeSystem.minutesPerHour !== 60)) notices.push({ blocking: false, text: "SmallTime non supporta questo giorno personalizzato: ora e oscurità collegate possono divergere. Usa l'orologio Khuzoe e disattiva il collegamento dell'oscurità di SmallTime." });
   if (units(definition).day !== 86400) {
-    const names = ["smalltime", "khuzoe-merchant", "monks-active-tiles", "monks-enhanced-journal"].filter(active).map((id) => modules.get(id).title || id);
+    const names = ["monks-active-tiles", "monks-enhanced-journal"].filter(active).map((id) => modules.get(id).title || id);
     if (names.length) notices.push({ blocking: false, text: `Il giorno ha una durata personalizzata. Verifica le funzioni giornaliere di: ${names.join(", ")}.` });
   }
   return notices;

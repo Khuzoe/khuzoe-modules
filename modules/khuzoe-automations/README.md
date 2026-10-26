@@ -129,6 +129,8 @@ L'applicazione o l'aggiornamento delle cinque automazioni conserva l'icona perso
 
 Il compendio **Khuzoe Automations — Capacità NPC 2014** contiene le capacità operative di **El'Athel**, **Na'Niss** e **Spirito Elementale Fatato**. Il Medkit CAT le riconosce sugli oggetti originali senza sostituirne nome, descrizione, immagine, attività o flag appartenenti ad altri moduli.
 
+Dalla versione runtime **0.27.3**, i TS aggiuntivi di Psychic Strike, i TS ripetuti di Brain Storm e il TS di Colpo Purificante vengono richiesti al proprietario connesso del bersaglio. Il personaggio assegnato ha precedenza fra più proprietari; senza proprietari giocatori connessi tira il GM. Il tiro conserva bonus e dialoghi nativi D&D5e/Midi/CAT. Una richiesta annullata o non riuscita non provoca un nuovo tiro sul client dell'attaccante. Dopo l'aggiornamento ricaricare GM e giocatori: non occorre riapplicare le capacità alla scheda.
+
 - **El'Athel**: Psychic Strike in mischia e a distanza condividono il conteggio dei colpi e applicano lo stordimento previsto al secondo colpo; Brain Storm gestisce il danno corretto e i TS ripetuti contro il veleno; Impenetrable Ego e Appeal to the Fervent intervengono automaticamente nei rispettivi tiri. Multiattack riceve un comando dedicato solo su questo attore. **Bend the Spoon è intenzionalmente esclusa.**
 - **Na'Niss**: Aura Rinvigorente, evocazione dello Spirito, Danza Incoraggiante, Multiattacco e Colpo Purificante sono collegati tra loro. Il secondo colpo può potenziare le cure dell'aura e lo Spirito evocato segue l'iniziativa di Na'Niss.
 - **Spirito Elementale Fatato**: Aura Rinvigorente Espansa, Esplosione Radiosa, Protettore Spirituale, Multiattacco e Colpo Energico gestiscono cure, punti ferita temporanei e trasferimento del danno nell'area condivisa.
@@ -161,10 +163,20 @@ Il mantenimento viene controllato tra due fini-turno: un attacco effettuato, anc
 
 Circle of the Moon aggiunge automaticamente attivazione come azione bonus, guarigione con slot, CR di Circle Forms, Primal Strike e le quattro forme elementali. Un GM attivo è necessario quando un giocatore non possiede il permesso globale di creare Attori: l'operazione viene delegata in modo ristretto tramite SocketLib.
 
+## Crown of Stars (2014)
+
+Disponibile nel compendio incantesimi 2014 e nel pulsante automazioni della scheda, identificatore `crown-of-stars`. **Crea la corona** consuma lo slot e prepara 7/9/11 stelle con slot di 7°/8°/9° livello; dura 1 ora senza concentrazione. **Scaglia una stella** è un attacco con incantesimo a distanza, azione bonus, contro una creatura o un oggetto entro 120 ft, per 4d12 radianti. L'attività consuma nativamente un utilizzo anche su un mancato: mantenere abilitato il consumo degli utilizzi nel dialogo.
+
+Gli utilizzi di «Scaglia una stella» indicano le stelle rimaste e non si recuperano con i riposi. L'icona dell'effetto riporta il conteggio. Con almeno 4 stelle la luce intensa raggiunge 30 ft e quella fioca 60 ft; con 1–3 stelle rimane solo luce fioca entro 30 ft. L'effetto non riduce altre fonti di luce più forti. All'ultima stella, alla scadenza o eliminando l'effetto, l'attacco successivo viene nascosto. Un nuovo lancio sostituisce la corona precedente. Non aggiunge dipendenze da moduli di animazione.
+
+La versione 0.28.0 aggiunge un nuovo compendio compilato senza sovrascrivere quello aperto: tornare alla schermata di configurazione e riaprire il mondo, poi ricaricare i client e applicare l'automazione dalla scheda (o importare Crown of Stars dal compendio Khuzoe).
+
 ## Comandi e comportamento dopo la revisione
 
 Nel Medkit è disponibile **Aiuta / termina un effetto**: rimozione dell’acido di Tasha’s Caustic Brew, liberazione dal ghiaccio di Rime’s Binding Ice, risveglio da Hypnotic Pattern, termine volontario di Gaseous Form, uso di Death Ward contro una morte istantanea senza danni e rilascio/richiamo di Shadow Blade. Le azioni di aiuto richiedono una creatura capace di agire; il richiamo della lama consuma un’azione bonus.
 
 Booming Blade e Green-Flame Blade aggiungono i dadi iniziali al tiro dell’arma, affinché critici e reazioni vedano un unico attacco. I danni ceduti da Legame del Danno e Protettore Spirituale vengono applicati dopo la risoluzione del danno originale. Le guarigioni generate usano il sistema nativo e rispettano le sue protezioni e limitazioni.
+
+Da 0.28.1, il danno da movimento di Booming Blade conserva il livello del lanciatore al momento del lancio: 1d8 ai livelli 1–4, 2d8 ai livelli 5–10, 3d8 ai livelli 11–16 e 4d8 dal 17°. Il tiro sul client del proprietario riceve la formula salvata, evitando che Midi ricarichi l'attività base da 1d8. Gli effetti precedenti con dadi già salvati rimangono validi; se mancano, si usa il livello del lanciatore originale. Per questa correzione basta ricaricare GM e giocatori con Ctrl+F5, senza riapplicare l'automazione o modificare i dati dei mondi.
 
 Grease, Earth Tremor, Ice Storm e le forme pertinenti di Guardian of Nature e Investiture of Ice creano terreno difficile tramite Regioni. Earth Tremor resta finché il terreno non viene ripulito e il GM elimina la relativa Regione. Lo spazio disponibile per crescere, le mani libere, gli oggetti e le altre condizioni narrative richiedono una decisione del tavolo.

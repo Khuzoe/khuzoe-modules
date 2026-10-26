@@ -22,6 +22,13 @@ test("all four shortcuts use the existing native calendar command, including neg
   assert.deepEqual(f.advances, [{ amount: -1, unit: "hour" }, { amount: -15, unit: "minute" }, { amount: 15, unit: "minute" }, { amount: 1, unit: "hour" }]);
 });
 
+test("widget shortcuts follow the configured calendar steps", async () => {
+  const f = fixture();
+  f.controller.definition = { timeSystem: { quickSteps: [{ amount: -2, unit: "hour" }, { amount: 1, unit: "day" }] } };
+  await f.widget.advance(0); await f.widget.advance(1); await f.widget.advance(2);
+  assert.deepEqual(f.advances, [{ amount: -2, unit: "hour" }, { amount: 1, unit: "day" }]);
+});
+
 test("readers, unlinked clocks, pull-disabled accounts and unresolved writes cannot advance", async () => {
   for (const override of [{ isGM: false }, { linked: false }, { writable: false }, { context: { localPullWrites: false } }, { conflict: "Conflict" }, { binding: { pending: {} } }, { binding: { incoming: {} } }, { busy: true }]) {
     const f = fixture(); Object.assign(f.controller, override);
