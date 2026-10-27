@@ -24,3 +24,5 @@ jobs:
         run: ./tools/build-app.ps1 -Test
       - shell: pwsh
         run: ./tools/build-app.ps1
+      - shell: pwsh
+        run: ./tests/PublishAppTests.ps1

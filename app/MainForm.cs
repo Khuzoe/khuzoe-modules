@@ -14,8 +14,9 @@ namespace KhuzoeUpdater
     internal static class Program
     {
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
+            if (args.Length == 2 && args[0] == "--apply-app-update") { AppUpdates.RunHelper(args[1]); return; }
             bool created;
             using (var mutex = new Mutex(true, "Local\\KhuzoeUpdater", out created))
             {
@@ -118,6 +119,10 @@ namespace KhuzoeUpdater
         readonly WebButton choose = new WebButton();
         readonly WebButton refresh = new WebButton();
         readonly WebButton update = new WebButton { Primary = true };
+        readonly WebButton appUpdate = new WebButton();
+        readonly Label appMessage = new Label();
+        AppRelease appRelease;
+        bool checkingApp;
         readonly DataGridView grid = new DataGridView();
         readonly ProgressBar bar = new ProgressBar();
         readonly Label summary = new Label();
@@ -134,13 +139,14 @@ namespace KhuzoeUpdater
             Font = new Font("Segoe UI", 10F);
             BackColor = Theme.Background;
             ForeColor = Theme.Text;
-            ClientSize = new Size(960, 770);
-            MinimumSize = new Size(820, 640);
+            ClientSize = new Size(960, 822);
+            MinimumSize = new Size(820, 692);
             StartPosition = FormStartPosition.CenterScreen;
             AutoScaleMode = AutoScaleMode.Dpi;
-            var layout = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(32, 24, 32, 24), ColumnCount = 1, RowCount = 7 };
+            var layout = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(32, 24, 32, 24), ColumnCount = 1, RowCount = 8 };
             layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 84));
+            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 52));
             layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 104));
             layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 64));
             layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
@@ -149,6 +155,14 @@ namespace KhuzoeUpdater
             layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 64));
             var header = new BrandHeader { Dock = DockStyle.Fill, Margin = Padding.Empty };
             layout.Controls.Add(header, 0, 0);
+            var appRow = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, Margin = Padding.Empty, Padding = new Padding(0, 0, 0, 12) };
+            appRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            appRow.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 170));
+            appMessage.Dock = DockStyle.Fill; appMessage.TextAlign = ContentAlignment.MiddleLeft; appMessage.ForeColor = Theme.Muted;
+            appMessage.Font = new Font("Segoe UI", 9F); appMessage.AutoEllipsis = true; appMessage.Text = "Controllo della versione dell'app…";
+            appUpdate.Text = "Controlla app"; appUpdate.Dock = DockStyle.Fill; appUpdate.Margin = new Padding(6, 0, 0, 0);
+            appUpdate.Click += async (s, e) => { if (appRelease == null) await CheckApp(); else await UpdateApp(); };
+            appRow.Controls.Add(appMessage, 0, 0); appRow.Controls.Add(appUpdate, 1, 0); layout.Controls.Add(appRow, 0, 1);
             var folderCard = new SurfacePanel { Dock = DockStyle.Fill, Padding = new Padding(22, 14, 22, 14), Margin = Padding.Empty };
             var folderRow = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 2, BackColor = Theme.Surface };
             folderRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
@@ -161,12 +175,12 @@ namespace KhuzoeUpdater
             choose.Click += async (s, e) => await ChooseFolder();
             folderRow.Controls.Add(folder, 0, 1); folderRow.Controls.Add(choose, 1, 0); folderRow.SetRowSpan(choose, 2);
             folderCard.Controls.Add(folderRow);
-            layout.Controls.Add(folderCard, 0, 1);
+            layout.Controls.Add(folderCard, 0, 2);
             var section = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, Margin = Padding.Empty, Padding = new Padding(0, 20, 0, 6) };
             section.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50)); section.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
             section.Controls.Add(new Label { Text = "Moduli", Font = new Font("Segoe UI", 15F, FontStyle.Bold), Dock = DockStyle.Fill }, 0, 0);
             summary.Dock = DockStyle.Fill; summary.TextAlign = ContentAlignment.MiddleRight; summary.ForeColor = Theme.Muted; summary.Font = new Font("Segoe UI", 9F);
-            section.Controls.Add(summary, 1, 0); layout.Controls.Add(section, 0, 2);
+            section.Controls.Add(summary, 1, 0); layout.Controls.Add(section, 0, 3);
             var tableCard = new SurfacePanel { Dock = DockStyle.Fill, Padding = new Padding(16, 8, 16, 8), Margin = Padding.Empty };
             grid.Dock = DockStyle.Fill; grid.ReadOnly = true; grid.AllowUserToAddRows = false; grid.AllowUserToDeleteRows = false;
             grid.AllowUserToResizeRows = false; grid.RowHeadersVisible = false; grid.MultiSelect = false;
@@ -205,11 +219,11 @@ namespace KhuzoeUpdater
             empty.Controls.Add(emptyTitle); empty.Controls.Add(emptyText);
             empty.Resize += (s, e) => { emptyTitle.SetBounds(0, Math.Max(0, empty.Height / 2 - 38), empty.Width, 36); emptyText.SetBounds(0, empty.Height / 2 + 2, empty.Width, 28); };
             tableCard.Controls.Add(grid); tableCard.Controls.Add(empty); empty.BringToFront();
-            layout.Controls.Add(tableCard, 0, 3);
+            layout.Controls.Add(tableCard, 0, 4);
             message.Dock = DockStyle.Fill; message.TextAlign = ContentAlignment.MiddleLeft; message.AutoEllipsis = true; message.ForeColor = Theme.Muted; message.Font = new Font("Segoe UI", 9F);
-            layout.Controls.Add(message, 0, 4);
+            layout.Controls.Add(message, 0, 5);
             bar.Dock = DockStyle.Fill; bar.Style = ProgressBarStyle.Marquee; bar.MarqueeAnimationSpeed = 0; bar.Visible = false;
-            layout.Controls.Add(bar, 0, 5);
+            layout.Controls.Add(bar, 0, 6);
             var bottom = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, Margin = Padding.Empty };
             bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 145));
@@ -220,9 +234,9 @@ namespace KhuzoeUpdater
             refresh.Click += async (s, e) => await Check();
             update.Click += async (s, e) => await Apply();
             bottom.Controls.Add(refresh, 1, 0); bottom.Controls.Add(update, 2, 0);
-            layout.Controls.Add(bottom, 0, 6);
+            layout.Controls.Add(bottom, 0, 7);
             Controls.Add(layout);
-            Shown += async (s, e) => await Startup();
+            Shown += async (s, e) => { await Task.WhenAll(Startup(), CheckApp(), AppUpdates.Cleanup()); };
             FormClosing += (s, e) => { if (busy) { e.Cancel = true; MessageBox.Show(this, "Attendi la fine dell'operazione.", Text); } };
             folder.Text = "Nessuna cartella selezionata";
             message.Text = "";
@@ -318,10 +332,50 @@ namespace KhuzoeUpdater
         void Busy(bool value)
         {
             busy = value; choose.Enabled = !value; refresh.Enabled = !value && installation != null;
+            appUpdate.Enabled = !value && !checkingApp;
             update.Enabled = !value && rows.Any(r => r.IsInstalled && r.CanUpdate); bar.MarqueeAnimationSpeed = value ? 25 : 0;
             bar.Visible = value;
             if (!value && rows.Count > 0) summary.Text = rows.Count(r => r.IsInstalled) + " installati · " + rows.Count(r => !r.IsInstalled) + " mancanti";
             grid.Invalidate();
+        }
+        async Task CheckApp()
+        {
+            if (checkingApp) return;
+            checkingApp = true; appUpdate.Enabled = false; appMessage.Text = "Controllo della versione dell'app…";
+            try
+            {
+                var available = await AppUpdates.Check();
+                appRelease = Versioning.Compare(available.version, BuildConfig.Version) > 0 ? available : null;
+                appMessage.Text = appRelease == null ? "L'app è aggiornata." : "Khuzoe Updater " + appRelease.version + " è disponibile.";
+                appMessage.ForeColor = appRelease == null ? Theme.Muted : Theme.Gold;
+                appUpdate.Text = appRelease == null ? "Controlla app" : "Aggiorna app";
+                appUpdate.Primary = appRelease != null;
+            }
+            catch
+            {
+                appRelease = null; appUpdate.Text = "Riprova"; appUpdate.Primary = false;
+                appMessage.Text = "Verifica dell'app non disponibile. Puoi riprovare."; appMessage.ForeColor = Theme.Muted;
+            }
+            finally { checkingApp = false; appUpdate.Enabled = !busy; appUpdate.Invalidate(); }
+        }
+        async Task UpdateApp()
+        {
+            if (busy || checkingApp || appRelease == null) return;
+            Busy(true); appMessage.Text = "Scarico e verifico l'app. Al termine si riaprirà automaticamente…";
+            string stage = null;
+            try
+            {
+                stage = await AppUpdates.Prepare(appRelease, Application.ExecutablePath);
+                AppUpdates.StartHelper(stage);
+                busy = false;
+                Application.Exit();
+            }
+            catch (Exception ex)
+            {
+                if (stage != null) AppUpdates.RemoveStage(stage);
+                appMessage.Text = "Aggiornamento dell'app non completato. Puoi riprovare.";
+                ShowError(ex); Busy(false);
+            }
         }
         void Render()
         {

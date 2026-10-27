@@ -162,6 +162,7 @@ internal static class CoreTests
             Settings.Save(new Preferences { ModulesPath = modules, SelectedPath = selected }, settings);
             Assert(Json.FileRead<Preferences>(settings).ModulesPath == modules, "cartella memorizzata e risalvata");
             Assert(Network.Hash(valid).Length == 64, "impronta SHA-256 disponibile");
+            AppUpdateTests.Run(root, Assert, Reject);
             if (args.Length == 1) VerifyPackages(args[0], root);
             Console.WriteLine("PASS: " + passed + " controlli, solo cartelle temporanee.");
             return 0;

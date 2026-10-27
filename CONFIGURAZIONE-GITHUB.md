@@ -36,6 +36,8 @@ L'indirizzo del catalogo è già incorporato nell'eseguibile preparato. Se scegl
 
 Per i DM distribuisci `KhuzoeUpdater-Windows.zip`, non lo ZIP dei sorgenti del progetto. Devono estrarlo e lasciare insieme `KhuzoeUpdater.exe` e `KhuzoeUpdater.exe.config`.
 
+Dalla versione 0.4.0, dopo questo primo download gli aggiornamenti successivi dell'app si installano tramite **Aggiorna app**. Il workflow pubblica anche il manifest con versione, URL e impronte del pacchetto nella release dell'app, poi aggiorna l'asset stabile `updater-channel/app-update.json`. La release tecnica `updater-channel` viene creata automaticamente, è separata dai moduli e non va cancellata. Non occorre configurare nuovi token, segreti o Pages: il permesso `contents: write` già presente è sufficiente. Un tentativo interrotto dopo la creazione della release può essere ripetuto per completare il canale senza ricompilare i pacchetti pubblicati.
+
 ## Uso successivo
 
 Per pubblicare Merchant, per esempio, si modificano i suoi file e si porta la versione da `1.21.2` a `1.21.3`, poi si invia a `main`. GitHub genera soltanto la nuova release Merchant. Il catalogo continua a contenere le versioni precedenti degli altri moduli.
