@@ -1,0 +1,12 @@
+{
+  "id": "khuzoe-tiles-creator",
+  "title": "Khuzoe Tiles Creator",
+  "description": "Seleziona un'area della scena, modifica sfondo e tile con AI e posiziona il risultato dopo l'anteprima.",
+  "version": "0.1.1",
+  "compatibility": { "minimum": "14", "verified": "14.367" },
+  "authors": [{ "name": "Khuzoe" }],
+  "esmodules": ["scripts/main.mjs"],
+  "styles": ["styles/tiles-creator.css"],
+  "relationships": { "requires": [{ "id": "cripta-wiki-sync", "type": "module", "compatibility": { "minimum": "0.11.1" } }] },
+  "readme": "README.md"
+}

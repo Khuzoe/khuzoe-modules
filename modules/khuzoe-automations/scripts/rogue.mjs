@@ -183,9 +183,25 @@ function hasAdjacentEnemyOfTarget(target, source) {
   }).some(candidate => !sameToken(candidate, source) && tokenUtils.isEnemy(target, candidate));
 }
 
+function attackAdvantageMode(workflow) {
+  const mode = workflow?.attackRoll?.options?.advantageMode
+    ?? workflow?.attackRollModifierTracker?.advantageMode;
+  const modes = globalThis.CONFIG?.Dice?.D20Roll?.ADV_MODE;
+  if (mode !== undefined && mode !== null && modes) {
+    if (mode === modes.ADVANTAGE) return "advantage";
+    if (mode === modes.DISADVANTAGE) return "disadvantage";
+    if (mode === modes.NORMAL) return "normal";
+  }
+  if (workflow?.advantage && workflow?.disadvantage) return "normal";
+  if (workflow?.disadvantage) return "disadvantage";
+  if (workflow?.advantage) return "advantage";
+  return "normal";
+}
+
 function hasSneakAttackCondition(workflow, target, source) {
-  if (workflow?.disadvantage) return false;
-  if (workflow?.advantage) return true;
+  const mode = attackAdvantageMode(workflow);
+  if (mode === "disadvantage") return false;
+  if (mode === "advantage") return true;
   return hasAdjacentEnemyOfTarget(target, source);
 }
 

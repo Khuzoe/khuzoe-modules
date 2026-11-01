@@ -16,7 +16,7 @@ export const CAMPAIGN_IDS = Object.freeze({
   regeneration: "regeneration"
 });
 const definitions = [
-  ["defense", "KhzCampDefense01", "Difesa Impenetrabile", "2024", "Posizione Guardinga prima del primo attacco: svantaggio agli attacchi visibili, +2 CA contro attacchi già svantaggiati e svantaggio obbligatorio ai propri attacchi da mischia con Forza."],
+  ["defense", "KhzCampDefense01", "Difesa Impenetrabile", "2024", "Scelta all'inizio del turno prima del primo attacco: tutti i propri attacchi hanno svantaggio non annullabile; tutti gli attacchi contro di sé hanno svantaggio fino all'inizio del turno seguente."],
   ["premonition", "KhzCampPremon001", "Premonizione Ripetuta", "2024", "+1 CA dopo ogni attacco ostile che colpisce, fino al modificatore di Saggezza; termina all'inizio del turno successivo."],
   ["reasoning", "KhzCampReason01x", "Ragionamento Preciso", "2024", "Propone 1d6 prima dei tiri per colpire, prove e TS; usi pari a Intelligenza (minimo 1), recupero al riposo lungo e di un uso con 20 naturale su attacchi o TS."],
   ["lucky", "KhzCampLucky001x", "Salvaculo Ragionato", "2024", "Con Ragionamento Preciso offre anche vantaggio ai TS. Estende Evasion ai TS di Intelligenza per dimezzare i danni solo se Evasion è posseduta."],
@@ -24,7 +24,8 @@ const definitions = [
 ];
 export const CAMPAIGN_AUTOMATIONS = definitions.map(([key, id, name, rules, notes]) => Object.freeze({
   source: MODULE, type: "feat", identifier: CAMPAIGN_IDS[key], key, name, rules,
-  version: RELEASE_VERSION, uuid: `${key === "regeneration" ? NPC_PACK : CLASS_PACK}.${id}`, notes
+  version: key === "defense" ? "0.28.4" : RELEASE_VERSION,
+  uuid: `${key === "regeneration" ? NPC_PACK : CLASS_PACK}.${id}`, notes
 }));
 const values = collection => Array.from(collection?.contents ?? collection?.values?.() ?? (Array.isArray(collection) ? collection : Object.values(collection ?? {})));
 const doc = token => token?.document ?? token;
@@ -117,45 +118,38 @@ export async function activateGuard({document: item, workflow}) {
   });
 }
 
-export async function guardAttackConfig({workflow, document: item}) {
+export async function guardTurnStart({document: item, combatant} = {}) {
   const actor = owner(item);
-  if (!workflow?.activity?.attack || !actor) return;
-  const state = rollState(workflow);
-  if (!state.guardAsked && ownTurn(actor) && actor.flags?.[MODULE]?.firstAttackTurn !== turnKey(actor) && !effect(actor, GUARD)) {
-    state.guardAsked = true;
-    if (await cat.utils.dialogUtils.confirmUseItem(item, {userId: userId(actor)})) await activateGuard({document: item});
-  }
-  if (effect(actor, GUARD) && isStrengthMelee(workflow)) {
-    state.forcedDisadvantage = true;
-    workflow.advantage = false;
-    workflow.disadvantage = true;
+  if (!actor || (combatant?.actor?.uuid && combatant.actor.uuid !== actor.uuid)
+    || !ownTurn(actor) || effect(actor, GUARD)
+    || actor.flags?.[MODULE]?.firstAttackTurn === turnKey(actor)) return;
+  if (await cat.utils.dialogUtils.confirmUseItem(item, {userId: userId(actor)})) {
+    await activateGuard({document: item});
   }
 }
 
-function isStrengthMelee(workflow) {
-  return workflow.activity?.actionType === "mwak" && (workflow.activity?.ability ?? workflow.activity?.attack?.ability ?? workflow.item?.system?.ability) === "str";
-}
-function canSee(defender, attacker) {
-  try { return Boolean(MidiQOL.canSee?.(doc(defender)?.object ?? defender, doc(attacker)?.object ?? attacker)); }
-  catch { return false; }
-}
-function addAC(workflow, actor, source, amount) {
-  const state = rollState(workflow);
-  state.ac ??= {};
-  (state.ac[actor.uuid] ??= {})[source] = amount;
+export async function guardAttackConfig({workflow, document: item}) {
+  const actor = owner(item);
+  if (!workflow?.activity?.attack || !actor) return;
+  if (effect(actor, GUARD)) {
+    rollState(workflow).forcedDisadvantage = true;
+    workflow.advantage = false;
+    workflow.disadvantage = true;
+  }
 }
 
 export function guardedTarget({workflow, document: item, sourceToken}) {
   const actor = owner(item);
   if (!actor || !effect(actor, GUARD) || !workflow?.activity?.attack) return;
   const defender = sourceToken ?? values(workflow.targets).find(token => token.actor?.uuid === actor.uuid);
-  if (!defender || !canSee(defender, workflow.token)) return;
+  if (doc(defender)?.actor?.uuid !== actor.uuid) return;
   const state = rollState(workflow);
   state.guarded ??= new Set();
   if (state.guarded.has(actor.uuid)) return;
   state.guarded.add(actor.uuid);
-  if (workflow.disadvantage && !workflow.advantage) addAC(workflow, actor, GUARD, 2);
-  workflow.disadvantage = true;
+  const disadvantage = workflow.attackRollModifierTracker?.disadvantage;
+  if (disadvantage?.add) disadvantage.add(GUARD, item.name);
+  else workflow.disadvantage = true;
 }
 
 export async function recordFirstAttack({workflow, document: item}) {
@@ -167,7 +161,7 @@ export async function recordFirstAttack({workflow, document: item}) {
 
 export function enforceGuardRoll(rolls, config) {
   const workflow = config?.workflow;
-  if (!workflow?.[STATE]?.forcedDisadvantage || !isStrengthMelee(workflow) || !effect(workflow.actor, GUARD)) return;
+  if (!workflow?.[STATE]?.forcedDisadvantage || !workflow.activity?.attack || !effect(workflow.actor, GUARD)) return;
   for (const roll of rolls ?? []) {
     if (roll._evaluated) continue;
     roll.options.advantage = false;
@@ -298,18 +292,8 @@ export async function guardianRegeneration({document: item, combatant, token}) {
   });
 }
 
-export function campaignACModifiers(workflow) {
-  for (const [actorUuid, sources] of Object.entries(workflow[STATE]?.ac ?? {})) {
-    const amount = Object.values(sources).reduce((sum, value) => sum + value, 0);
-    workflow.targetACModifiers.set(actorUuid, (workflow.targetACModifiers.get(actorUuid) ?? 0) + amount);
-  }
-}
 export async function cancelCampaignAttack(workflow) {
   await cancelReasoning(workflow);
-  const state = workflow?.[STATE];
-  if (state && !workflow.attackRoll) {
-    state.ac = {}; state.guardAsked = false;
-  }
 }
 let hooksInstalled = false;
 export function registerCampaignHooks() {
@@ -322,9 +306,6 @@ export function registerCampaignHooks() {
     let result;
     try { result = await wrapped(config, ...args); return result; }
     finally { if (!result?.length) await cancelCampaignAttack(config.workflow); }
-  }, "WRAPPER");
-  libWrapper.register(MODULE, "MidiQOL.Workflow.prototype.recordTargetACModifiers", function(wrapped, ...args) {
-    const result = wrapped(...args); campaignACModifiers(this); return result;
   }, "WRAPPER");
   libWrapper.register(MODULE, "MidiQOL.Workflow.prototype.checkSuperSaver", async function(wrapped, token, abilities) {
     return await wrapped(token, abilities) || intelligenceEvasion(this, token, abilities);
@@ -339,7 +320,7 @@ export function registerCampaignFeatures(api) {
   const pass = (pass, macro, priority = 100) => ({pass, macro, priority});
   const reasoningD20 = [pass("actorSituational", reasoningSituational), pass("actorPost", reasoningPost)];
   const macros = [
-    macro(CAMPAIGN_IDS.defense, {roll: [pass("itemRollFinished", activateGuard), pass("actorAttackRollConfig", guardAttackConfig, 200), pass("targetAttackRollConfig", guardedTarget, 240), pass("actorAttackRollBonuses", recordFirstAttack, 1)]}),
+    macro(CAMPAIGN_IDS.defense, {roll: [pass("itemRollFinished", activateGuard), pass("actorAttackRollConfig", guardAttackConfig, 200), pass("targetAttackRollConfig", guardedTarget, 240), pass("actorAttackRollBonuses", recordFirstAttack, 1)], combat: [pass("actorTurnStart", guardTurnStart)]}),
     macro(CAMPAIGN_IDS.premonition, {roll: [pass("targetAttackRollComplete", repeatedPremonition, 500)]}),
     macro(CAMPAIGN_IDS.reasoning, {roll: [pass("actorAttackRollConfig", reasoningAttackConfig), pass("actorAttackRollBonuses", reasoningAttackBonus), pass("actorAttackRollComplete", reasoningAttackPost)], save: reasoningD20, check: reasoningD20, skill: reasoningD20, tool: reasoningD20}),
     macro(CAMPAIGN_IDS.regeneration, {combat: [pass("actorTurnStart", guardianRegeneration)]}, "2014")

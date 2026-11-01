@@ -55,6 +55,12 @@ function item(actor, key, options = {}) {
 }
 const garun = actor("Garun"), theldarion = actor("Theldarion"), guardian = actor("Velkarya"), wearer = actor("Wearer"), enemy = actor("Enemy");
 const defense = item(garun, "defense"), premonition = item(garun, "premonition"), reasoning = item(theldarion, "reasoning"), lucky = item(theldarion, "lucky");
+const defenseSource = JSON.parse(await readFile(new URL("../packData/khuzoe-class-features-2014/Difesa_Impenetrabile_KhzCampDefense01.json", import.meta.url), "utf8"));
+assert.equal(defenseSource.flags.cat.automation.version,
+  campaign.CAMPAIGN_AUTOMATIONS.find(entry => entry.key === "defense").version,
+  "La versione della capacità nel compendio deve corrispondere alla versione proposta dalla bacchetta");
+assert.equal(defenseSource.flags.cat.macros.combat?.[0]?.identifier, campaign.CAMPAIGN_IDS.defense);
+assert.ok(!defenseSource.system.description.value.includes("+2 CA"));
 const shield = {name: "Shield", type: "feat", system: {identifier: "shield", source: {rules: "2014"}},
   flags: {cat: {automation: {source: MODULE, version: "0.25.0"}, macros: {roll: [{source: MODULE, rules: "2014", identifier: "khuzoe-guardian-shield"}]}}}};
 const regeneration = item(guardian, "regeneration");
@@ -103,8 +109,14 @@ assert.equal(changes.system.uses.spent, 3);
 assert.equal(changes.system.uses.max, "max(1, @abilities.int.mod)");
 assert.deepEqual(changes.system.uses.recovery, [{period: "lr", type: "recoverAll"}]);
 
-// Guard: first attack only, forced disadvantage despite a dialog override, visibility and per-target AC.
+// La scelta arriva all'inizio del turno; tutti gli attacchi del difensore
+// restano svantaggiati anche se il dialogo o un effetto concede vantaggio.
 combatFor(garun); selection = true;
+await campaign.guardTurnStart({document: defense, combatant: {actor: garun}});
+assert.equal(garun.effects.length, 1);
+const choicesAfterActivation = confirmations;
+await campaign.guardTurnStart({document: defense, combatant: {actor: garun}});
+assert.equal(confirmations, choicesAfterActivation, "La scelta non va ripetuta nello stesso turno");
 const ga = attack(garun, et);
 await campaign.guardAttackConfig({workflow: ga, document: defense});
 assert.equal(garun.effects.length, 1); assert.equal(ga.disadvantage, true);
@@ -112,15 +124,30 @@ assert.equal(garun.effects[0].duration.expiry, "turnStart");
 const configured = {options: {advantage: true, advantageMode: 1}, configureModifiers() { this.reconfigured = true; }};
 campaign.enforceGuardRoll([configured], {workflow: ga});
 assert.equal(configured.options.advantageMode, -1); assert.equal(configured.options.advantage, false); assert.ok(configured.reconfigured);
-const incoming = attack(enemy, gt, {disadvantage: true});
+for (const actionType of ["rwak", "msak", "rsak", "mwak"]) {
+  const other = attack(garun, et, {activity: {attack: {}, actionType, ability: "dex"}, advantage: true});
+  await campaign.guardAttackConfig({workflow: other, document: defense});
+  const roll = {options: {advantage: true, advantageMode: 1}, configureModifiers() { this.reconfigured = true; }};
+  campaign.enforceGuardRoll([roll], {workflow: other});
+  assert.equal(roll.options.advantageMode, -1, `Difesa Impenetrabile deve forzare svantaggio a ${actionType}`);
+  assert.ok(roll.reconfigured);
+}
+// Lo svantaggio imposto agli attaccanti segue invece la cancellazione normale
+// con il loro vantaggio e non conferisce alcun bonus alla CA.
+const incoming = attack(enemy, gt, {advantage: true});
 campaign.guardedTarget({workflow: incoming, document: defense, sourceToken: gt.document});
 campaign.guardedTarget({workflow: incoming, document: defense, sourceToken: gt.document});
-campaign.campaignACModifiers(incoming);
-assert.equal(incoming.targetACModifiers.get(garun.uuid), 2, "Independent disadvantage gives exactly +2 for this target");
+assert.equal(incoming.advantage, true);
+assert.equal(incoming.disadvantage, true);
+assert.equal(incoming.targetACModifiers.size, 0);
 const normal = attack(enemy, gt); campaign.guardedTarget({workflow: normal, document: defense, sourceToken: gt.document});
-campaign.campaignACModifiers(normal); assert.equal(normal.targetACModifiers.size, 0); assert.equal(normal.disadvantage, true);
+assert.equal(normal.targetACModifiers.size, 0); assert.equal(normal.disadvantage, true);
 visible = false; const unseen = attack(enemy, gt); campaign.guardedTarget({workflow: unseen, document: defense, sourceToken: gt.document});
-assert.equal(unseen.disadvantage, undefined); visible = true;
+assert.equal(unseen.disadvantage, true, "Lo svantaggio vale anche se l'attaccante non è visibile"); visible = true;
+let trackerAdditions = 0;
+const tracked = attack(enemy, gt, {attackRollModifierTracker: {disadvantage: {add() { trackerAdditions++; }}}});
+campaign.guardedTarget({workflow: tracked, document: defense, sourceToken: gt.document});
+assert.equal(trackerAdditions, 1, "Midi 14 deve ricevere lo svantaggio nel tracker del tiro");
 ga.attackRoll = d20(); await campaign.recordFirstAttack({workflow: ga, document: defense});
 garun.effects = []; await campaign.activateGuard({document: defense}); assert.equal(garun.effects.length, 0);
 game.combat.turn = 1; await campaign.activateGuard({document: defense}); assert.equal(garun.effects.length, 0);
@@ -139,7 +166,7 @@ assert.equal(garun.effects.length, 0); et.document.disposition = -1;
 
 // Pre-roll decision, d6 in the native formula, optional advantage and cancellation refunds.
 campaign.registerCampaignHooks();
-assert.equal(wrappers.size, 7); assert.ok(hooks.has("dnd5e.preRollSavingThrow"));
+assert.equal(wrappers.size, 6); assert.ok(hooks.has("dnd5e.preRollSavingThrow"));
 const save = {ability: "dex"}, options = {}; selection = "advantage";
 await campaign.reasoningSituational({document: reasoning, config: save, options, saveId: "dex"});
 assert.equal(options.advantage, true); assert.equal(reasoning.system.uses.spent, 4);
@@ -182,17 +209,18 @@ assert.equal(campaign.intelligenceEvasion({saveActivity: {damage: {onSave: "none
 assert.equal(campaign.intelligenceEvasion(intSave, {actor: theldarion}, new Set(["wis"])), false);
 evasion.disabled = true; assert.equal(campaign.intelligenceEvasion(intSave, {actor: theldarion}, new Set(["int"])), false);
 
-// Retiring guardian Shield must leave cancellation and guard-state cleanup intact.
+// La cancellazione di un attacco non conserva più modificatori CA della
+// precedente versione di Difesa Impenetrabile.
 const canceledAttack = attack(garun, et);
-canceledAttack[STATE] = {guardAsked: true, ac: {[garun.uuid]: {guard: 2}}};
+canceledAttack[STATE] = {};
 await campaign.cancelCampaignAttack(canceledAttack);
-assert.deepEqual(canceledAttack[STATE].ac, {});
-assert.equal(canceledAttack[STATE].guardAsked, false);
+assert.deepEqual(canceledAttack[STATE], {});
 assert.equal(campaign.guardianShield, undefined);
 assert.equal(campaign.configureGuardian, undefined);
 
 // Regeneration uses the common healing path and the existing authoritative combat deduplication.
 const macros = []; campaign.registerCampaignFeatures(khuzoeRegistrationApi({registerFnMacro: entry => { macros.push(entry); return entry; }, registerAutomation: entry => entry}));
+assert.equal(macros.find(entry => entry.identifier === campaign.CAMPAIGN_IDS.defense).combat[0].pass, "actorTurnStart");
 const regen = macros.find(entry => entry.identifier === "regeneration").combat[0].macro;
 const combat = combatFor(guardian); const context = {document: regeneration, combat, combatant: combat.combatant, token: st.document};
 await Promise.all([regen(context), regen(context)]); assert.equal(guardian.system.attributes.hp.value, 60);

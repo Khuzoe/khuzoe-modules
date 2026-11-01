@@ -46,7 +46,7 @@ export function renderEventEditor(controller, event) {
   if (!editable) return `<article class="kc-event-detail"><span class="kc-eyebrow">${esc(KINDS[event.kind])} · ${esc(VISIBILITIES[event.visibility])}</span><h2>${esc(event.title)}</h2><p>${esc(formatDate(def, event.start.date))}${event.allDay ? " · Tutto il giorno" : ` · ${esc(formatTime(event.start.time))}`}${event.end ? ` → ${esc(formatDate(def, event.end.date))}${event.allDay ? "" : ` · ${esc(formatTime(event.end.time))}`}` : ""}</p><div class="kc-description">${esc(event.description)}</div>${event.tags?.length ? `<p>${event.tags.map(esc).join(" · ")}</p>` : ""}</article>`;
   return `<div class="kc-form-error" role="alert" hidden></div><label>Titolo<input name="title" value="${esc(event.title)}" maxlength="240" placeholder="Cosa accade?" required autofocus></label>
     ${select("visibility", "Chi può leggerlo", controller.writable ? VISIBILITIES : { owner: "Personale", players: "Giocatori" }, event.visibility)}
-    <p class="kc-note">Personale: tu e i DM. Giocatori: il gruppo. Solo DM: i gestori della campagna.</p>
+    <p class="kc-note">Le note personali sono leggibili anche dai DM.</p>
     <label class="kc-check"><input type="checkbox" name="allDay" ${event.allDay ? "checked" : ""}> Tutto il giorno</label>
     <fieldset class="kc-moment"><legend>Inizio</legend>${dateFields(def, "start", event.start)}</fieldset>
     <label class="kc-check"><input type="checkbox" name="hasEnd" ${event.end ? "checked" : ""}> Aggiungi una fine</label>

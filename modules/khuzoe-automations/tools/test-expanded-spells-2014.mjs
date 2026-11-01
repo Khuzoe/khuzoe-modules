@@ -525,6 +525,36 @@ assert.equal(retaliationCount, 0, "Fire Shield: non deve reagire a un attacco a 
 await onHitMacro({document: fireShieldEffect, workflow: {token: shieldAttacker, activity: {actionType: "mwak"}}});
 assert.equal(retaliationCount, 1, "Fire Shield: deve reagire a un attacco in mischia entro 5 ft");
 
+// CAT può emettere itemRollFinished anche per l'attività di ritorsione. La
+// stessa macro dello spell non deve creare Fire Shield sull'attaccante.
+const fireShieldFinishMacro = registeredMacros.find(entry => entry.identifier === "fire-shield")
+  .roll.find(entry => entry.pass === "itemRollFinished").macro;
+const fireShieldActivities = new Map([
+  ["warm", {id: "warm"}], ["chill", {id: "chill"}], ["damage", {id: "damage"}]
+]);
+const fireShieldCastItem = {
+  ...fireShieldItem,
+  actor: shieldOwner.actor,
+  system: {identifier: "fire-shield", activities: fireShieldActivities},
+  flags: {"khuzoe-automations": {activityIdentifiers: {
+    fireShieldWarm: "warm", fireShieldChill: "chill", fireShieldDamage: "damage"
+  }}}
+};
+let fireShieldBuffActor = null;
+globalThis.cat.utils.effectUtils = {
+  async createEffects(actor) { fireShieldBuffActor = actor; return []; }
+};
+await fireShieldFinishMacro({
+  workflow: {actor: shieldAttacker.actor, activity: {id: "damage"}},
+  item: fireShieldCastItem
+});
+assert.equal(fireShieldBuffActor, null, "Fire Shield: la ritorsione non deve applicare il buff all'attaccante");
+await fireShieldFinishMacro({
+  workflow: {actor: shieldOwner.actor, activity: {id: "warm"}},
+  item: fireShieldCastItem
+});
+assert.equal(fireShieldBuffActor, shieldOwner.actor, "Fire Shield: il buff va sul lanciatore");
+
 // Lightning Arrow sostituisce il danno dell'arma con soli d8: il modificatore
 // dell'arma non viene sommato una seconda volta.
 const lightningDamageMacro = effectMacro.roll.find(entry => entry.pass === "actorDamageRoll").macro;

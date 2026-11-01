@@ -4,7 +4,7 @@ import {normalizeAutomationData} from "../scripts/pack-normalization.mjs";
 
 // Campaign rules transcribed from the audited Items; no world database is read or changed.
 const content = {
-  defense: ["icons/skills/melee/shield-block-gray-yellow.webp", "<p>Prima di fare il tuo primo attacco nel tuo turno, puoi scegliere di assumere una Posizione Guardinga. Fino all'inizio del tuo prossimo turno:</p><p>Gli attacchi contro di te hanno svantaggio se puoi vedere l'attaccante. Se la creatura avrebbe già avuto svantaggio, ottieni +2 CA contro quell'attacco.</p><p>I tuoi attacchi con armi da mischia basati sulla Forza hanno svantaggio e non possono beneficiare di vantaggio in alcun modo.</p>"],
+  defense: ["icons/skills/melee/shield-block-gray-yellow.webp", "<p><em>Rinunci alla precisione dei tuoi colpi per concentrare ogni movimento sulla difesa e sulla reazione agli attacchi avversari.</em></p><p>All'inizio del tuo turno, prima di effettuare il tuo primo attacco, puoi scegliere di attivare <strong>Difesa Impenetrabile</strong>. Fino all'inizio del tuo prossimo turno, tutti i tuoi attacchi vengono effettuati con <strong>svantaggio</strong>, indipendentemente da qualsiasi bonus o effetto che normalmente concederebbe vantaggio o annullerebbe lo svantaggio.</p><p>Durante questo periodo, tutti i tiri per colpire effettuati contro di te vengono effettuati con <strong>svantaggio</strong>.</p>"],
   premonition: ["icons/magic/perception/eye-ringed-glow-angry-small-red.webp", "<p>Quando una creatura ostile ti colpisce con un attacco, ottieni +1 alla Classe Armatura fino all'inizio del tuo turno successivo. Il bonus si accumula fino al tuo modificatore di Saggezza.</p>"],
   reasoning: ["icons/magic/perception/eye-tendrils-web-purple.webp", "<p>Quando effettui una prova di caratteristica, un tiro salvezza o un tiro per colpire, puoi scegliere di applicare Ragionamento Preciso prima di conoscere l'esito. Tira 1d6 e aggiungi il risultato al tiro.</p><p>Usi pari al modificatore di Intelligenza (minimo 1), recuperati al riposo lungo. Ogni 20 naturale su un tiro salvezza o un tiro per colpire recupera un uso.</p>"],
   lucky: ["icons/magic/perception/eye-tendrils-web-purple.webp", "<p>Quando usi Ragionamento Preciso per migliorare un tiro salvezza, puoi scegliere di ottenere anche vantaggio su quel tiro.</p><p>Se possiedi Eludere (Evasion), si applica anche agli effetti che consentono un tiro salvezza su Intelligenza per dimezzare i danni.</p>"],
@@ -24,8 +24,9 @@ function utility(id, name) {
 for (const data of CAMPAIGN_AUTOMATIONS) {
   const id = data.uuid.split(".").at(-1), [img, description] = content[data.key];
   const activities = {};
-  if (data.key === "defense") activities.KhzGuardActivate = utility("KhzGuardActivate", "Posizione Guardinga");
-  const groups = data.key === "reasoning" ? ["roll", "save", "check", "skill", "tool"]
+  if (data.key === "defense") activities.KhzGuardActivate = utility("KhzGuardActivate", "Attiva Difesa Impenetrabile");
+  const groups = data.key === "defense" ? ["roll", "combat"]
+    : data.key === "reasoning" ? ["roll", "save", "check", "skill", "tool"]
     : data.key === "regeneration" ? ["combat"] : data.key === "lucky" ? [] : ["roll"];
   const item = {_id: id, _key: `!items!${id}`, name: data.name, type: "feat", img,
     system: {identifier: data.identifier, source: {rules: data.rules, custom: data.key === "regeneration" ? "Shield Guardian 2014" : "Cripta di Sangue"},

@@ -80,8 +80,9 @@ export class ClockWidget {
     this.date.textContent = clock && def ? formatDate(def, clock.date) : "Calendario della campagna";
     this.date.title = this.date.textContent;
     this.time.textContent = clock && def ? formatTime(clock.time) : c.busy ? "Caricamento…" : !c.context.campaignId ? "Seleziona campagna" : "Data non disponibile";
-    this.status.textContent = c.error || c.conflict ? "Da allineare" : c.busy || this.advancing ? "Aggiornamento…" : c.linked ? "Collegato a Foundry" : "Calendario wiki";
+    this.status.textContent = c.error || c.conflict ? "Da allineare" : c.busy || this.advancing ? "Aggiornamento…" : "";
     if (!clock && c.error) this.status.textContent = "Apri per vedere il problema";
+    this.status.hidden = !this.status.textContent;
     this.status.title = c.error || c.conflict || this.status.textContent;
     this.controls.hidden = !c.isGM || !c.linked;
     if (JSON.stringify(this.steps) !== this.stepsSignature) this.renderSteps();

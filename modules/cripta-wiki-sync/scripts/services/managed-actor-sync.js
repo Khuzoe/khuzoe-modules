@@ -1,3 +1,8 @@
+import { applyNpcNativeSheet } from "./npc-native-sheet.mjs";
+import { applyNpcNativeEditor } from "./npc-native-editor.mjs";
+import { validateNativeAbilityItem } from "./npc-native-ability.mjs";
+import { createVerifiedNpcAbility } from "./npc-native-ability-create.mjs";
+import { nativeValuePreserved } from "./npc-native-model.mjs";
 import { DISCORD_WORKER_URL, MODULE_ID, SETTINGS } from "../constants.js";
 import { canPullFromWorker, canPushToWorker } from "./sync-policy.js";
 import { policyFetch } from "./worker-gateway.js";
@@ -7,6 +12,7 @@ import { modernizeSpellPreparationUpdate, normalizePreparedState, readDnd5eSense
 import { NpcDossierVisibilitySync, NPC_VISIBILITY_SETTING } from "./npc-dossier-visibility.mjs";
 import { validateManagedMidiRollConfig } from "./midi-roll-config.mjs";
 import { isTemporaryWikiActor } from "./actor-sync-eligibility.mjs";
+import { captureNpcNativeSnapshot, npcNativeSnapshotEnabled, npcNativeBackfillCandidates, NPC_NATIVE_SNAPSHOT_VERSION } from "./npc-native-snapshot.mjs";
 
 const TOKENIZER_MODULE_ID = "khuzoe-tokenizer";
 const MERCHANT_MODULE_ID = "khuzoe-merchant";
@@ -44,6 +50,11 @@ const DEFAULT_VISIBILITY = Object.freeze({ state: "dm", published: false });
 const pendingJobs = new Map();
 const pendingTimers = new Map();
 let managedActorFlushChain = Promise.resolve();
+const nativeSnapshotBackfillQueue = new Map();
+let nativeSnapshotBackfillTimer = null;
+let nativeSnapshotBackfillBusy = false;
+let nativeSnapshotBackfillIdentity = '';
+let nativeSnapshotBackfillOwner = '';
 let managedActorRuntimeChain = Promise.resolve();
 let managedActorCommandPullPromise = null;
 const managedActorLinkConversions = new Map();
@@ -107,7 +118,11 @@ export function registerManagedActorSync(options = {}) {
     });
     Hooks.on("updateActor", (...args) => npcDossierVisibilitySync.onActorUpdate(...args));
     Hooks.on("updateToken", (...args) => npcDossierVisibilitySync.onTokenUpdate(...args));
-    Hooks.on("userConnected", () => { if (game.ready) npcDossierVisibilitySync.resume(); });
+    Hooks.on("userConnected", () => {
+        if (!game.ready) return;
+        npcDossierVisibilitySync.resume();
+        if (canRunManagedActorSync() && (nativeSnapshotBackfillOwner !== game.user.id || nativeSnapshotBackfillQueue.size && !nativeSnapshotBackfillBusy)) queueManagedNpcNativeBackfill();
+    });
     Hooks.on("updateUser", () => { if (game.ready) npcDossierVisibilitySync.resume(); });
 
     game.settings.register(MODULE_ID, PENDING_SETTING, {
@@ -171,6 +186,10 @@ export function registerManagedActorSync(options = {}) {
         }
         if (hasManagedRuntimeChanges(changes) && managedActorUsesSharedRuntime(actor)) {
             scheduleManagedActorRuntimeSync(actor.id);
+        }
+        if (npcNativeSnapshotEnabled(getCampaignId(), actor) && hasManagedRuntimeChanges(changes) && !hasManagedDefinitionChanges(changes)) {
+            queueManagedActorSync(actor, { reason: "native-runtime-update", nativeSnapshotOnly: true })
+                .catch(error => console.warn(`${MODULE_ID} | Snapshot NPC non accodato.`, { actor: actor.name, error: error.message }));
         }
         if (managedActorUsesSharedRuntime(actor) && hasManagedLinkedPrototypeChanges(changes)) {
             updateLinkedPlacedTokens(actor).catch((error) => {
@@ -271,7 +290,8 @@ export async function resumeManagedActorSyncQueue() {
         scheduleManagedActorFlush(actor.id, 2_500 + (index * 100));
     });
     if (queueChanged) await game.settings.set(MODULE_ID, PENDING_SETTING, nextStored);
-    return pendingJobs.size > 0;
+    queueManagedNpcNativeBackfill();
+    return pendingJobs.size > 0 || nativeSnapshotBackfillQueue.size > 0 || nativeSnapshotBackfillBusy;
 }
 
 export function startManagedActorVariantPull({ initialPull = true } = {}) {
@@ -3297,6 +3317,8 @@ async function applyManagedActorCommand(command) {
         || Array.from(game.actors || []).find((entry) => sanitizeId(entry.id) === sanitizeId(command.actorId));
     if (!actor) return { status: "conflict", error: "Actor non trovato in questo mondo" };
     if (isTemporaryWikiActor(actor)) return { status: "conflict", error: "Le forme temporanee non sono sincronizzate con la wiki" };
+    if (command.nativeSheetVersion) return applyNpcNativeSheet(actor, command, {read: readManagedCommandPath, applyItem: applyManagedActorCommand});
+    if (command.nativeEditorVersion) return applyNpcNativeEditor(actor, command, {read: readManagedCommandPath, applyItem: applyManagedActorCommand});
     if (kind === "relationship.update") {
         if (typeof callbacks.setCompanionRelationship !== "function") {
             return { status: "failed", error: "Gestione companion non disponibile" };
@@ -3330,6 +3352,7 @@ async function applyManagedActorCommand(command) {
             if (requestedRules !== undefined || (requestedActivities !== undefined && item.flags?.["khuzoe-automations"]?.npcRules)) {
                 const compiler = game.modules?.get("khuzoe-automations")?.api?.npcRules;
                 if (compiler?.version !== 1) throw new Error("Ricarica Foundry con Khuzoe Automations aggiornato e attivo per usare i preset NPC.");
+                if(Object.values(requestedRules?.activities||item.flags?.["khuzoe-automations"]?.npcRules?.activities||{}).some(rule=>rule.healingTypes?.length)&&compiler.healingTypes!==1)throw new Error("Aggiorna Khuzoe Automations per usare la cura da tipi di danno selezionati.");
                 const compiled = compiler.prepare({
                     rules: requestedRules ?? item.flags["khuzoe-automations"].npcRules,
                     activities: requestedActivities ?? readManagedCommandPath(item, "system.activities"),
@@ -3345,7 +3368,7 @@ async function applyManagedActorCommand(command) {
             // Validate all new embedded data before performing the first write.
             if (requestedEffects !== undefined) validateManagedItemEffects(item, requestedEffects);
             if (requestedActivities !== undefined || requestedEffects !== undefined) {
-                if (requestedActivities !== undefined) managedActivityChanges(currentActivities, requestedActivities);
+                if (requestedActivities !== undefined) managedActivityChanges(currentActivities, requestedActivities, item);
                 const ids = new Set((requestedEffects ?? getManagedItemEffects(item)).map(effect => effect._id));
                 for (const activity of Object.values(requestedActivities ?? readManagedCommandPath(item, "system.activities"))) {
                     if ((activity.effects ?? []).some(effect => !ids.has(effect._id))) throw new Error("Un'attività fa riferimento a un effetto mancante.");
@@ -3563,9 +3586,13 @@ async function applyManagedActorDocumentUpdate(actor, command) {
 
 async function applyManagedItemCreate(actor, command) {
     const source = command.document || {};
+    if(command.nativeAbilityVersion) {
+        if(command.nativeAbilityVersion!==1||command.campaignId!=="cripta-di-sangue"||getCampaignId()!==command.campaignId||source.campaignItemId||actor.isToken||actor.type!=="npc")return{status:"failed",error:"Creazione nativa non compatibile."};
+        validateNativeAbilityItem({name:source.name,type:source.type,system:source.system,effects:source.effects,flags:source.flags});
+    }
     const transferId = String(command.target?.transferId || source.transferId || "");
     const existing = transferId ? Array.from(actor.items || []).find((entry) => String(getItemTransferId(entry) || "") === transferId) : null;
-    if (existing) return { status: "applied", actor };
+    if (existing && !command.nativeAbilityVersion) return { status: "applied", actor };
     const campaignItemId = sanitizeId(source.campaignItemId || "");
     const libraryItem = campaignItemId
         ? Array.from(game.items || []).find((entry) => sanitizeId(entry.getFlag?.(MODULE_ID, "campaignItemId") || entry.getFlag?.(MODULE_ID, "wikiItemId")) === campaignItemId)
@@ -3584,9 +3611,23 @@ async function applyManagedItemCreate(actor, command) {
         type: String(librarySource?.type || source.type || "feat"),
         ...((librarySource?.img || source.img) ? { img: librarySource?.img || toWorkerMediaUrl(source.img) } : {}),
         system: foundry.utils.deepClone(librarySource?.system || source.system || {}),
-        effects: foundry.utils.deepClone(librarySource?.effects || (Array.isArray(source.effects) ? source.effects : [])),
+        effects: foundry.utils.deepClone(librarySource?.effects || (command.nativeAbilityVersion && existing ? (existing.toJSON?.() ?? existing.toObject(true)).effects : Array.isArray(source.effects) ? source.effects : [])),
         flags: itemFlags
     };
+    const rules = source.flags?.["khuzoe-automations"]?.npcRules;
+    if (!librarySource && rules !== undefined) {
+        const compiler = game.modules?.get("khuzoe-automations")?.api?.npcRules;
+        if (compiler?.version !== 1) throw new Error("Attiva e aggiorna Khuzoe Automations prima di creare questa capacità.");
+        const activities = data.system.activities || {};
+        const needsMidi = Object.values(activities).some(activity => activity.midiProperties?.triggeredActivityId)
+            || Object.values(rules.activities || {}).some(rule => rule.healing > 0 || rule.conditions?.length);
+        if (needsMidi && !game.modules?.get("midi-qol")?.active) throw new Error("Questa capacità richiede Midi-QOL attivo.");
+        const compiled = compiler.prepare({rules, activities, effects: data.effects, itemName: data.name, statusEffects: CONFIG.statusEffects});
+        data.system.activities = compiled.activities;
+        data.effects = compiled.effects;
+        data.flags["khuzoe-automations"] = {npcRules: foundry.utils.deepClone(rules)};
+    }
+    if(command.nativeAbilityVersion)return createVerifiedNpcAbility(actor,command,data,existing);
     await actor.createEmbeddedDocuments("Item", [data], { criptaWikiSyncCommand: true });
     return { status: "applied", actor };
 }
@@ -3651,16 +3692,19 @@ function managedActivityUpdatePath(path) {
     return path;
 }
 
-function managedActivityChanges(currentActivities, requestedActivities) {
+function managedActivityChanges(currentActivities, requestedActivities, item = null) {
     const current = managedActivitiesSourceMap(currentActivities);
     const requested = managedActivitiesSourceMap(requestedActivities);
     const changedPaths = managedCommandChangedPaths(current, requested);
     const grouped = new Map();
+    const created = new Set();
+    const removed = new Set();
     for (const changedPath of changedPaths) {
         const [activityId, ...relativePath] = changedPath;
-        if (!activityId || !relativePath.length || !current[activityId] || !requested[activityId]) {
-            throw new Error("Creazione e rimozione delle attivita D&D5e non sono disponibili da questa modifica");
-        }
+        if (!activityId) throw new Error("Identificativo attività mancante");
+        if (!current[activityId] && requested[activityId]) { created.add(activityId); continue; }
+        if (current[activityId] && !requested[activityId]) { removed.add(activityId); continue; }
+        if (!relativePath.length) throw new Error("Struttura dell’attività non valida");
         if (relativePath[0] === "_id") continue;
         if (relativePath[0] === "type") {
             throw new Error("Il tipo di un'attivita D&D5e non puo essere cambiato dal sito");
@@ -3672,20 +3716,33 @@ function managedActivityChanges(currentActivities, requestedActivities) {
         group.verifyPaths.push(relativePath);
         grouped.set(activityId, group);
     }
-    return { requested, grouped };
+    for (const id of created) {
+        const data = requested[id], Activity = CONFIG.DND5E?.activityTypes?.[data.type]?.documentClass;
+        if (!/^[A-Za-z0-9]{16}$/.test(id) || !Activity || data._id !== id) throw new Error("Nuova attività non valida");
+        new Activity(data, {parent: item, strict: true});
+    }
+    for (const activity of Object.values(requested)) {
+        for (const id of [activity.otherActivityId, activity.midiProperties?.triggeredActivityId]) {
+            if (removed.has(id)) throw new Error("Rimuovi prima il collegamento all’attività da eliminare");
+        }
+    }
+    return { requested, grouped, created, removed };
 }
 
 async function applyManagedActivitiesUpdate(item, currentActivities, requestedActivities) {
-    const { requested, grouped } = managedActivityChanges(currentActivities, requestedActivities);
-    if (!grouped.size) return;
+    const { requested, grouped, created, removed } = managedActivityChanges(currentActivities, requestedActivities, item);
+    if (!grouped.size && !created.size && !removed.size) return;
+    if ((created.size && typeof item.createActivity !== "function") || (removed.size && typeof item.deleteActivity !== "function")) throw new Error("Gestione delle attività non disponibile");
     applyingManagedActivityCommands.add(item);
     try {
+        for (const id of created) await item.createActivity(requested[id].type, requested[id], {renderSheet:false});
         for (const [activityId, group] of grouped) {
             const activity = item.system?.activities?.get?.(activityId);
             if (!activity) throw new Error(`Attivita ${activityId} non trovata nell'elemento`);
             if (typeof activity.update !== "function") throw new Error("Aggiornamento attivita D&D5e non disponibile");
             await activity.update(group.changes);
         }
+        for (const id of removed) await item.deleteActivity(id);
     } finally {
         applyingManagedActivityCommands.delete(item);
     }
@@ -3696,9 +3753,11 @@ async function applyManagedActivitiesUpdate(item, currentActivities, requestedAc
         for (const path of group.verifyPaths) {
             const actual = managedCommandRelativeValue(persisted[activityId], path);
             const desired = managedCommandRelativeValue(requested[activityId], path);
-            if (!sameManagedCommandValue(actual, desired)) missingPaths.push(`${activityId}.${path.join(".")}`);
+            if (!nativeValuePreserved(actual, desired, managedCommandRelativeValue(managedActivitiesSourceMap(currentActivities)[activityId],path))) missingPaths.push(`${activityId}.${path.join(".")}`);
         }
     }
+    for (const id of created) if (!nativeValuePreserved(persisted[id],requested[id])) missingPaths.push(id);
+    for (const id of removed) if (persisted[id]) missingPaths.push(id);
     if (missingPaths.length) {
         throw new Error(`Foundry non ha conservato le modifiche alle attivita: ${missingPaths.slice(0, 3).join(", ")}`);
     }
@@ -3831,6 +3890,11 @@ function managedVariantSignature(variant, source = "") {
 export async function syncManagedActorNow(actor, event = {}) {
     const pullCommandReconciliation = event?.pullCommandReconciliation === true && canRunManagedActorPull(actor);
     if (!canRunManagedActorSync(actor) && !pullCommandReconciliation) return false;
+    // Read-only backfill: skip transfer IDs, media and the existing site projection.
+    if (event?.nativeSnapshotOnly === true) {
+        if (!npcNativeSnapshotEnabled(getCampaignId(), actor)) return false;
+        return syncManagedNpcNativeSnapshotNow(actor);
+    }
     await callbacks.ensureTransferIds?.(actor);
 
     const worldId = sanitizeId(game.world?.id || "world");
@@ -3904,7 +3968,8 @@ export async function syncManagedActorNow(actor, event = {}) {
                 }
             });
         }
-        console.info(`${MODULE_ID} | Managed Actor invariato, nessuna chiamata al Worker.`, { actor: actor.name });
+        await syncManagedNpcNativeSnapshotNow(actor);
+        console.info(`${MODULE_ID} | Scheda Managed Actor invariata.`, { actor: actor.name });
         return false;
     }
 
@@ -3922,6 +3987,18 @@ export async function syncManagedActorNow(actor, event = {}) {
         icons: mediaResult.state.icons,
         runtimePolicyOverride: String(previousState.runtimePolicyOverride || ""),
         runtimeHash: hashValue(buildManagedActorRuntime(actor)),
+        ...(npcNativeSnapshotEnabled(getCampaignId(), actor) ? {
+            nativeSnapshotVersion: Number(previousState.nativeSnapshotVersion || 0),
+            nativeEditorVersion: Number(previousState.nativeEditorVersion || 0),
+            nativeAbilityVersion: Number(previousState.nativeAbilityVersion || 0),
+            nativeAbilityEditVersion: Number(previousState.nativeAbilityEditVersion || 0),
+            nativeSheetVersion: Number(previousState.nativeSheetVersion || 0),
+            npcRulesHealingTypes: Number(previousState.npcRulesHealingTypes || 0),
+            nativeSnapshotHash: String(previousState.nativeSnapshotHash || ""),
+            nativeSnapshotReceivedAt: String(previousState.nativeSnapshotReceivedAt || ""),
+            nativeSnapshotRejectedHash: String(previousState.nativeSnapshotRejectedHash || ""),
+            nativeSnapshotError: String(previousState.nativeSnapshotError || "")
+        } : {}),
         merchantSchemaVersion: isManagedMerchant(actor) ? MANAGED_MERCHANT_SCHEMA_VERSION : 0
     };
     await game.settings.set(MODULE_ID, STATE_SETTING, { ...stateRoot, [actor.id]: nextState });
@@ -3932,6 +4009,117 @@ export async function syncManagedActorNow(actor, event = {}) {
         revision: response.revision,
         reason: normalizedEvent.reason,
         media: mediaResult.uploaded
+    });
+    await syncManagedNpcNativeSnapshotNow(actor);
+    return true;
+}
+
+// Independent of media/content jobs: a failed portrait upload must not prevent
+// the wiki from receiving an NPC's complete source. Recheck every known NPC at
+// startup, including edits made while the module was disabled; hashes suppress
+// unchanged network writes. One request at a time, with network-error backoff.
+function queueManagedNpcNativeBackfill() {
+    if (!canRunManagedActorSync()) return;
+    nativeSnapshotBackfillOwner = game.user.id;
+    const campaignId = getCampaignId(), worldId = sanitizeId(game.world?.id || 'world');
+    const identity = `${campaignId}:${worldId}`;
+    if (nativeSnapshotBackfillIdentity !== identity) {
+        nativeSnapshotBackfillQueue.clear();
+        if (nativeSnapshotBackfillTimer !== null) window.clearTimeout(nativeSnapshotBackfillTimer);
+        nativeSnapshotBackfillTimer = null;
+        nativeSnapshotBackfillIdentity = identity;
+    }
+    const known = managedActorRelationshipCache.campaignId === campaignId ? managedActorRelationshipCache.payload?.data || [] : [];
+    const actors = Array.from(game.actors || []).filter(actor => !isTemporaryWikiActor(actor));
+    for (const actor of npcNativeBackfillCandidates(actors, {campaignId,worldId,state:getWorldObjectSetting(STATE_SETTING),known})) {
+        nativeSnapshotBackfillQueue.set(actor.id, {actor,identity});
+    }
+    if (!nativeSnapshotBackfillBusy && nativeSnapshotBackfillTimer === null && nativeSnapshotBackfillQueue.size) {
+        nativeSnapshotBackfillTimer = window.setTimeout(flushManagedNpcNativeBackfill, 500);
+    }
+}
+
+async function flushManagedNpcNativeBackfill() {
+    nativeSnapshotBackfillTimer = null;
+    if (nativeSnapshotBackfillBusy || !canRunManagedActorSync()) return;
+    const first = nativeSnapshotBackfillQueue.entries().next().value;
+    if (!first) return;
+    const [id,job] = first;
+    nativeSnapshotBackfillQueue.delete(id);
+    const currentIdentity = () => `${getCampaignId()}:${sanitizeId(game.world?.id || 'world')}`;
+    if (job.identity !== currentIdentity()) { nativeSnapshotBackfillQueue.clear(); return; }
+    nativeSnapshotBackfillBusy = true;
+    let retry = false;
+    try {
+        const run = async () => {
+            const actor = game.actors.get(id);
+            if (actor && actor === job.actor && job.identity === currentIdentity()) await syncManagedNpcNativeSnapshotNow(actor);
+        };
+        const task = managedActorFlushChain.then(run, run);
+        managedActorFlushChain = task.catch(() => {});
+        await task;
+    } catch (error) {
+        retry = true;
+        if (job.identity === currentIdentity()) nativeSnapshotBackfillQueue.set(id, job);
+        console.warn(`${MODULE_ID} | Scheda completa NPC in attesa; nuovo tentativo automatico.`, {actor:job.actor.name,error:error.message});
+    } finally {
+        nativeSnapshotBackfillBusy = false;
+        if (canRunManagedActorSync() && nativeSnapshotBackfillQueue.size) {
+            nativeSnapshotBackfillTimer = window.setTimeout(flushManagedNpcNativeBackfill, retry ? RETRY_DELAY_MS : 50);
+        }
+    }
+}
+
+async function syncManagedNpcNativeSnapshotNow(actor) {
+    const campaignId = getCampaignId();
+    const worldId = sanitizeId(game.world?.id || 'world');
+    const known = managedActorRelationshipCache.campaignId === campaignId ? managedActorRelationshipCache.payload?.data || [] : [];
+    if (!canRunManagedActorSync(actor) || !npcNativeBackfillCandidates([actor],{campaignId,worldId,state:getWorldObjectSetting(STATE_SETTING),known}).length) return true;
+    const state = getWorldObjectSetting(STATE_SETTING)[actor.id] || {};
+    const contract = buildFoundrySyncContract();
+    let snapshot;
+    try {
+        snapshot = await captureNpcNativeSnapshot(actor, {
+            campaignId, worldId: sanitizeId(game.world?.id || "world"),
+            foundry: contract.foundry, system: contract.system,
+            wikiSync: contract.module?.version,
+            nativeEditor: 1,
+            nativeSheetEditor: 1,
+            nativeAbilityCreate: 1,
+            nativeAbilityEdit: 1,
+            npcRulesHealingTypes: Number(game.modules?.get("khuzoe-automations")?.api?.npcRules?.healingTypes || 0),
+            modules: Array.from(game.modules?.values?.() || [])
+        });
+    } catch (error) {
+        if (error?.code !== "NPC_SNAPSHOT_TOO_LARGE") throw error;
+        if (state.nativeSnapshotRejectedHash !== error.hash) {
+            const fresh = getWorldObjectSetting(STATE_SETTING);
+            await game.settings.set(MODULE_ID, STATE_SETTING, {
+                ...fresh, [actor.id]: { ...(fresh[actor.id] || {}), nativeSnapshotRejectedHash: error.hash, nativeSnapshotError: error.message }
+            });
+            console.warn(`${MODULE_ID} | Snapshot NPC non inviato.`, { actor: actor.name, error: error.message });
+        }
+        return true;
+    }
+    if (!snapshot || (state.nativeSnapshotHash === snapshot.hash && Number(state.nativeSnapshotVersion || 0) === NPC_NATIVE_SNAPSHOT_VERSION)) return true;
+    if (getCampaignId() !== campaignId || sanitizeId(game.world?.id || 'world') !== worldId || !canRunManagedActorSync(actor)) return true;
+    const url = new URL(`${DISCORD_WORKER_URL}/api/managed-actors/${encodeURIComponent(snapshot.identity.worldId)}/${encodeURIComponent(sanitizeId(actor.id))}/snapshot`);
+    url.searchParams.set("campaign", campaignId);
+    const response = await policyFetch(url.toString(), {
+        method: "POST", signal: AbortSignal.timeout(60000),
+        headers: { ...buildWorkerAuthHeaders(true), "Content-Type": "application/json", "X-Khuzoe-Sync-Contract": "1", "X-Khuzoe-Foundry-Generation": "14" },
+        body: JSON.stringify({ campaignId, contract, snapshot })
+    });
+    const result = await response.json().catch(() => null);
+    if (!response.ok || result?.ok !== true || result.hash !== snapshot.hash || result.schemaVersion !== NPC_NATIVE_SNAPSHOT_VERSION) {
+        throw Object.assign(new Error(result?.error || `Snapshot NPC HTTP ${response.status}`), { status: response.status, code: result?.code || "NPC_SNAPSHOT_NOT_CONFIRMED" });
+    }
+    if (getCampaignId() !== campaignId || sanitizeId(game.world?.id || 'world') !== worldId) return true;
+    // Keep confirmation metadata locally, never a second full Actor JSON.
+    const fresh = getWorldObjectSetting(STATE_SETTING);
+    await game.settings.set(MODULE_ID, STATE_SETTING, {
+        ...fresh, [actor.id]: { ...(fresh[actor.id] || {}), revision:Math.max(Number(fresh[actor.id]?.revision||0),Number(result.actorRevision||0)), nativeSnapshotVersion: NPC_NATIVE_SNAPSHOT_VERSION, nativeEditorVersion: 1, nativeAbilityVersion: 1, nativeAbilityEditVersion: 1, nativeSheetVersion: 1, npcRulesHealingTypes: Number(game.modules?.get("khuzoe-automations")?.api?.npcRules?.healingTypes || 0),
+            nativeSnapshotHash: snapshot.hash, nativeSnapshotReceivedAt: String(result.receivedAt || ""), nativeSnapshotRejectedHash: "", nativeSnapshotError: "" }
     });
     return true;
 }
@@ -4341,7 +4529,8 @@ function queueManagedItemOwnerSync(item, reason, options = {}) {
 
 function queueManagedEffectOwnerSync(effect, reason, options = {}) {
     if (isInternalCriptaDocumentUpdate(options)) return;
-    const actor = effect?.parent;
+    const parent = effect?.parent;
+    const actor = parent?.documentName === "Item" ? (parent.actor || parent.parent) : parent;
     if (managedActorLinkConversions.has(String(actor?.id || "")) || managedActorLinkNativeImports.has(String(actor?.id || ""))) return;
     if (!canRunManagedActorSync(actor) || !hasManagedActorState(actor)) return;
     queueManagedActorSync(actor, { reason }).catch((error) => console.warn(`${MODULE_ID} | Sync effetto modificato non accodata.`, { effect: effect?.name, error }));
@@ -4529,6 +4718,7 @@ function normalizeTokenizerEvent(event = {}) {
         reason: String(event.reason || "save"),
         forceCreate: Boolean(event.forceCreate),
         forceContentSync: Boolean(event.forceContentSync),
+        nativeSnapshotOnly: event.nativeSnapshotOnly === true,
         variantsChanged: Boolean(event.variantsChanged) || String(event.reason || "").startsWith("variant-"),
         allowMissingBaseMedia: Boolean(event.allowMissingBaseMedia),
         changedTargets: Array.from(new Set((Array.isArray(event.changedTargets) ? event.changedTargets : []).filter((target) => ["avatar", "token"].includes(target)))),
@@ -4544,6 +4734,7 @@ function mergeTokenizerEvents(previous, next) {
         changedTargets: Array.from(new Set([...previous.changedTargets, ...next.changedTargets])),
         forceCreate: Boolean(previous.forceCreate || next.forceCreate),
         forceContentSync: Boolean(previous.forceContentSync || next.forceContentSync),
+        nativeSnapshotOnly: previous.nativeSnapshotOnly === true && next.nativeSnapshotOnly === true,
         variantsChanged: Boolean(previous.variantsChanged || next.variantsChanged),
         allowMissingBaseMedia: Boolean(previous.allowMissingBaseMedia || next.allowMissingBaseMedia),
         removedVariantIds: Array.from(new Set([...previous.removedVariantIds, ...next.removedVariantIds]))
@@ -4808,7 +4999,7 @@ function buildManagedEditorMetadata(actor) {
         fields[path] = {base, effective, editable: !overridden,
             ...(overridden ? {reason: "Valore controllato da un effetto attivo: modifica l'effetto in Foundry."} : {})};
     }
-    return {version: 1, itemEffects: true, npcRules: game.modules?.get("khuzoe-automations")?.api?.npcRules?.version ?? 0, midiRollConfig: game.modules?.get("khuzoe-automations")?.api?.midiRollConfig?.version ?? 0, fields};
+    return {version: 1, itemEffects: true, generatedAbilities: 1, npcRules: game.modules?.get("khuzoe-automations")?.api?.npcRules?.version ?? 0, midiRollConfig: game.modules?.get("khuzoe-automations")?.api?.midiRollConfig?.version ?? 0, fields};
 }
 
 function normalizeManagedRollFormula(value, rollData = {}) {
@@ -4976,6 +5167,19 @@ function buildManagedEntryEffectiveRolls(item, system = {}) {
     }
     return summaries.length ? { formulaVersion: 2, activities: summaries } : undefined;
 }
+function buildManagedDescriptionLinks(item, description) {
+    const links = {};
+    if (typeof fromUuidSync !== "function") return links;
+    const targets = new Set(Array.from(String(description || "").matchAll(/@UUID\[([^\]]+)\]/gi), (match) => match[1].trim()));
+    for (const target of Array.from(targets).slice(0, 100)) {
+        try {
+            const name = fromUuidSync(target, { relative: item, strict: false })?.name;
+            if (typeof name === "string" && name.trim()) links[target] = name.trim();
+        } catch { /* A missing pack or document must not block actor sync. */ }
+    }
+    return links;
+}
+
 function buildManagedActorEntry(item, iconStates = {}) {
     // Serialize the persistent source together with D&D5e's live ActivityCollection.
     // Items first opened after a v12 migration can still have an empty stored
@@ -4993,6 +5197,8 @@ function buildManagedActorEntry(item, iconStates = {}) {
         transferId,
         campaignItemId: String(flags?.[MODULE_ID]?.campaignItemId || ""),
         sourceId: String(source?._stats?.compendiumSource || item?._stats?.compendiumSource || flags?.core?.sourceId || ""),
+        cachedFor: item.type === "spell" ? String(flags?.dnd5e?.cachedFor || "") : undefined,
+        descriptionLinks: buildManagedDescriptionLinks(item, system.description?.value || system.description || ""),
         name: String(item.name || "Elemento"),
         type: String(item.type || "item"),
         media: iconState?.path ? { icon: { path: iconState.path, revision: iconState.revision || 1, source: "foundry" } } : undefined,

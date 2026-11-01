@@ -1,4 +1,12 @@
-# Khuzoe Calendar · 0.3.0
+# Khuzoe Calendar · 0.3.1
+
+## Correzioni 0.3.1
+
+- Corretto il calcolo delle durate ActiveEffect di Foundry v14: gli intervalli in secondi, minuti, ore, giorni, mesi e anni non sottraggono più lo scarto della data della campagna. Il difetto poteva rendere subito negativa la durata di un buff, anche senza usare i comandi del calendario. Le date complete e `game.time.set` mantengono invece la conversione assoluta; `game.time.advance` usa sempre durate.
+- Il widget mostra data, ora e pulsanti; le etichette di stato compaiono solo durante un aggiornamento o in presenza di un problema.
+- Gli stili dei pulsanti sono limitati al contenuto: X e menu della finestra conservano le icone native. Le caselle delle note conservano lo stile nativo senza bordi o spunte sovrapposti.
+
+Ricaricare i client Foundry, incluso quello del GM che gestisce gli effetti. Non occorre cambiare data, scollegare il calendario o ripubblicare il Worker. Gli effetti eventualmente già rimossi non vengono ricreati automaticamente. I test riproducono la conversione usando il metodo ActiveEffect della versione installata, senza aprire o modificare mondi.
 
 Calendario condiviso tra la wiki Khuzoe e Foundry VTT 14.367. Richiede **Khuzoe Wiki Sync** con il servizio calendario incluso in questa modifica.
 

@@ -2,6 +2,8 @@
 
 App Windows per installare e aggiornare i moduli Khuzoe in Foundry. Scegli la cartella una volta: **Aggiorna** aggiorna quelli già presenti; **Installa**, accanto a un modulo mancante, scarica l'ultima versione pubblicata.
 
+Il catalogo include **Khuzoe Tiles Creator** dalla versione **0.4.1** dell'Updater. Se usi la 0.4.0, premi prima **Aggiorna app**; poi puoi installare Tiles Creator dalla sua riga, insieme a Cripta Wiki Sync se necessario.
+
 ## Per i DM
 
 1. Scarica `KhuzoeUpdater-Windows.zip` dalla release dell'app ed estrailo.

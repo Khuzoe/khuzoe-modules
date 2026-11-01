@@ -50,8 +50,35 @@ test("native epoch mapping keeps absolute dates and duration calculations separa
   assert.equal(calendar.componentsToTime(calendar.add(current, { second: 6 })), 706);
   assert.equal(calendar.difference(706, 700).second, 6);
   assert.equal(calendar.difference(706, 700).year, 0);
+  assert.equal(calendar.componentsToTime(calendar.difference(706, 700)), 6);
+  assert.equal(calendar.componentsToTime({ hour: 1, minute: 2, second: 3 }), 3723);
+  assert.equal(calendar.componentsToTime({ year: 1, day: 2 }), 1296000);
   const negative = createCalendarClass(CoreCalendar, -1);
   assert.ok(new negative(calendarConfig(def)).timeToComponents(0).dayOfWeek >= 0);
+});
+
+test("native effect durations do not inherit the campaign epoch, even during combat", async () => {
+  const core = await readFile(new URL("../../../../App/resources/app/public/scripts/foundry.mjs", import.meta.url), "utf8");
+  const block = core.slice(core.indexOf("  _prepareTimeBasedDuration(duration, context) {"), core.indexOf("  _prepareCombatBasedDuration(duration, context) {"));
+  const method = block.slice(0, block.lastIndexOf("\n  }") + 4);
+  const Effect = new Function("iterateEntries", `return class { ${method} };`)(Object.entries);
+  for (const offset of [0, clockSeconds(def, initialClock) - 700, -900000]) {
+    globalThis.game = { time: { worldTime: 700 }, combat: { started: true } };
+    globalThis.foundry = { data: { CalendarData: CoreCalendar } };
+    game.time.calendar = new (createCalendarClass(CoreCalendar, offset))(calendarConfig(def));
+    game.time.calendar.format = () => "duration label"; // Only rendering/localization is stubbed.
+    const effect = new Effect(); effect.start = { time: 700 };
+    for (const [unit, seconds] of [['seconds', 1], ['minutes', 60], ['hours', 3600], ['days', 144000], ['months', 576000], ['years', 1008000]]) {
+      game.time.worldTime = 700;
+      const duration = effect._prepareTimeBasedDuration({ value: 1, units: unit });
+      assert.equal(duration.seconds, seconds, `${unit}, epoch ${offset}`);
+      assert.equal(duration.secondsRemaining, seconds);
+      game.time.worldTime = 706;
+      const nextTurn = effect._prepareTimeBasedDuration({ value: 1, units: unit });
+      assert.equal(nextTurn.secondsRemaining, seconds - 6);
+      if (seconds > 6) assert.equal(nextTurn.expired, false);
+    }
+  }
 });
 
 class FakeTimers {
@@ -125,6 +152,23 @@ test("first link and provider restore never write core time or effects", async (
   assert.equal(game.time.worldTime, 706);
   await f.controller.unlink();
   assert.equal(game.time.worldTime, 706); assert.equal(CONFIG.time.worldCalendarClass, CoreCalendar);
+});
+
+test("setting partial absolute dates and restoring native setters remain independent of durations", async () => {
+  const f = fixture(), originalSet = game.time.set, originalAdvance = game.time.advance;
+  await f.controller.link();
+  const components = game.time.calendar.timeToComponents(700);
+  const { year, day, hour, minute, second } = components;
+  await game.time.set({ year, day, hour, minute, second }, { test: true });
+  assert.equal(game.time.worldTime, 700);
+  assert.deepEqual(f.timeWrites.at(-1).options, { test: true });
+  await game.time.advance({ minute: 1 });
+  assert.equal(game.time.worldTime, 760);
+  await game.time.set({ ...components, second: components.second + 6 });
+  assert.equal(game.time.worldTime, 706);
+  await f.controller.unlink();
+  assert.equal(game.time.set, originalSet);
+  assert.equal(game.time.advance, originalAdvance);
 });
 test("native rounds publish once and remote steps advance native time once", async () => {
   const f = fixture(); await f.controller.link();

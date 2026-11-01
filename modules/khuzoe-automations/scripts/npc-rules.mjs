@@ -16,8 +16,10 @@ export function validateNpcRules(rules, activities = {}) {
     || Object.keys(rules.activities).length > 32) throw new Error("Preset NPC non valido o di versione non supportata.");
   for (const [id, rule] of Object.entries(rules.activities)) {
     if (!/^[A-Za-z0-9_-]{1,64}$/.test(id) || ["__proto__", "constructor", "prototype"].includes(id) || !Object.hasOwn(activities, id)) throw new Error(`Attività del preset non trovata: ${id}`);
-    if (!rule || typeof rule !== "object" || Array.isArray(rule) || Object.keys(rule).some(key => !["healing", "conditions", "rounds", "expiry"].includes(key))
+    if (!rule || typeof rule !== "object" || Array.isArray(rule) || Object.keys(rule).some(key => !["healing", "healingTypes", "conditions", "rounds", "expiry"].includes(key))
       || ![0, 0.5, 1].includes(rule.healing ?? 0)
+      || !Array.isArray(rule.healingTypes ?? []) || (rule.healingTypes ?? []).length > 13
+      || (rule.healingTypes ?? []).some(type => !["acid","bludgeoning","cold","fire","force","lightning","necrotic","piercing","poison","psychic","radiant","slashing","thunder"].includes(type))
       || !Array.isArray(rule.conditions ?? []) || (rule.conditions ?? []).length > 14 || (rule.conditions ?? []).some(id => !NPC_CONDITIONS.includes(id))
       || !Number.isInteger(rule.rounds ?? 1) || (rule.rounds ?? 1) < 0 || (rule.rounds ?? 1) > 100
       || !["turnStart", "turnEnd"].includes(rule.expiry ?? "turnEnd")) throw new Error(`Configurazione non valida per ${id}`);
@@ -82,7 +84,8 @@ export async function healFromNpcRule(workflow) {
   if (workflow.userId && workflow.userId !== globalThis.game?.user?.id) return;
   const rules = workflow.item?.flags?.[MODULE]?.npcRules;
   const id = workflow.activity?.id ?? workflow.activity?._id;
-  const fraction = rules?.version === 1 ? rules.activities?.[id]?.healing : 0;
+  const rule = rules?.version === 1 ? rules.activities?.[id] : null;
+  const fraction = rule?.healing ?? 0;
   if (![0.5, 1].includes(fraction)) return;
   const damageEntries = values(workflow.damageList).filter(entry => entry.isHit !== false);
   if (!damageEntries.length) return;
@@ -108,7 +111,7 @@ export async function healFromNpcRule(workflow) {
     damage += damageDealt({damageList: [measured]}, {
       uuid: entry.tokenUuid ?? entry.targetUuid, id: entry.tokenId,
       actor: {uuid: entry.actorUuid, id: entry.actorId}
-    });
+    }, rule.healingTypes?.length ? rule.healingTypes : undefined);
   }
   const amount = Math.floor(damage * fraction);
   const token = workflow.token?.object ?? workflow.token;
@@ -126,5 +129,5 @@ export function exposeNpcRulesApi() {
   const module = globalThis.game?.modules?.get(MODULE);
   if (!module) return;
   module.api ??= {};
-  module.api.npcRules = {version: NPC_RULES_VERSION, prepare: prepareNpcRules};
+  module.api.npcRules = {version: NPC_RULES_VERSION, healingTypes: 1, prepare: prepareNpcRules};
 }

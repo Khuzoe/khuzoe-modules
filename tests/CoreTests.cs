@@ -138,6 +138,8 @@ internal static class CoreTests
             Assert(brokenFolder.IsInstalled && !brokenFolder.CanUpdate && brokenFolder.Status == "Errore", "cartella esistente senza manifest non trattata come modulo mancante");
             Network.Validate(Catalog(Release("khuzoe-merchant", "1.1.0")));
             Assert(true, "catalogo del repository previsto accettato");
+            Network.Validate(Catalog(Release("khuzoe-tiles-creator", "0.1.1")));
+            Assert(true, "Tiles Creator riconosciuto tra i moduli autorizzati dell'app");
             Reject(() => Network.Validate(Catalog(Release("foreign-module", "1.0.0"))), "modulo estraneo rifiutato dal catalogo");
             Reject(() => Network.Validate(Catalog(Release("khuzoe-merchant", "1.0.0"), Release("khuzoe-merchant", "1.1.0"))), "catalogo duplicato rifiutato");
             var external = Release("khuzoe-merchant", "1.1.0"); external.download = "https://example.com/evil.zip";

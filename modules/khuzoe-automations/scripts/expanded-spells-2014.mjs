@@ -997,7 +997,12 @@ async function applyFireShield(workflow, item) {
   if (key === "fireShieldDismiss") {
     return removeEffect(effectByState(workflow.actor, "fire-shield"));
   }
-  const warm = key === "fireShieldWarm" || workflow.activity?.name?.toLowerCase().includes("warm");
+  // La ritorsione usa un'attività dello stesso Item. Se CAT richiama il pass
+  // finale anche per quell'attività, non deve creare uno scudo sul suo attore.
+  const activityName = String(workflow.activity?.name ?? "");
+  const warm = key === "fireShieldWarm" || (!key && /\bwarm\b/i.test(activityName));
+  const chill = key === "fireShieldChill" || (!key && /\bchill\b/i.test(activityName));
+  if (!warm && !chill) return;
   const damageType = warm ? "fire" : "cold";
   const resistance = warm ? "cold" : "fire";
   const damageActivity = activityByKey(item, "fireShieldDamage");

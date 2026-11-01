@@ -1,7 +1,7 @@
 {
   "name": "khuzoe-automations",
   "private": true,
-  "version": "0.28.1",
+  "version": "0.28.5",
   "type": "module",
   "scripts": {
     "generate:rune-knight": "node tools/generate-rune-knight-items.mjs",

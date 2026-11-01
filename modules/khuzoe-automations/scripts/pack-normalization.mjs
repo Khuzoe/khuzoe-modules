@@ -9,7 +9,10 @@ export const FOLLOW_UP_ACTIVITIES = new Set([
 /** Applied to generated data only; no migration of world Items. */
 export function normalizeAutomationData(item) {
   if (item?.flags?.cat?.automation?.source === "khuzoe-automations") {
-    item.flags.cat.automation.version = item.system?.identifier === "crown-of-stars" ? "0.28.0" : RELEASE_VERSION;
+    item.flags.cat.automation.version = ({
+      "crown-of-stars": "0.28.0",
+      "difesa-impenetrabile": "0.28.4"
+    })[item.system?.identifier] ?? RELEASE_VERSION;
   }
   if (!item?.system?.activities) return item;
   const identifier = item.system.identifier;

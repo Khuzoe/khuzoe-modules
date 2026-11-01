@@ -15,7 +15,14 @@ export function createCalendarClass(Base, offset = 0) {
       result.dayOfWeek = ((result.dayOfWeek % this.days.values.length) + this.days.values.length) % this.days.values.length;
       return result;
     }
-    componentsToTime(components) { return super.componentsToTime(components) - offset; }
+    componentsToTime(components) {
+      // v14 uses this API for ActiveEffect durations too ({minute: 1}, {year: 1}).
+      // Calendar dates carry month/day-of-month metadata; plain unit amounts
+      // must remain elapsed seconds, with no campaign epoch subtraction.
+      const isDate = Number.isFinite(components.month) || Number.isFinite(components.dayOfMonth);
+      return isDate ? this.dateComponentsToTime(components) : this.elapsedSeconds(components);
+    }
+    dateComponentsToTime(components) { return super.componentsToTime(components) - offset; }
     elapsedSeconds(components) { return super.componentsToTime(components); }
     componentsToUnit(components, unit, { roundFn = "ceil" } = {}) {
       if (unit === "second") return this.elapsedSeconds(components);
@@ -25,13 +32,15 @@ export function createCalendarClass(Base, offset = 0) {
       return Math[roundFn](this.elapsedSeconds(components) / factors[unit]);
     }
     add(start, delta) {
-      const time = typeof start === "number" ? start : this.componentsToTime(start);
+      const time = typeof start === "number" ? start : this.dateComponentsToTime(start);
       return this.timeToComponents(time + (typeof delta === "number" ? delta : this.elapsedSeconds(delta)));
     }
     difference(end, start = game.time.worldTime) {
-      const from = typeof start === "number" ? start : this.componentsToTime(start);
-      const to = typeof end === "number" ? end : this.componentsToTime(end);
-      return super.timeToComponents(to - from);
+      const from = typeof start === "number" ? start : this.dateComponentsToTime(start);
+      const to = typeof end === "number" ? end : this.dateComponentsToTime(end);
+      const { year, day, hour, minute, second } = super.timeToComponents(to - from);
+      // A difference is a duration, not a calendar date. Keep it round-trippable.
+      return { year, day, hour, minute, second };
     }
     format(time = game.time.worldTime, formatter = "timestamp", options = {}) {
       const resolved = typeof formatter === "function" ? formatter : CONFIG.time.formatters?.[formatter];
@@ -49,7 +58,7 @@ export class NativeCalendarBridge {
     if (!binding?.enabled) return this.restore();
     const signature = JSON.stringify([binding.definition, binding.offset]);
     if (signature === this.signature && CONFIG.time.worldCalendarClass?.khuzoeCalendar) return;
-    if (!this.original) this.original = { config: clone(CONFIG.time.worldCalendarConfig), Class: CONFIG.time.worldCalendarClass, advance: game.time.advance };
+    if (!this.original) this.original = { config: clone(CONFIG.time.worldCalendarConfig), Class: CONFIG.time.worldCalendarClass, advance: game.time.advance, set: game.time.set };
     CONFIG.time.worldCalendarConfig = calendarConfig(binding.definition);
     CONFIG.time.worldCalendarClass = createCalendarClass(this.original.Class, binding.offset);
     if (!this.advance) {
@@ -58,6 +67,15 @@ export class NativeCalendarBridge {
         return original.call(this, typeof delta === "number" ? delta : this.calendar.elapsedSeconds(delta), options);
       };
       game.time.advance = this.advance;
+    }
+    if (!this.set) {
+      const original = this.original.set;
+      this.set = function(time, options) {
+        // Unlike componentsToTime, GameTime.set always means an absolute date,
+        // including partial objects with no month metadata.
+        return original.call(this, typeof time === "number" ? time : this.calendar.dateComponentsToTime(time), options);
+      };
+      game.time.set = this.set;
     }
     game.time.initializeCalendar();
     this.signature = signature;
@@ -72,7 +90,8 @@ export class NativeCalendarBridge {
       game.time.initializeCalendar();
     }
     if (game.time.advance === this.advance) game.time.advance = this.original.advance;
-    this.original = null; this.advance = null; this.signature = "";
+    if (game.time.set === this.set) game.time.set = this.original.set;
+    this.original = null; this.advance = null; this.set = null; this.signature = "";
   }
 }
 

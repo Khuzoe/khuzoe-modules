@@ -175,6 +175,31 @@ sneakWorkflow.disadvantage = false;
 sneakWorkflow.item.system.properties = new Set();
 assert.equal(await sneakMacro({workflow: sneakWorkflow, document: sneakItem}), undefined);
 
+// Midi 14 può lasciare workflow.advantage vuoto anche quando il tiro vero ha
+// vantaggio (Elven Accuracy tira tre d20). Senza un alleato adiacente il
+// vantaggio effettivo deve comunque far proporre Sneak Attack.
+globalThis.CONFIG = {Dice: {D20Roll: {ADV_MODE: {DISADVANTAGE: -1, NORMAL: 0, ADVANTAGE: 1}}}};
+nearby = [];
+sneakItem.flags = {};
+sneakWorkflow.item.system.properties = new Set(["fin"]);
+const elvenWorkflow = {
+  ...sneakWorkflow,
+  khuzoeSneakAttackApplied: false,
+  advantage: undefined,
+  disadvantage: undefined,
+  attackRoll: {options: {advantageMode: 1}, terms: [{number: 3, faces: 20}]}
+};
+assert.equal(await sneakMacro({workflow: elvenWorkflow, document: sneakItem}), undefined);
+assert.equal(confirmed, 2, "Elven Accuracy: Sneak Attack deve essere proposto con vantaggio effettivo");
+const normalWorkflow = {...elvenWorkflow, khuzoeSneakAttackApplied: false,
+  attackRoll: {options: {advantageMode: 0}}};
+assert.equal(await sneakMacro({workflow: normalWorkflow, document: sneakItem}), undefined);
+assert.equal(confirmed, 2, "Senza vantaggio né alleato adiacente Sneak Attack non va proposto");
+const disadvantageWorkflow = {...elvenWorkflow, khuzoeSneakAttackApplied: false,
+  attackRoll: {options: {advantageMode: -1}}, advantage: true};
+assert.equal(await sneakMacro({workflow: disadvantageWorkflow, document: sneakItem}), undefined);
+assert.equal(confirmed, 2, "Lo svantaggio effettivo deve prevalere su un vecchio flag di vantaggio");
+
 const uncannyActivity = {_id: ROGUE_ACTIVITY_IDS.uncannyDodge};
 const uncannyItem = {
   name: "Uncanny Dodge",

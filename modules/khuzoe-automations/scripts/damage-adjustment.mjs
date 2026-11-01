@@ -45,9 +45,10 @@ export function damageDealt(workflow, target, type) {
     || data.tokenId === target.id || (!data.tokenUuid && !data.targetUuid && !data.tokenId && (data.actorUuid === target.actor?.uuid || data.actorId === target.actor?.id)));
   if (!entry || entry.isHit === false) return 0;
   const details = entry.damageDetail ?? entry.damageDetails?.combinedDamage;
-  if (!details) return Math.max(0, Number(entry.hpDamage ?? 0) + Number(entry.tempDamage ?? 0));
+  if (!details) return type ? 0 : Math.max(0, Number(entry.hpDamage ?? 0) + Number(entry.tempDamage ?? 0));
+  const selectedTypes = type ? new Set(Array.isArray(type) ? type : [type]) : null;
   const nonDamage = new Set(["healing", "temphp", "vitality", "maximum", "none", "midi-none"]);
-  const typed = damageEntries(details).reduce((sum, part) => sum + ((type ? part.type === type : !nonDamage.has(part.type)) ? Math.max(0, Number(part.value ?? part.damage) || 0) : 0), 0);
+  const typed = damageEntries(details).reduce((sum, part) => sum + ((selectedTypes ? selectedTypes.has(part.type) : !nonDamage.has(part.type)) ? Math.max(0, Number(part.value ?? part.damage) || 0) : 0), 0);
   const genericReduction = damageEntries(details).reduce((sum, part) =>
     sum + (["none", "midi-none"].includes(part.type) ? Math.min(0, Number(part.value ?? part.damage) || 0) : 0), 0);
   // Losing the target's last HP does not cap the damage dealt by the spell.
