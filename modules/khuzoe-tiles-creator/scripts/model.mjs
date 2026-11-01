@@ -49,4 +49,14 @@ export function tileData(job,path) {
   const area=rect(job.capture.target);
   return {name:'Tile AI',...area,texture:{src:path,anchorX:0,anchorY:0,fit:'fill',scaleX:1,scaleY:1},rotation:0,alpha:1,hidden:false,locked:true,elevation:job.capture.elevation,sort:job.capture.sort,levels:[job.context.levelId],flags:{[MODULE_ID]:{generationId:job.id,version:VERSION}}};
 }
+export function placedTileMatches(job,tile){
+  if(!tile||tile.flags?.[MODULE_ID]?.generationId!==job.id)return false;
+  const expected=tileData(job,`khuzoe-tiles/${job.context.worldId}/${job.id}.webp`),texture=tile.texture||{};
+  const levels=Array.from(tile.levels||[]);
+  return ['x','y','width','height','rotation','alpha','elevation','sort'].every(k=>Number(tile[k])===Number(expected[k]))
+    &&!tile.hidden&&levels.length===1&&levels[0]===job.context.levelId
+    &&texture.src===expected.texture.src&&texture.anchorX===0&&texture.anchorY===0
+    &&(texture.fit??'fill')==='fill'&&(texture.scaleX??1)===1&&(texture.scaleY??1)===1
+    &&Number(texture.tint??0xffffff)===0xffffff;
+}
 export function contextKey(context) { return JSON.stringify([context.campaignId,context.worldId,context.sceneId,context.levelId]); }

@@ -1,8 +1,8 @@
-import {MAX_SOURCE_BYTES,VERSION,planCapture,sourceCrop} from './model.mjs';
+import {MODULE_ID,MAX_SOURCE_BYTES,VERSION,planCapture,sourceCrop} from './model.mjs';
 
 const hasImage=source=>typeof source==='string'&&source.trim().length>0;
 
-export function mapLayers(scene){
+export function mapLayers(scene,{excludeGenerationId}={}){
   // Like Scene#createThumbnail in v14, compose detached sprites. Never render
   // canvas.stage: that would capture tokens, fog, lights and selection handles.
   const center=scene.dimensions.sceneRect.center||{x:scene.dimensions.sceneRect.x+scene.dimensions.sceneRect.width/2,y:scene.dimensions.sceneRect.y+scene.dimensions.sceneRect.height/2};
@@ -10,12 +10,12 @@ export function mapLayers(scene){
   // The viewed level includes a foreground entry even when no image is set.
   // Its background color is already drawn by the fill; only load real textures.
   const backgrounds=scene._configureLevelTextures().filter(lt=>hasImage(lt.src)).map(lt=>({...lt,...lt.level.textures,x:center.x,y:center.y,width:scene.dimensions.sceneRect.width,height:scene.dimensions.sceneRect.height,sortLayer:sceneLayer,zIndex:-Infinity,alpha:lt.alpha??1}));
-  const tiles=Array.from(scene.tiles).filter(t=>hasImage(t.texture?.src)&&!t.hidden&&t.viewed!==false).map(t=>({...t.texture,x:t.x,y:t.y,width:t.width,height:t.height,rotation:t.rotation,elevation:t.elevation,sort:t.sort,alpha:t.alpha,sortLayer:tilesLayer,zIndex:0,id:t.id}));
+  const tiles=Array.from(scene.tiles).filter(t=>hasImage(t.texture?.src)&&!t.hidden&&t.viewed!==false&&(!excludeGenerationId||t.flags?.[MODULE_ID]?.generationId!==excludeGenerationId)).map(t=>({...t.texture,x:t.x,y:t.y,width:t.width,height:t.height,rotation:t.rotation,elevation:t.elevation,sort:t.sort,alpha:t.alpha,sortLayer:tilesLayer,zIndex:0,id:t.id}));
   return [...backgrounds,...tiles].sort(foundry.canvas.groups.PrimaryCanvasGroup._compareObjects);
 }
-export async function sceneFingerprint(scene){
+export async function sceneFingerprint(scene,options){
   const fields=['id','src','x','y','width','height','rotation','elevation','sort','sortLayer','zIndex','alpha','tint','anchorX','anchorY','offsetX','offsetY','fit','scaleX','scaleY'];
-  const value=JSON.stringify([scene.backgroundColor,mapLayers(scene).map(layer=>Object.fromEntries(fields.map(k=>[k,layer[k]])))]);
+  const value=JSON.stringify([scene.backgroundColor,mapLayers(scene,options).map(layer=>Object.fromEntries(fields.map(k=>[k,layer[k]])))]);
   const hash=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value));return Array.from(new Uint8Array(hash),b=>b.toString(16).padStart(2,'0')).join('');
 }
 export async function captureArea(area,settings){
@@ -66,6 +66,32 @@ export async function composeTile(sourceBlob,generatedBlob,capture,feather=12){
     ctx.drawImage(overlay,0,0);
     const blob=await new Promise(resolve=>result.toBlob(resolve,'image/webp',0.96));if(!blob)throw new Error('Impossibile preparare il tile.');return blob;
   }finally{source.close();generated.close();}
+}
+
+export async function resizeInput(sourceBlob,size){
+  const source=await createImageBitmap(sourceBlob);
+  try{
+    const output=document.createElement('canvas');output.width=size.width;output.height=size.height;
+    output.getContext('2d').drawImage(source,0,0,size.width,size.height);
+    const blob=await new Promise(resolve=>output.toBlob(resolve,'image/webp',0.98));
+    if(!blob||blob.size>MAX_SOURCE_BYTES)throw new Error('L’immagine di partenza è troppo grande. Scegli una risoluzione inferiore.');
+    return blob;
+  }finally{source.close();}
+}
+
+export async function resultAsInput(sourceBlob,tileBlob,capture){
+  const [source,tile]=await Promise.all([createImageBitmap(sourceBlob),createImageBitmap(tileBlob)]);
+  try{
+    const crop=sourceCrop(capture);
+    if(source.width!==capture.width||source.height!==capture.height||tile.width!==Math.round(crop.width)||tile.height!==Math.round(crop.height))throw new Error('L’anteprima non corrisponde all’area selezionata.');
+    // Keep the original context margin and replace only the authorized crop
+    // with the exact preview shown to the DM, including its current feathering.
+    const output=document.createElement('canvas');output.width=capture.width;output.height=capture.height;const ctx=output.getContext('2d');
+    ctx.drawImage(source,0,0);ctx.drawImage(tile,crop.x,crop.y,crop.width,crop.height);
+    const blob=await new Promise(resolve=>output.toBlob(resolve,'image/webp',0.98));
+    if(!blob||blob.size>MAX_SOURCE_BYTES)throw new Error('L’immagine di partenza è troppo grande. Scegli una risoluzione inferiore.');
+    return blob;
+  }finally{source.close();tile.close();}
 }
 
 // This overlay listens only on the canvas DOM element. It does not change a

@@ -9,13 +9,15 @@ Seleziona una porzione di una scena Foundry VTT 14 e descrivi come modificarla. 
 3. Apri una scena. Nella barra **Tile**, premi la bacchetta **Modifica area con AI**. In alternativa: impostazioni modulo → Apri Tiles Creator, oppure **Alt + Shift + T**.
 4. Scegli la risoluzione, premi **Seleziona area** e trascina un rettangolo sulla mappa. **Esc** annulla. Un margine di contesto aiuta il generatore a mantenere lo stile.
 5. Descrivi la modifica e premi **Genera anteprima**. Puoi chiudere e riaprire la finestra nella stessa scena per recuperare il risultato. Clicca sulle immagini per ingrandirle.
-6. Regola il raccordo dei bordi e premi **Posiziona nella scena**. Il tile è bloccato inizialmente, con posizione e dimensioni della selezione. Rimane un normale tile Foundry e puoi sbloccarlo, nasconderlo o eliminarlo.
+6. Per altre modifiche, premi **Usa come nuovo input**: l'anteprima corrente diventa la nuova base. Scrivi le altre modifiche e premi **Genera nuova modifica**. Puoi ripetere il ciclo; ogni generazione conserva il risultato precedente. **Torna all’anteprima precedente** annulla la richiesta ancora in bozza senza chiamate AI.
+7. Prima di posizionare, premi **Gomma** per cancellare parti dell'anteprima. Regola la dimensione del pennello con il cursore o il valore in pixel e trascina sull'immagine. **Annulla tratto**, **Rifai** e **Ripristina tutto** consentono di correggere il ritocco. Il motivo a scacchi indica le parti trasparenti. Premi **Applica gomma** per conservare il ritocco, oppure **Annulla** per uscire senza modificarlo.
+8. Regola il raccordo dei bordi e premi **Posiziona nella scena**. Il tile è bloccato inizialmente, con posizione e dimensioni della selezione. Rimane un normale tile Foundry e puoi sbloccarlo, nasconderlo o eliminarlo. Puoi continuare anche da un risultato già posizionato, purché il tile e la mappa siano rimasti invariati: alla conferma viene creato un nuovo tile sovrapposto, conservando il precedente.
 
 ## Servizio wiki
 
 È necessario pubblicare il Worker aggiornato, con la nuova binding `TILE_GENERATOR` / classe SQLite Durable Object `TileGenerationStore` e la migrazione additiva `tile-generation-v1`. Usa il segreto `OPENAI_API_KEY` già configurato. Il modulo non contiene la chiave e il segreto di sincronizzazione Foundry non autorizza le generazioni a pagamento.
 
-Il modello è lo stesso del generatore avatar (`gpt-image-2.5-sunburst`), con prompt dedicato alle mappe. Qualità media/alta; risoluzione media circa 1 MP, alta circa 2,25 MP, con proporzioni mantenute entro i vincoli API. Cambiare risoluzione prima della generazione aggiorna la cattura senza costi AI. Il limite `TILE_MONTHLY_LIMIT` è inizialmente **20 generazioni per campagna al mese**: è un numero di richieste, non un tetto monetario. Un invio ambiguo conserva lo stesso identificativo; nessun nuovo tentativo a pagamento è automatico.
+Il modello è lo stesso del generatore avatar (`gpt-image-2.5-sunburst`), con prompt dedicato alle mappe. Qualità media/alta; risoluzione media circa 1 MP, alta circa 2,25 MP, con proporzioni mantenute entro i vincoli API. Cambiare risoluzione prima della generazione aggiorna la cattura senza costi AI; nelle modifiche progressive ridimensiona la base scelta, mantenendo le modifiche precedenti. **Non esiste un limite mensile di generazioni tile.** Rimangono l'autenticazione DM/admin, la verifica della campagna e un solo lavoro attivo alla volta per campagna. Ogni nuova generazione usa le API a pagamento. Un invio ambiguo conserva lo stesso identificativo; nessun nuovo tentativo a pagamento è automatico.
 
 Le immagini su R2 sono nel prefisso privato `_private/ai-tiles/`, accessibili tramite richieste autenticate del proprietario della generazione. Al posizionamento viene salvata una copia in `Data/khuzoe-tiles/<worldId>/<generationId>.webp`. Nessuna cattura o immagine viene pubblicata nella wiki o nei suoi elenchi NPC. Nessuna modifica ai dati esistenti in KV.
 
@@ -36,3 +38,11 @@ La sorgente versionata è `integrations/khuzoe-tiles-creator`. `node scripts/ins
 ## Correzioni 0.1.1
 
 La cattura ignora le texture non configurate dei livelli Foundry, compreso il primo piano vuoto restituito anche nelle scene con solo sfondo. Funzionano anche scene prive di tile e sfondi di solo colore. I primi piani con un'immagine configurata restano inclusi.
+
+## Modifiche 0.2.0
+
+Modifiche progressive: usa l'anteprima come nuovo input, mantenendo il margine di contesto originale. La base scelta e il testo ancora in bozza sono recuperabili dopo la chiusura della finestra. Il servizio conserva il collegamento fra una generazione e la sua base senza sovrascrivere le immagini precedenti. Rimosso il limite mensile dei tile; contatori già esistenti restano conservati per l'utilizzo storico. L'aggiornamento richiede il nuovo Worker, senza migrazioni o modifiche ai dati in KV.
+
+## Modifiche 0.3.0
+
+Gomma locale con pennello regolabile da 4 a 300 pixel, annullamento/ripetizione dei tratti e ripristino completo. Le parti cancellate vengono salvate come trasparenza nel WebP finale, non come colore di sfondo. La maschera rimane in questo browser, distinta per campagna/mondo/scena/livello/generazione, ed è recuperata riaprendo la finestra o ricaricando Foundry. Cambiare il raccordo dei bordi conserva le cancellazioni. Le modifiche progressive mantengono la maschera, anche quando si cambia risoluzione; il ripristino completo permette di rimuoverla. Il ritocco non usa API AI e non modifica immagini o tile già presenti. Non serve ripubblicare il Worker per questo aggiornamento.
