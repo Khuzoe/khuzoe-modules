@@ -22,7 +22,7 @@ export class TilesClient {
     const response=await fetch(url,{method:body===undefined?'GET':'POST',cache:'no-store',signal:AbortSignal.timeout(45000),headers:{Authorization:`Bearer ${token}`,...(body===undefined?{}:{'Content-Type':'application/json'})},...(body===undefined?{}:{body:JSON.stringify({...body,context})})});
     this.assert(origin);
     if(!response.ok){const result=await response.json().catch(()=>({}));throw Object.assign(new Error(result.error||(response.status===404?'Pubblica il Worker aggiornato per attivare Tiles Creator.':`Servizio non disponibile (${response.status}).`)),{status:response.status});}
-    if(action==='preview'||action==='source')return response.blob();
+    if(action==='preview'||action==='source'||/^reference-/.test(action))return response.blob();
     const result=await response.json();if(result.campaignId&&result.campaignId!==c.campaignId)throw new Error('Il risultato appartiene a un’altra campagna.');
     return result;
   }
