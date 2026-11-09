@@ -38,9 +38,9 @@ export function runSyntheticActivityData(data, item, targets = [], options = {})
 
 /** Midi 14's remote activity call carries only a UUID. Send a transient Item
  * snapshot when the owner must receive modified activity data (e.g. saved dice). */
-export async function runSnapshotActivityData(data, item, targets = [], {userId} = {}) {
+export async function runSnapshotActivityData(data, item, targets = [], {userId, workflowOptions = {}} = {}) {
   userId ??= globalThis.cat.utils.queryUtils.firstOwner(item.actor, true) ?? game.user.id;
-  if (userId === game.user.id) return runSyntheticActivityData(data, item, targets, {userId});
+  if (userId === game.user.id) return runSyntheticActivityData(data, item, targets, {userId, options: {workflowOptions}});
   const itemData = runnableItemData(item);
   const activityData = clone(data);
   activityData.flags ??= {};
@@ -57,7 +57,7 @@ export async function runSnapshotActivityData(data, item, targets = [], {userId}
         asUser: userId, activityId: activityData._id, workflowData: true,
         targetUuids: targets.map(target => (target.document ?? target).uuid), configureDialog: false,
         workflowOptions: {autoFastDamage: true, autoRollDamage: "always", autoRollAttack: true,
-          targetConfirmation: "none", khuzoeInternalActivity: true, khuzoeActivitySnapshot: true}
+          targetConfirmation: "none", ...workflowOptions, khuzoeInternalActivity: true, khuzoeActivitySnapshot: true}
       }
     },
     dialog: {configure: false}, message: {}

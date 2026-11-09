@@ -10,6 +10,8 @@ const AUTHENTICATION_PATHS = new Set([
 const MANAGED_ACTOR_ACK_PATH = /^\/api\/managed-actor-commands\/[^/]+\/ack$/;
 const MANAGED_ACTOR_DOCUMENT_PATH = /^\/api\/managed-actors\/[^/]+\/[^/]+$/;
 
+const CITY_MAP_IMPORT_ACK_PATH = /^\/api\/city-maps\/scene-imports\/[a-f0-9-]{36}\/complete$/i;
+
 function requestPath(input) {
     try {
         const value = typeof input === "string" || input instanceof URL ? input : input?.url;
@@ -35,7 +37,7 @@ export async function policyFetch(input, init = {}) {
     if (AUTHENTICATION_PATHS.has(path) && canAuthenticateRemote()) {
         return globalThis.fetch(input, requestInit);
     }
-    if (method === "POST" && MANAGED_ACTOR_ACK_PATH.test(path) && canAcknowledgeRemotePull()) {
+    if (method === "POST" && (MANAGED_ACTOR_ACK_PATH.test(path) || CITY_MAP_IMPORT_ACK_PATH.test(path)) && canAcknowledgeRemotePull()) {
         return globalThis.fetch(input, requestInit);
     }
     if (method === "POST"

@@ -54,6 +54,7 @@ confirm = () => new Promise(resolve => { resolveConfirmation = resolve; });
 const before = confirmations;
 const first = applyAllKhuzoeAutomations(actor, app, button);
 const duplicate = applyAllKhuzoeAutomations(actor, app, {...button});
+await new Promise(resolve => setImmediate(resolve));
 assert.equal(confirmations, before + 1, "Sheet and Medkit share one in-flight application per actor");
 resolveConfirmation(true);
 await Promise.all([first, duplicate]);
@@ -62,6 +63,13 @@ assert.equal(status(actor.items).state, "current");
 assert.equal(button.disabled, false);
 
 actor.items[0].flags.cat.automation.version = "0.1.0";
+globalThis.fromUuid = async () => null;
+const beforeMissing = confirmations;
+await applyAllKhuzoeAutomations(actor, app, button);
+assert.equal(confirmations, beforeMissing, "Sorgente assente: nessuna conferma o modifica del mondo");
+assert.match(notices.at(-1).message, /Chiudi completamente Foundry/);
+globalThis.fromUuid = async () => ({});
+
 update = async () => {}; // CAT returned without updating the item version.
 confirm = async () => true;
 await applyAllKhuzoeAutomations(actor, app, button);

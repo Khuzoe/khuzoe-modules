@@ -16,7 +16,9 @@ const feetPixels = scene => Number(scene.grid.size) * sceneUnitsPerFoot(scene) /
 /** A terrain cost applies to the segment inside the area, not to the actor's speed. */
 export function registerSpellTerrainType() {
   const Base = globalThis.foundry?.data?.regionBehaviors?.RegionBehaviorType;
-  if (!Base || !globalThis.CONFIG?.RegionBehavior) return;
+  const models = globalThis.CONFIG?.RegionBehavior?.dataModels;
+  if (!Base || !models) return false;
+  if (models[TYPE]?.prototype instanceof Base) return true;
   class SpellTerrain extends Base {
     /** Foundry initializes this schema at startup; spell state lives on the Region flags. */
     static defineSchema() {
@@ -34,9 +36,10 @@ export function registerSpellTerrainType() {
       return [{name: "difficulty", difficulty: 2}];
     }
   }
-  CONFIG.RegionBehavior.dataModels[TYPE] = SpellTerrain;
+  models[TYPE] = SpellTerrain;
   CONFIG.RegionBehavior.typeLabels ??= {};
   CONFIG.RegionBehavior.typeLabels[TYPE] = "Terreno difficile (Khuzoe)";
+  return true;
 }
 
 function circle(token, radius) {
@@ -46,6 +49,10 @@ function circle(token, radius) {
 }
 
 export async function createSpellArea(workflow, item, {rule, controller, radius, mobile = false, enemiesOnly = false, seconds = 60} = {}) {
+  if (!registerSpellTerrainType()) {
+    ui.notifications.error(`${item.name}: il comportamento di terreno Khuzoe non è stato registrato in questo client. Ricarica Foundry.`);
+    return;
+  }
   const source = doc(workflow.token);
   if (!source?.parent) return;
   const scene = source.parent;

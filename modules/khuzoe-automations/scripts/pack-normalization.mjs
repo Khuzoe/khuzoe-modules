@@ -11,7 +11,8 @@ export function normalizeAutomationData(item) {
   if (item?.flags?.cat?.automation?.source === "khuzoe-automations") {
     item.flags.cat.automation.version = ({
       "crown-of-stars": "0.28.0",
-      "difesa-impenetrabile": "0.28.4"
+      "difesa-impenetrabile": "0.28.4",
+      "abbraccio-di-ginevra": "0.28.8"
     })[item.system?.identifier] ?? RELEASE_VERSION;
   }
   if (!item?.system?.activities) return item;

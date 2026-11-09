@@ -74,10 +74,15 @@ class RegionBehaviorType {
   static get schema() { return this.defineSchema(); }
   get behavior() { return this.parent; }
 }
-globalThis.foundry = {data: {regionBehaviors: {RegionBehaviorType}}};
+globalThis.foundry = {data: {regionBehaviors: {}}};
 globalThis.CONFIG = {RegionBehavior: {dataModels: {}}};
-registerSpellTerrainType();
+assert.equal(registerSpellTerrainType(), false, "La registrazione riprova se il modello base non è ancora disponibile");
+foundry.data.regionBehaviors.RegionBehaviorType = RegionBehaviorType;
+assert.equal(registerSpellTerrainType(), true);
 const Terrain = CONFIG.RegionBehavior.dataModels["khuzoe-automations.terrain"];
+assert.equal(registerSpellTerrainType(), true);
+assert.equal(CONFIG.RegionBehavior.dataModels["khuzoe-automations.terrain"], Terrain,
+  "La seconda registrazione non sostituisce il modello delle regioni già caricate");
 assert.throws(() => RegionBehaviorType.schema, /must define its Document schema/);
 assert.deepEqual(Terrain.schema, {}, "Foundry must be able to initialize the terrain schema before any Region is created");
 const terrain = new Terrain();

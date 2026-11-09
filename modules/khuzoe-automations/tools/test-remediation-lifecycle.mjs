@@ -5,6 +5,8 @@ import {finishShadowBladeThrow, restrictGaseousActions} from "../scripts/spell-s
 import {createSpellArea} from "../scripts/persistent-spell-areas.mjs";
 
 globalThis.game = {user: {id: "gm", isGM: true}, users: {activeGM: {id: "gm"}}, actors: [], time: {worldTime: 0}};
+globalThis.foundry = {data: {regionBehaviors: {RegionBehaviorType: class {}}}};
+globalThis.CONFIG = {RegionBehavior: {dataModels: {}}};
 globalThis.ui = {notifications: {warn() {}, info() {}, error() {}}};
 globalThis.cat = {utils: {
   queryUtils: {gmUser: () => game.user, firstOwner: () => "gm"},

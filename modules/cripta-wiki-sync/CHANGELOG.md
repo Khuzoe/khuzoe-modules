@@ -1,3 +1,7 @@
+# Khuzoe Wiki Sync 0.11.20 — 3 novembre 2026
+
+- Il messaggio ordinario «Assorbimento check» usa il livello debug anziché warning. I controlli e l'applicazione dell'assorbimento restano invariati; gli avvisi relativi a errori o dati insufficienti continuano a essere visibili. Ricaricare il client per caricare la modifica.
+
 # Khuzoe Wiki Sync 0.11.11 — 8 ottobre 2026
 
 - Rafforzato il salvataggio di Link Actor Data del token predefinito: aggiornamento puntuale del flag se la configurazione completa non lo conserva e verifica immediata prima di convertire i token in mappa. Un rifiuto effettivo interrompe la conversione e mantiene il ripristino dal backup; la diagnostica non suggerisce più di impostare manualmente il collegamento su No.

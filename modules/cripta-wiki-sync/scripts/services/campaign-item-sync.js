@@ -263,7 +263,8 @@ export async function linkEmbeddedCampaignItem(item) {
     }
     if (!campaignId && source) campaignId = getCampaignItemId(source);
     if (!campaignId) {
-        const candidates = managedWorldItems().filter((entry) => normalizeName(entry.name) === normalizeName(item.name));
+        const candidates = managedWorldItems().filter((entry) => !requiresExactCampaignItemId(getCampaignItemId(entry))
+            && normalizeName(entry.name) === normalizeName(item.name));
         if (candidates.length === 1) {
             source = candidates[0];
             campaignId = getCampaignItemId(source);
@@ -354,6 +355,11 @@ async function flushCampaignItemPush() {
     for (const itemId of ids) {
         const item = game.items.get(itemId);
         if (!item || !isManagedWorldItem(item)) continue;
+        const folder = categoryFolderForItem(item);
+        if (categoryFolderNeedsRegistration(folder)) {
+            await queueCategoryFolderChange(folder, "item-snapshot");
+            if (categoryFolderNeedsRegistration(folder)) continue;
+        }
         const id = await ensureWorldItemIdentity(item);
         const document = await buildWorldItemSnapshot(item, null);
         if (document.hash === String(nextItemsState[id]?.foundryHash || "")) continue;
@@ -748,18 +754,25 @@ function itemIsInsideManagedRoot(item) {
     return false;
 }
 
+function requiresExactCampaignItemId(id) {
+    return /^(?:ai-drop-[a-f0-9-]{36}-[1-5]|nuovo-oggetto-[a-f0-9-]{36})$/i.test(id);
+}
+
 function findWorldItemByCampaignId(id, record = null) {
     const direct = managedWorldItems().find((item) => getCampaignItemId(item) === id || normalizeId(item.getFlag?.(MODULE_ID, "wikiItemId")) === id);
-    if (direct) return direct;
+    // New site items have a stable identity even when their names are identical.
+    if (direct || requiresExactCampaignItemId(id)) return direct || null;
     const aliases = new Set([record?.name, ...(Array.isArray(record?.foundryNames) ? record.foundryNames : []), ...(Array.isArray(record?.aliases) ? record.aliases : [])].map(normalizeName).filter(Boolean));
-    const managedMatch = aliases.size ? managedWorldItems().find((item) => aliases.has(normalizeName(item.name))) || null : null;
+    const managedMatch = aliases.size ? managedWorldItems().find((item) => !requiresExactCampaignItemId(getCampaignItemId(item))
+        && aliases.has(normalizeName(item.name))) || null : null;
     if (managedMatch) return managedMatch;
 
     // foundryNames e un collegamento esplicito: possiamo adottare un Item fuori
     // dalla radice gestita soltanto quando la corrispondenza e unica.
     const explicitNames = new Set((Array.isArray(record?.foundryNames) ? record.foundryNames : []).map(normalizeName).filter(Boolean));
     if (!explicitNames.size) return null;
-    const candidates = Array.from(game.items || []).filter((item) => !item?.actor && !item?.pack && explicitNames.has(normalizeName(item.name)));
+    const candidates = Array.from(game.items || []).filter((item) => !item?.actor && !item?.pack
+        && !requiresExactCampaignItemId(getCampaignItemId(item)) && explicitNames.has(normalizeName(item.name)));
     if (candidates.length === 1) return candidates[0];
     if (candidates.length > 1) {
         console.warn(`${MODULE_ID} | Alias Foundry ambiguo; creo una copia gestita senza modificare gli originali.`, {
@@ -908,6 +921,14 @@ function folderParentId(folder) {
     return String(folder?.folder?.id || folder?.folder || folder?.parent?.id || folder?.parent || "");
 }
 
+function categoryFolderDepth(folder, root = getRootFolder()) {
+    if (!root || folder?.type !== "Item") return 0;
+    const parentId = folderParentId(folder);
+    if (parentId === String(root.id)) return 1;
+    const parent = game.folders.get(parentId);
+    return parent && folderParentId(parent) === String(root.id) && !isArchiveFolder(parent) ? 2 : 0;
+}
+
 function getFolderCategoryId(folder) {
     return normalizeId(folder?.getFlag?.(MODULE_ID, CATEGORY_FOLDER_ID_FLAG)
         || folder?.flags?.[MODULE_ID]?.[CATEGORY_FOLDER_ID_FLAG]
@@ -935,14 +956,20 @@ async function ensureCategoryFolderIdentity(folder, category, { rename = false }
 }
 
 async function getOrCreateCategoryFolder(record, registry = null) {
-    const category = resolveRecordCategory(record, registry || latestCategoryRegistry);
+    registry ||= latestCategoryRegistry;
+    const category = resolveRecordCategory(record, registry);
     const root = await getOrCreateRootFolder();
-    const children = Array.from(game.folders || []).filter((folder) => folder?.type === "Item" && folderParentId(folder) === String(root.id));
-    let child = children.find((folder) => getFolderCategoryId(folder) === category.id);
+    const parentCategory = registry?.categories?.find(entry => entry.id === category.parentId && !entry.parentId && !entry.archived && !entry.mergedInto);
+    const parent = parentCategory
+        ? await getOrCreateCategoryFolder({ categoryId: parentCategory.id, category: parentCategory.name }, registry)
+        : root;
+    const folders = Array.from(game.folders || []).filter(folder => categoryFolderDepth(folder, root) && !isArchiveFolder(folder));
+    const children = folders.filter(folder => folderParentId(folder) === String(parent.id));
+    let child = children.find(folder => getFolderCategoryId(folder) === category.id)
+        || folders.find(folder => folder.id !== parent.id && getFolderCategoryId(folder) === category.id);
     if (!child) {
         const wantedName = normalizeName(category.name);
         child = children.find((folder) => !getFolderCategoryId(folder) && normalizeName(folder.name) === wantedName)
-            || children.find((folder) => getFolderCategoryId(folder) === category.id && normalizeName(folder.name) === wantedName)
             || null;
     }
     if (!child) {
@@ -950,10 +977,13 @@ async function getOrCreateCategoryFolder(record, registry = null) {
             name: categoryFolderName(category.name),
             type: "Item",
             sorting: "a",
-            folder: root.id,
+            folder: parent.id,
             flags: { [MODULE_ID]: { [CATEGORY_FOLDER_ID_FLAG]: category.id, [CATEGORY_FOLDER_NAME_FLAG]: category.name } }
         }, { criptaCampaignItemSync: true });
     } else {
+        if (folderParentId(child) !== String(parent.id)) {
+            await child.update({ folder: parent.id }, { criptaCampaignItemSync: true });
+        }
         await ensureCategoryFolderIdentity(child, category, { rename: true });
     }
     return child;
@@ -962,7 +992,7 @@ async function getOrCreateCategoryFolder(record, registry = null) {
 export function resolveRecordCategory(record, registry = null) {
     const categories = Array.isArray(registry?.categories) ? registry.categories : [];
     const byId = new Map(categories.map((category) => [normalizeId(category?.id || category?.name), category]).filter(([id]) => id));
-    const byName = new Map(categories.map((category) => [normalizeName(category?.name), category]).filter(([name]) => name));
+    const byName = new Map(categories.filter(category => !category.parentId).map((category) => [normalizeName(category?.name), category]).filter(([name]) => name));
     let categoryId = normalizeId(record?.categoryId || record?.category || "");
     let category = byId.get(categoryId) || byName.get(normalizeName(record?.category || "")) || null;
     const visited = new Set();
@@ -970,7 +1000,10 @@ export function resolveRecordCategory(record, registry = null) {
         categoryId = normalizeId(category.id);
         visited.add(categoryId);
         const merged = normalizeId(category.mergedInto || "");
-        if (!merged || !byId.has(merged)) return { id: categoryId, name: String(category.name).trim().slice(0, 120) };
+        if (!merged || !byId.has(merged)) {
+            const parentId = normalizeId(category.parentId);
+            return { id: categoryId, name: String(category.name).trim().slice(0, 120), ...(parentId ? { parentId } : {}) };
+        }
         category = byId.get(merged);
     }
     const explicit = String(record?.category || record?.type || "").trim();
@@ -999,8 +1032,9 @@ function categoryIdentityForFolder(folder, fallback = null, registry = latestCat
     const flaggedId = getFolderCategoryId(folder);
     const flaggedName = getFolderCategoryName(folder);
     if (flaggedId) return resolveRecordCategory({ categoryId: flaggedId, category: flaggedName || folder?.name }, registry);
+    const parentId = categoryFolderDepth(folder) === 2 ? getFolderCategoryId(game.folders.get(folderParentId(folder))) : "";
     const exact = (Array.isArray(registry?.categories) ? registry.categories : [])
-        .find((category) => normalizeName(category?.name) === normalizeName(folder?.name));
+        .find(category => normalizeId(category.parentId) === parentId && normalizeName(category.name) === normalizeName(folder?.name));
     if (exact) return resolveRecordCategory({ categoryId: exact.id, category: exact.name }, registry);
     if (fallback?.id && fallback?.name) return fallback;
     const name = categoryFolderName(folder?.name || "Senza categoria");
@@ -1016,7 +1050,7 @@ function categoryFolderForItem(item) {
         if (typeof folder === "string") folder = game.folders.get(folder) || null;
         if (!folder || seen.has(folder.id)) return null;
         seen.add(folder.id);
-        if (folderParentId(folder) === String(root.id)) return folder;
+        if (categoryFolderDepth(folder, root)) return folder;
         folder = folder.folder || folder.parent || null;
     }
     return null;
@@ -1042,7 +1076,10 @@ function categoryFolderNeedsRegistration(folder, registry = latestCategoryRegist
     if (!id) return true;
     const category = (Array.isArray(registry?.categories) ? registry.categories : [])
         .find((entry) => normalizeId(entry?.id) === id);
-    return !category || category.inferred === true || normalizeName(category.name) !== normalizeName(folder.name);
+    const nested = categoryFolderDepth(folder) === 2;
+    const parentId = nested ? getFolderCategoryId(game.folders.get(folderParentId(folder))) : "";
+    return (nested && !parentId) || !category || category.inferred === true || normalizeName(category.name) !== normalizeName(folder.name)
+        || normalizeId(category.parentId) !== parentId;
 }
 
 function queueCategoryFolderChange(folder, reason) {
@@ -1050,6 +1087,7 @@ function queueCategoryFolderChange(folder, reason) {
         .catch(() => undefined)
         .then(() => synchronizeCategoryFolderFromFoundry(folder, reason))
         .catch((error) => console.warn(`${MODULE_ID} | Categoria cartella non sincronizzata; nessun dato e stato rimosso.`, { folder: folder?.name, error }));
+    return categoryFolderQueue;
 }
 
 async function synchronizeCategoryFolderFromFoundry(folder, reason) {
@@ -1060,7 +1098,8 @@ async function synchronizeCategoryFolderFromFoundry(folder, reason) {
         return true;
     }
     const root = await getOrCreateRootFolder();
-    if (folderParentId(folder) !== String(root.id)) return false;
+    const depth = categoryFolderDepth(folder, root);
+    if (!depth) return false;
     if (isArchiveFolder(folder)) {
         if (folder.getFlag?.(MODULE_ID, ARCHIVE_FOLDER_FLAG) !== true) {
             await folder.update({ [`flags.${MODULE_ID}.${ARCHIVE_FOLDER_FLAG}`]: true }, { criptaCampaignItemSync: true });
@@ -1069,24 +1108,31 @@ async function synchronizeCategoryFolderFromFoundry(folder, reason) {
         return true;
     }
 
+    const parent = depth === 2 ? game.folders.get(folderParentId(folder)) : null;
+    if (parent && categoryFolderNeedsRegistration(parent)) await synchronizeCategoryFolderFromFoundry(parent, reason);
+    const parentId = getFolderCategoryId(parent);
+    if (parent && !parentId) return false;
     let registry = await loadCategoryRegistry();
-    const exact = registry.categories.find((category) => normalizeName(category?.name) === normalizeName(folder.name));
-    let categoryId = getFolderCategoryId(folder) || normalizeId(exact?.id || folder.name) || `categoria-${normalizeId(folder.id)}`;
-    const collision = registry.categories.find((category) => normalizeId(category?.id) === categoryId && normalizeName(category?.name) !== normalizeName(folder.name));
-    if (!getFolderCategoryId(folder) && collision) categoryId = `${categoryId}-${normalizeId(folder.id).slice(0, 8)}`;
+    const exact = registry.categories.find(category => normalizeId(category.parentId) === parentId && normalizeName(category.name) === normalizeName(folder.name));
+    const fallbackId = `categoria-${normalizeId(folder.id)}`;
+    let categoryId = getFolderCategoryId(folder) || normalizeId(exact?.id || (!parentId ? folder.name : "")) || fallbackId;
+    const collision = registry.categories.find(category => normalizeId(category.id) === categoryId && category.id !== exact?.id);
+    if (!getFolderCategoryId(folder) && collision) categoryId = fallbackId;
 
     const currentCategory = registry.categories.find((category) => normalizeId(category?.id) === categoryId);
     const categoryChanged = !currentCategory
         || currentCategory.inferred === true
-        || normalizeName(currentCategory.name) !== normalizeName(folder.name);
+        || normalizeName(currentCategory.name) !== normalizeName(folder.name)
+        || normalizeId(currentCategory.parentId) !== parentId;
     if (categoryChanged) {
         for (let attempt = 0; attempt < 3; attempt += 1) {
             const categories = registry.categories.map((category) => ({ ...category }));
             const index = categories.findIndex((category) => normalizeId(category?.id) === categoryId);
-            if (index >= 0) categories[index] = { ...categories[index], name: categoryFolderName(folder.name) };
+            if (index >= 0) categories[index] = { ...categories[index], name: categoryFolderName(folder.name), parentId };
             else categories.push({
                 id: categoryId,
                 name: categoryFolderName(folder.name),
+                parentId,
                 order: categories.reduce((max, category) => Math.max(max, Number(category?.order || 0)), 0) + 10,
                 color: "#b99a45",
                 icon: "fa-folder-open",
@@ -1109,7 +1155,8 @@ async function synchronizeCategoryFolderFromFoundry(folder, reason) {
     for (const item of managedWorldItems()) {
         if (categoryFolderForItem(item)?.id === folder.id) scheduleCampaignItemPush(item);
     }
-    requestCampaignItemReconcile();
+    // The folder already reflects the Foundry change. Let queued item snapshots
+    // publish their new placement before a pull can restore the old catalog folder.
     console.info(`${MODULE_ID} | Categoria oggetti sincronizzata dalla cartella Foundry.`, { categoryId: resolved.id, name: resolved.name, reason });
     return true;
 }

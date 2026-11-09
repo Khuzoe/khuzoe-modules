@@ -47,8 +47,9 @@ globalThis.cat = {
 const {canManageAutomations} = await import("../scripts/main.mjs");
 onceHooks.get("catReady")();
 
-assert.equal(automations.length, 169);
-assert.equal(macros.length, 180);
+assert.equal(automations.length, 170);
+assert.equal(macros.length, 181);
+assert.ok(automations.some(data => data.identifier === "abbraccio-di-ginevra" && data.rules === "2024"));
 assert.ok(!automations.some(data => data.identifier === "shield" && data.type === "feat"));
 assert.ok(automations.some(data => data.identifier === "shield" && data.type === "spell"));
 assert.ok(!macros.some(data => data.identifier === "khuzoe-guardian-shield"));

@@ -1,0 +1,274 @@
+{
+  "_id": "KhzGinevraEmbr01",
+  "_key": "!items!KhzGinevraEmbr01",
+  "name": "Abbraccio di Ginevra",
+  "type": "feat",
+  "img": "modules/khuzoe-automations/assets/ginevra-embrace.webp",
+  "system": {
+    "identifier": "abbraccio-di-ginevra",
+    "source": {
+      "rules": "2024",
+      "custom": "Cripta di Sangue"
+    },
+    "type": {
+      "value": "class"
+    },
+    "description": {
+      "value": "<p><em>I tuoi occhi diventano gialli e il tuo corpo si copre parzialmente di piume dorate.</em></p>\n      <h3>Effetto base</h3><ul><li>Ottieni scurovisione entro 60 piedi.</li><li>Ottieni resistenza ai danni radiosi.</li>\n      </ul>\n      <p><strong>Attivazione.</strong> Come azione bonus, puoi manifestare lo Spirito di Ginevra alle tue spalle per 1 minuto.\n      Puoi usare questa capacità un numero di volte pari al tuo modificatore di Saggezza e recuperi tutti gli utilizzi spesi al termine di un riposo lungo.</p>\n      <blockquote><p><strong>Durante Abbraccio di Ginevra</strong></p><ul><li>Ottieni resistenza a tutti i danni.</li>\n      <li>I tuoi attacchi in mischia infliggono 2d4 danni radiosi aggiuntivi.</li>\n      <li>Ogni volta che infliggi danni a un nemico, Ginevra accumula cariche pari ai danni effettivamente inflitti, fino a 100.</li></ul>\n      <p><strong>Spendere le cariche.</strong> Come azione, consumi tutte le cariche accumulate e scegli uno degli effetti seguenti:</p>\n      <ul><li><strong>Angelo della Vita.</strong> Una creatura a tua scelta entro 60 piedi recupera punti ferita pari alle cariche consumate.</li>\n      <li><strong>Angelo della Morte.</strong> Una creatura a tua scelta entro 60 piedi effettua un tiro salvezza su Destrezza contro la CD dei tuoi incantesimi. Se lo fallisce, subisce danni radiosi pari alle cariche consumate; se lo supera, subisce la metà di quei danni.</li></ul></blockquote>\n      <p><strong>Origine:</strong> Albero abilità - Circolo della Nascita.</p>",
+      "chat": ""
+    },
+    "activities": {
+      "KhzGinActivate01": {
+        "_id": "KhzGinActivate01",
+        "type": "utility",
+        "name": "Manifesta lo Spirito di Ginevra",
+        "activation": {
+          "type": "bonus",
+          "value": 1,
+          "override": true
+        },
+        "consumption": {
+          "targets": [
+            {
+              "type": "itemUses",
+              "target": "",
+              "value": "1",
+              "scaling": {
+                "mode": "",
+                "formula": ""
+              }
+            }
+          ],
+          "spellSlot": false,
+          "scaling": {
+            "allowed": false
+          }
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "value": null,
+          "units": "self",
+          "override": true
+        },
+        "target": {
+          "override": true,
+          "prompt": false,
+          "affects": {
+            "count": "",
+            "type": "self"
+          },
+          "template": {
+            "units": "ft"
+          }
+        },
+        "roll": {
+          "formula": "",
+          "prompt": false,
+          "visible": false
+        },
+        "midiProperties": {
+          "confirmTargets": "never"
+        },
+        "uses": {
+          "max": "",
+          "spent": 0,
+          "recovery": []
+        }
+      },
+      "KhzGinLife000001": {
+        "_id": "KhzGinLife000001",
+        "type": "utility",
+        "name": "Angelo della Vita",
+        "activation": {
+          "type": "action",
+          "value": 1,
+          "override": true
+        },
+        "consumption": {
+          "targets": [],
+          "spellSlot": false,
+          "scaling": {
+            "allowed": false
+          }
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "value": "60",
+          "units": "ft",
+          "override": true
+        },
+        "target": {
+          "override": true,
+          "prompt": true,
+          "affects": {
+            "count": "1",
+            "type": "creature"
+          },
+          "template": {
+            "units": "ft"
+          }
+        },
+        "roll": {
+          "formula": "",
+          "prompt": false,
+          "visible": false
+        },
+        "midiProperties": {
+          "confirmTargets": "default"
+        },
+        "uses": {
+          "max": "",
+          "spent": 0,
+          "recovery": []
+        }
+      },
+      "KhzGinDeath00001": {
+        "_id": "KhzGinDeath00001",
+        "type": "utility",
+        "name": "Angelo della Morte",
+        "activation": {
+          "type": "action",
+          "value": 1,
+          "override": true
+        },
+        "consumption": {
+          "targets": [],
+          "spellSlot": false,
+          "scaling": {
+            "allowed": false
+          }
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": true
+        },
+        "effects": [],
+        "range": {
+          "value": "60",
+          "units": "ft",
+          "override": true
+        },
+        "target": {
+          "override": true,
+          "prompt": true,
+          "affects": {
+            "count": "1",
+            "type": "creature"
+          },
+          "template": {
+            "units": "ft"
+          }
+        },
+        "roll": {
+          "formula": "",
+          "prompt": false,
+          "visible": false
+        },
+        "midiProperties": {
+          "confirmTargets": "default"
+        },
+        "uses": {
+          "max": "",
+          "spent": 0,
+          "recovery": []
+        }
+      }
+    },
+    "uses": {
+      "max": "max(0, @abilities.wis.mod)",
+      "spent": 0,
+      "recovery": [
+        {
+          "period": "lr",
+          "type": "recoverAll"
+        }
+      ]
+    },
+    "properties": [],
+    "requirements": ""
+  },
+  "effects": [
+    {
+      "_id": "KhzGinevraBase01",
+      "_key": "!items.effects!KhzGinevraEmbr01.KhzGinevraBase01",
+      "name": "Abbraccio di Ginevra: effetto base",
+      "img": "modules/khuzoe-automations/assets/ginevra-embrace.webp",
+      "type": "base",
+      "origin": null,
+      "transfer": true,
+      "disabled": false,
+      "duration": {
+        "value": null,
+        "units": "seconds",
+        "expired": false
+      },
+      "showIcon": 0,
+      "statuses": [],
+      "system": {
+        "changes": [
+          {
+            "key": "system.attributes.senses.ranges.darkvision",
+            "type": "upgrade",
+            "value": "60",
+            "priority": 20
+          },
+          {
+            "key": "system.traits.dr.value",
+            "type": "add",
+            "value": "radiant",
+            "priority": 20
+          }
+        ]
+      },
+      "flags": {
+        "dae": {
+          "transfer": true,
+          "stackable": "noneNameOnly",
+          "specialDuration": [],
+          "expiryMode": "delete"
+        }
+      }
+    }
+  ],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "cat": {
+      "automation": {
+        "source": "khuzoe-automations",
+        "version": "0.28.8"
+      },
+      "macros": {
+        "roll": [
+          {
+            "source": "khuzoe-automations",
+            "rules": "2024",
+            "identifier": "abbraccio-di-ginevra"
+          }
+        ]
+      }
+    },
+    "midi-qol": {
+      "forceCEOff": true
+    },
+    "dnd5e": {
+      "riders": {
+        "activity": []
+      }
+    }
+  }
+}

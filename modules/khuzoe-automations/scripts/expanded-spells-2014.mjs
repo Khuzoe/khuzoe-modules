@@ -1165,7 +1165,7 @@ async function applyWardingBond(workflow, item) {
       identifier: "warding-bond",
       state: {kind: "bond-target", sourceTokenUuid: sourceToken?.uuid, sourceEffectUuid: sourceEffect?.uuid, maxDistance: 60},
       effectChanges: changes(
-        {key: "system.traits.dr.all", value: "1", type: "custom"},
+        {key: "system.traits.dr.value", value: "ALL", type: "add"},
         {key: "system.attributes.ac.bonus", value: "1"},
         {key: "system.bonuses.abilities.save", value: "1"}
       ),

@@ -1,8 +1,18 @@
 # Khuzoe Automations
 
-Versione **0.28.4** — ambiente di riferimento **Foundry VTT 14.367 / D&D5e 5.3.3**. Arcane Ward e le capacità Armorer di Valdor sono descritte in [WARD-ARMORER-0.26.0.md](WARD-ARMORER-0.26.0.md). Le capacità introdotte nella 0.25.0 sono descritte nello storico [CAMPAIGN-FEATURES-0.25.0.md](CAMPAIGN-FEATURES-0.25.0.md); Difesa Impenetrabile usa ora la formulazione riportata qui sotto. Le copie già presenti sugli attori si aggiornano dall'icona Khuzoe nella barra della scheda oppure dal Medkit CAT. Nessun aggiornamento del mondo viene eseguito dagli strumenti di compilazione.
+Versione **0.28.9** — ambiente di riferimento **Foundry VTT 14.367 / D&D5e 5.3.3**. Arcane Ward e le capacità Armorer di Valdor sono descritte in [WARD-ARMORER-0.26.0.md](WARD-ARMORER-0.26.0.md). Le capacità introdotte nella 0.25.0 sono descritte nello storico [CAMPAIGN-FEATURES-0.25.0.md](CAMPAIGN-FEATURES-0.25.0.md); Difesa Impenetrabile usa ora la formulazione riportata qui sotto. Le copie già presenti sugli attori si aggiornano dall'icona Khuzoe nella barra della scheda oppure dal Medkit CAT. Nessun aggiornamento del mondo viene eseguito dagli strumenti di compilazione.
 
 Automazioni D&D 5e per Foundry VTT v14 basate su Coven's Automation Toolkit, Midi-QOL e DAE.
+
+## Abbraccio di Ginevra
+
+La capacità di Garun usa le regole 2024. Il suo effetto base conferisce scurovisione a 60 piedi e resistenza radiante. L'automazione non modifica classi, progressione degli slot o incantesimi; Attacco Extra rimane invariato.
+
+L'attività bonus manifesta lo Spirito per 1 minuto e consuma un uso della capacità (usi pari al modificatore di Saggezza, recuperati al riposo lungo). Durante la manifestazione Garun resiste a tutti i danni e aggiunge 2d4 radianti agli attacchi in mischia che colpiscono. I danni effettivamente subiti da nemici, inclusi quelli ai PF temporanei, generano fino a 100 cariche; i danni in eccesso oltre i PF rimasti non contano. Le attività **Angelo della Vita** e **Angelo della Morte** spendono tutte le cariche come azione entro 60 piedi. La Morte chiede al proprietario del bersaglio un TS Destrezza contro la CD dei suoi incantesimi e dimezza i danni radianti se riesce. Se il tiro viene annullato, le cariche restano disponibili. La fine dell'effetto elimina le cariche non spese.
+
+L'applicazione alla scheda avviene dalla bacchetta Khuzoe; gli strumenti di generazione e compilazione non modificano i mondi.
+
+Le cariche compaiono nel nome dell'effetto attivo su Garun, nella scheda **Effetti** e sull'icona del token: `Abbraccio di Ginevra (0/100)` già all'attivazione, aggiornato dopo i danni. Gli utilizzi della capacità sono separati e contano soltanto le attivazioni disponibili.
 
 ## Capacità della campagna — primo gruppo
 
@@ -163,6 +173,26 @@ Il mantenimento viene controllato tra due fini-turno: un attacco effettuato, anc
 
 Circle of the Moon aggiunge automaticamente attivazione come azione bonus, guarigione con slot, CR di Circle Forms, Primal Strike e le quattro forme elementali. Un GM attivo è necessario quando un giocatore non possiede il permesso globale di creare Attori: l'operazione viene delegata in modo ristretto tramite SocketLib.
 
+## Cariche di Abbraccio di Ginevra e widget Energia radiosa
+
+Da 0.28.10, Energia radiosa 1.2.0 può leggere e modificare la stessa riserva dell'effetto attivo di Ginevra. Il widget rileva automaticamente la capacità sul personaggio associato, mostra 0–100 cariche e conserva slider e campo numerico per GM e proprietari. Quando Abbraccio termina, il widget mostra «Abbraccio non attivo». Una nuova attivazione riparte da 0. Le modifiche vengono gestite sul GM attivo insieme a guadagni, spesa e rimborsi; una correzione basata su un valore cambiato nel frattempo viene rifiutata con un avviso. Ricaricare completamente GM e giocatori; non serve riapplicare l'automazione per il collegamento e non vengono migrati i contatori precedenti.
+
+Da 0.28.12, Angelo della Morte usa `MidiQOL.DamageOnlyWorkflow` con un tiro di danno già valutato dall'importo delle cariche riservate. Il TS viene richiesto una sola volta al proprietario del bersaglio; il danno è pieno oppure metà per difetto. Il danno viene eseguito sul client che ha avviato l'azione, anche quando è il GM con il proprietario del lanciatore connesso. Questo percorso evita che un secondo uso di un'attività temporanea produca soltanto la carta senza tirare danni, come osservato dopo la precedente correzione 0.28.11. Si attende il completamento `ready` di Midi e si verifica che il bersaglio sia stato elaborato. Restano attivi reazioni, resistenze, immunità, PF temporanei e concentrazione, con le normali impostazioni Midi di applicazione del danno. Un bersaglio immune può subire 0 danni consumando correttamente le cariche; un'esecuzione annullata o fallita le restituisce. Ricaricare GM e giocatori con Ctrl+F5; non occorre riapplicare la capacità.
+
+Da 0.28.13 anche Angelo della Vita usa il medesimo percorso risolto di Midi con tipo `healing`, per curare il bersaglio scelto di un importo pari a tutte le cariche riservate. La cura può essere diretta anche a sé stessi, entro il normale limite dei PF massimi; non consuma PF temporanei e rispetta le immunità alla guarigione. Si attende il completamento del flusso e si controlla il bersaglio elaborato prima di confermare la spesa. Un errore, un annullamento o un flusso che non elabora il bersaglio restituisce le cariche con un avviso. Il semplice raggiungimento dei PF massimi o un'immunità alla cura non costituisce un errore e consuma le cariche. Non richiede TS o un secondo uso di attività. Ricaricare il client che avvia l'azione; non occorre riapplicare la capacità.
+
+Da 0.28.14, Ginevra e Warding Bond creano la resistenza a tutti i danni con `system.traits.dr.value = "ALL"` e tipo `add`, come previsto da DAE v14. Il precedente `system.traits.dr.all` produceva un avviso di deprecazione. Il buff di Ginevra già attivo corregge la sola chiave obsoleta durante il normale aggiornamento delle cariche, preservando origine, durata, altri bonus e cariche. È possibile aggiornare il formato anche risalvando lo stesso numero dal widget. Non vengono eseguite scansioni o migrazioni dei mondi all'avvio. Ricaricare i client per caricare la correzione.
+
+Altri moduli possono usare `game.modules.get("khuzoe-automations").api.ginevra`:
+
+```js
+const ginevra = game.modules.get("khuzoe-automations").api.ginevra;
+const stato = ginevra.get(actor); // active, value, min, max, effectId, origin
+await ginevra.set(actor, 40, stato); // GM/owner, buff attivo e GM connesso
+```
+
+Passare lo stato letto all'inizio dell'interazione protegge dalle modifiche contemporanee. Omettendolo, viene usato lo stato presente al momento della chiamata. L'API aggiorna cariche e nome del buff senza scrivere una seconda riserva sull'attore. Il flag resta `flags.khuzoe-automations.charges` sull'ActiveEffect identificato da `flags.cat.identifier = "khuzoe-ginevra-embrace"`; per modificare le cariche usare l'API.
+
 ## Crown of Stars (2014)
 
 Disponibile nel compendio incantesimi 2014 e nel pulsante automazioni della scheda, identificatore `crown-of-stars`. **Crea la corona** consuma lo slot e prepara 7/9/11 stelle con slot di 7°/8°/9° livello; dura 1 ora senza concentrazione. **Scaglia una stella** è un attacco con incantesimo a distanza, azione bonus, contro una creatura o un oggetto entro 120 ft, per 4d12 radianti. L'attività consuma nativamente un utilizzo anche su un mancato: mantenere abilitato il consumo degli utilizzi nel dialogo.
@@ -184,3 +214,5 @@ Da 0.28.2, Fire Shield crea il proprio effetto soltanto durante la scelta Warm o
 Da 0.28.3, Sneak Attack legge il vantaggio effettivo del tiro d'attacco di Midi, anche quando Elven Accuracy aggiunge un terzo d20 e il vecchio indicatore del workflow resta vuoto. Restano necessari un colpo valido con arma a distanza o finesse, le altre condizioni di Sneak Attack e il limite di un uso per turno. Basta ricaricare GM e giocatori con Ctrl+F5.
 
 Grease, Earth Tremor, Ice Storm e le forme pertinenti di Guardian of Nature e Investiture of Ice creano terreno difficile tramite Regioni. Earth Tremor resta finché il terreno non viene ripulito e il GM elimina la relativa Regione. Lo spazio disponibile per crescere, le mani libere, gli oggetti e le altre condizioni narrative richiedono una decisione del tavolo.
+
+Da 0.28.7 il modello di terreno difficile viene registrato anche nelle fasi successive all'avvio, per i client in cui Foundry non lo aveva ancora reso disponibile durante `init`. Prima di creare una Regione, l'automazione verifica che il modello sia presente e mostra un errore esplicito se manca. Dopo l'aggiornamento è necessario ricaricare completamente sia il client GM sia quelli dei giocatori.

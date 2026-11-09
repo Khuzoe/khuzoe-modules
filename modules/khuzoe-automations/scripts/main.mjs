@@ -4,6 +4,8 @@ import {exposeNpcRulesApi, healFromNpcRule} from "./npc-rules.mjs";
 import {createAutomationToolbar} from "./automation-toolbar.mjs";
 import {RELEASE_VERSION} from "./release.mjs";
 import {getCampaignAutomation, prepareCampaignItemUpdate, applyCampaignAlias, registerCampaignFeatures, registerCampaignHooks} from "./campaign-features.mjs";
+import {GINEVRA_AUTOMATION, getGinevraAutomation, prepareGinevraItemUpdate, applyGinevraAlias, registerGinevra} from "./ginevra.mjs";
+import {registerGinevraChargesApi, registerGinevraChargesSocket} from "./ginevra-charges.mjs";
 import {ARCANE_WARD_AUTOMATION, prepareArcaneWardUpdate, registerArcaneWard, registerArcaneWardHooks} from "./arcane-ward.mjs";
 import {getArmorerAutomation, applyArmorerAlias, prepareArmorerUpdate, registerArmorer, registerArmorerHooks} from "./armorer.mjs";
 import {registerCombatFallbackHooks} from "./combat-events.mjs";
@@ -227,15 +229,21 @@ const SUPPORTED_AUTOMATIONS = new Map([
   ...HOME_BREW_NPC_AUTOMATIONS.map(automation => [
     `${automation.rules}:${automation.identifier}`,
     {version: automation.version, uuid: automation.uuid}
-  ])
+  ]),
+  [`${GINEVRA_AUTOMATION.rules}:${GINEVRA_AUTOMATION.identifier}`, {
+    version: GINEVRA_AUTOMATION.version, uuid: GINEVRA_AUTOMATION.uuid
+  }]
 ]);
 
 let registrationComplete = false;
 
 Hooks.once("init", () => {
+  registerGinevraChargesApi();
   registerSpellTerrainType();
   registerSpells2014Settings();
 });
+Hooks.once("setup", registerSpellTerrainType);
+Hooks.once("socketlib.ready", registerGinevraChargesSocket);
 
 function timedEffectDuration(seconds, expiry = "turnStart") {
   return {
@@ -753,6 +761,8 @@ export function getSupportedAutomation(item) {
   if (armorer) return armorer;
   const campaign = getCampaignAutomation(item);
   if (campaign) return campaign;
+  const ginevra = getGinevraAutomation(item);
+  if (ginevra) return ginevra;
   const identifier = item?.system?.identifier;
   const rules = item?.system?.source?.rules;
   const automation = SUPPORTED_AUTOMATIONS.get(`${rules}:${identifier}`);
@@ -826,6 +836,7 @@ function prepareKhuzoeAutomationItemUpdate(item, changes) {
   prepareDamageBondItemUpdate(item, changes);
   prepareHomebrewNpcItemUpdate(item, changes);
   prepareCampaignItemUpdate(item, changes);
+  prepareGinevraItemUpdate(item, changes);
   prepareArcaneWardUpdate(item, changes);
   prepareArmorerUpdate(item, changes);
 }
@@ -917,6 +928,21 @@ async function performApplyAllKhuzoeAutomations(actor, app, button) {
     return;
   }
 
+  const unavailableSources = [];
+  for (const {item, automation} of pending) {
+    try {
+      if (!(await fromUuid(automation.uuid))) unavailableSources.push(item.name);
+    } catch (error) {
+      console.error(`${MODULE_TITLE} | Lettura del compendio non riuscita per ${item.name}.`, error);
+      unavailableSources.push(item.name);
+    }
+  }
+  if (unavailableSources.length) {
+    console.error(`${MODULE_TITLE} | Sorgenti assenti nel compendio caricato: ${unavailableSources.join(", ")}.`);
+    ui.notifications.error(`${MODULE_TITLE}: ${unavailableSources.join(", ")} non è ancora disponibile nel compendio caricato. Chiudi completamente Foundry, riaprilo e riprova.`);
+    return;
+  }
+
   const itemList = pending.map(({item}) => `<li>${escapeHtml(item.name)}</li>`).join("");
   const confirmed = await foundry.applications.api.DialogV2.confirm({
     window: {title: `${MODULE_TITLE} — applicazione multipla`},
@@ -944,10 +970,10 @@ async function performApplyAllKhuzoeAutomations(actor, app, button) {
           throw new Error(`Documento sorgente non disponibile: ${automation?.uuid ?? item.name}`);
         }
 
-        await applyArmorerAlias(item, automation, () => applyCampaignAlias(item, automation, () => globalThis.cat.utils.automationUtils.updateItem(item, {
+        await applyArmorerAlias(item, automation, () => applyCampaignAlias(item, automation, () => applyGinevraAlias(item, automation, () => globalThis.cat.utils.automationUtils.updateItem(item, {
           source: MODULE_ID,
           skipEvent: true
-        })));
+        }))));
 
         const updated = actor.items.get?.(item.id) ?? item;
         if (isKhuzoeAutomationCurrent(updated, automation)) applied += 1;
@@ -1250,6 +1276,9 @@ function registerAutomations() {
     const campaign = registerCampaignFeatures(api);
     macroResults.push(...campaign.macros);
     automationResults.push(...campaign.automations);
+    const ginevra = registerGinevra(api);
+    macroResults.push(...ginevra.macros);
+    automationResults.push(...ginevra.automations);
 
     if (macroResults.includes(false) || automationResults.includes(false)) {
       throw new Error("CAT ha rifiutato una o più registrazioni Khuzoe.");
@@ -1287,6 +1316,9 @@ Hooks.once("khuzoeAuras.ready", registerPaladinAuraVisuals);
 
 // Fallback per ordini di caricamento non standard: non duplica la registrazione.
 Hooks.once("ready", () => {
+  registerGinevraChargesApi();
+  registerGinevraChargesSocket();
+  registerSpellTerrainType();
   exposeNpcRulesApi();
   registerMidiRollConfig();
   registerAutomations();

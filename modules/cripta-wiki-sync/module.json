@@ -2,7 +2,7 @@
   "id": "cripta-wiki-sync",
   "title": "Khuzoe Wiki Sync",
   "description": "Sincronizzazione bidirezionale tra wiki e Foundry per Actor gestiti, Tokenizer e catalogo oggetti di campagna.",
-  "version": "0.11.19",
+  "version": "0.11.20",
   "authors": [
     {
       "name": "Delia + Codex"
@@ -13,7 +13,9 @@
     "verified": "14"
   },
   "esmodules": [
-    "scripts/main.js"
+    "scripts/main.js",
+    "scripts/services/foundry-map-snapshots.mjs",
+    "scripts/services/city-maps.mjs"
   ],
   "styles": [
     "styles/module.css"

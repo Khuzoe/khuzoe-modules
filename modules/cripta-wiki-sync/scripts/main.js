@@ -8634,7 +8634,7 @@ async function applyAbsorptionFromMidiWorkflow(workflow, source = "") {
         const damageTypes = new Set([...workflowDamageTypes, ...event.damageTypes]);
         const matched = absorbedTypes.filter((type) => damageTypes.has(type));
         const amount = getWorkflowAbsorbedDamageAmount(workflow, event, matched, damageTypes, workflowAmount);
-        console.warn(`${MODULE_ID} | Assorbimento check da ${source}`, {
+        console.debug(`${MODULE_ID} | Assorbimento check da ${source}`, {
             actor: actor.name,
             absorbedTypes,
             damageTypes: Array.from(damageTypes),

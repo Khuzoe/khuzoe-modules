@@ -49,7 +49,8 @@ const Triggers = original("lib/trigger", {automationUtils: {}, documentUtils, to
 const Events = original("lib/event", {actorUtils, documentUtils, tokenUtils, genericUtils: {}, effectUtils: {}, utils: {},
   Triggers, Logging, constants, DamageBonus: class {}, D20Bonus: class {}});
 globalThis.game = {user: {id: "gm", isGM: true}, users: {activeGM: {id: "gm"}}, time: {worldTime: 50}, settings: {get: () => false}};
-globalThis.foundry = {utils: {deepClone: structuredClone}};
+globalThis.foundry = {utils: {deepClone: structuredClone}, data: {regionBehaviors: {RegionBehaviorType: class {}}}};
+globalThis.CONFIG = {RegionBehavior: {dataModels: {}}};
 globalThis.fromUuid = async uuid => docs.get(uuid);
 globalThis.cat = {lib: {Events}, utils: {actorUtils, tokenUtils, documentUtils, workflowUtils: {},
   queryUtils: {isTheGM: () => game.user.id === "gm"}, effectUtils: {getConcentrationEffect: () => null}}};

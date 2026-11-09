@@ -1284,7 +1284,7 @@
   padding: 0.65rem 0.85rem;
   border-bottom: 1px solid rgba(200, 163, 79, 0.2);
   background: linear-gradient(90deg, rgba(200, 163, 79, 0.16), rgba(200, 163, 79, 0.035));
-  color: #f2ead8;
+  color: inherit;
   font-size: 1.24em;
   font-weight: 750;
   line-height: 1.25;
@@ -1293,6 +1293,7 @@
 
 .cripta-catalog-property > h3 > span {
   min-width: 0;
+  overflow-wrap: anywhere;
   padding-left: 0.6rem;
   border-left: 3px solid #c8a34f;
 }
@@ -1303,7 +1304,7 @@
   border: 1px solid rgba(200, 163, 79, 0.46);
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.16);
-  color: #e5ca87;
+  color: inherit;
   font-size: 0.72em;
   font-weight: 700;
   line-height: 1.2;
@@ -1346,7 +1347,7 @@
 
 .cripta-catalog-notes > h4 {
   margin: 0 0 0.35rem;
-  color: #b99ad0;
+  color: inherit;
   font-size: 0.85em;
   letter-spacing: 0.035em;
   text-transform: uppercase;
