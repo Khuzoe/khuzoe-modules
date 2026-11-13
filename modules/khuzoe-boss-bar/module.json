@@ -2,7 +2,7 @@
   "id": "khuzoe-boss-bar",
   "title": "Khuzoe Boss Bar",
   "description": "A souls-like DnD5e boss health bar for Foundry Virtual Tabletop V14. The GM selects one or more monster tokens and players see persistent health bars without HP numbers.",
-  "version": "0.3.0",
+  "version": "0.4.1",
   "authors": [
     {
       "name": "Khuzoe"

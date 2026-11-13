@@ -1,4 +1,6 @@
-import { NPC_NATIVE_EDITOR_VERSION, nativeGet, nativeHas, nativeValidateChanges, nativePatchConflict, nativePatchSatisfied, nativeEqual, nativeEditorSource } from "./npc-native-model.mjs";
+import { NPC_NATIVE_EDITOR_VERSION, nativeGet, nativeHas, nativeValidateChanges, nativePatchConflict, nativePatchSatisfied, nativeEqual, nativeEditorSource,nativeNormalizeActorRanges } from "./npc-native-model.mjs";
+import {nativeUndoPatches} from './npc-native-undo.mjs';
+import {nativePreserveActivityReferencePatches} from './npc-native-automation.mjs';
 
 const sourceOf = document => JSON.parse(JSON.stringify(document.toJSON?.() ?? document.toObject(true)));
 const deletion = path => { const parts=path.split(".");parts[parts.length-1]="-="+parts.at(-1);return parts.join("."); };
@@ -21,9 +23,9 @@ export async function applyNpcNativeEditor(actor, command, services) {
       : target?.type === "ActiveEffect" ? (target.itemId ? actor.items.get(target.itemId) : actor)?.effects?.get(target.id) : null;
   if (!document) return {status:"conflict",error:"L’elemento selezionato non esiste più."};
   const readSource=()=>nativeEditorSource(sourceOf(document),target.type);
-  const before=readSource(),patches=command.patches;
+  const before=readSource();let patches=command.patches;
   let next;
-  try { next=nativeValidateChanges(before,target,patches,{...command.nativePermissions,sharedRuntime:actor.prototypeToken?.actorLink !== false}); }
+  try { const permissions={...command.nativePermissions,sharedRuntime:actor.prototypeToken?.actorLink !== false};next=nativeValidateChanges(before,target,patches,permissions);if(target.type==='Actor'){nativeNormalizeActorRanges(before,next);patches=patches.map(patch=>patch.op==='set'?{...patch,value:nativeGet(next,patch.path)}:patch);next=nativeValidateChanges(before,target,patches,permissions);}if(target.type==='Item'){patches=nativePreserveActivityReferencePatches(before,patches,permissions);next=nativeValidateChanges(before,target,patches,permissions);} }
   catch(error) { return {status:"failed",error:error.message}; }
   const comparableBefore=comparableSource(before,next,target.type);
   const conflicting=patches.filter(patch=>nativePatchConflict(comparableBefore,patch));
@@ -32,7 +34,7 @@ export async function applyNpcNativeEditor(actor, command, services) {
   // A detached document validates against the installed D&D5e model before
   // any document is written. It never creates an Actor in the world.
   // Document.clone() forces strict:false in v14, so use the constructor.
-  try { new document.constructor(next,{parent:document.parent,pack:document.pack,strict:true}); }
+  try { new document.constructor(structuredClone(next),{parent:document.parent,pack:document.pack,strict:true}); }
   catch(error) { return {status:"failed",error:`Valori non accettati da Foundry: ${error.message}`}; }
   const grouped = new Set();
   if(target.type === "Item") {
@@ -69,16 +71,16 @@ export async function applyNpcNativeEditor(actor, command, services) {
     // Leave unrelated changes (including combat updates) in place.
     try {
       const current=readSource();
-      const restore=ordinary.filter(patch=>written ? nativeHas(current,patch.path)===nativeHas(written,patch.path)&&nativeEqual(nativeGet(current,patch.path),nativeGet(written,patch.path)) : nativePatchSatisfied(current,patch)).map(patch=>({path:patch.path,op:nativeHas(before,patch.path)?"set":"delete",value:nativeGet(before,patch.path)}));
-      await write(document,restore);
-      if(groupedPatches.length){
-        // Restore activities, effects and their rules together: an intermediate
-        // combination could refer to effects or activities already removed.
-        const paths=new Set([...grouped,"system.activities","effects"]);
-        const rollbackPatches=[...paths].map(path=>({path,value:nativeGet(before,path)??(path.endsWith('.npcRules')?{version:1,activities:{}}:undefined),baseValue:services.read(document,path)})).filter(patch=>patch.value!==undefined);
+      const restore=nativeUndoPatches(before,next,current,target.type,command.nativePermissions);
+      const groupedRestore=restore.filter(patch=>[...grouped].some(path=>patch.path===path||patch.path.startsWith(path+'.')));
+      await write(document,restore.filter(patch=>!groupedRestore.includes(patch)));
+      if(groupedRestore.length){
+        const wanted=nativeValidateChanges(current,target,groupedRestore,command.nativePermissions);
+        const paths=new Set([...grouped,'system.activities','effects']);
+        const rollbackPatches=[...paths].map(path=>({path,value:nativeGet(wanted,path)??(path.endsWith('.npcRules')?{version:1,activities:{}}:undefined),baseValue:services.read(document,path)})).filter(patch=>patch.value!==undefined);
         const rollback=await services.applyItem({...command,nativeEditorVersion:undefined,target:{itemId:document.id},patches:rollbackPatches});
-        if(rollback.status!=="applied")throw new Error(rollback.error||"Attività ed effetti non ripristinati.");
-        for(const path of grouped)if(!nativeHas(before,path))await write(document,[{path,op:"delete"}]);
+        if(rollback.status!=='applied')throw new Error(rollback.error||'Attività ed effetti non ripristinati.');
+        for(const path of grouped)if(!nativeHas(wanted,path))await write(document,[{path,op:'delete'}]);
       }
     } catch(rollback) { return {status:"failed",error:`${error.message} Ripristino incompleto: ${rollback.message}. Verifica l’elemento in Foundry.`}; }
     return {status:"failed",error:error.message};

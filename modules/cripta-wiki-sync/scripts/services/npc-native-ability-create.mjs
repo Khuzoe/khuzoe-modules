@@ -1,8 +1,8 @@
-import {nativeValuePreserved} from "./npc-native-model.mjs";
+import {nativePatchMissingPaths} from "./npc-native-model.mjs";
 import {npcNativeSnapshotEnabled} from './npc-native-snapshot.mjs';
 
 const sourceOf=document=>JSON.parse(JSON.stringify(document.toJSON?.()??document.toObject(true)));
-const missing=(source,wanted)=>["name","type","img","system","flags","effects"].filter(key=>Object.hasOwn(wanted,key)&&!nativeValuePreserved(source[key],wanted[key]));
+const missing=(source,wanted)=>["name","type","img","system","flags","effects"].filter(key=>Object.hasOwn(wanted,key)).flatMap(path=>nativePatchMissingPaths(source,{path,op:'set',value:wanted[path]}));
 
 // This path is used only for newly generated pilot abilities. Existing Items
 // are never replaced or deleted. Retrying verifies the same transfer identity.
@@ -12,13 +12,13 @@ export async function createVerifiedNpcAbility(actor,command,data,existing=null)
  try {
   const ItemClass=globalThis.CONFIG?.Item?.documentClass;
   if(!ItemClass)throw new Error("Modello Item non disponibile.");
-  const detached=new ItemClass(data,{parent:actor,strict:true});
+  const detached=new ItemClass(structuredClone(data),{parent:actor,strict:true});
   const lost=missing(sourceOf(detached),data);
   if(lost.length)throw new Error(`Il modello non conserva ${lost.join(", ")}.`);
  }catch(error){return{status:"failed",error:`Capacità non creata: ${error.message}`};}
  let created;
  try {
-  const result=await actor.createEmbeddedDocuments("Item",[data],{criptaWikiSyncCommand:true});
+  const result=await actor.createEmbeddedDocuments("Item",[structuredClone(data)],{criptaWikiSyncCommand:true});
   created=result?.[0];if(!created)throw new Error("Foundry non ha restituito la capacità creata.");
   const saved=actor.items?.get?.(created.id)||created,lost=missing(sourceOf(saved),data);
   if(lost.length)throw new Error(`Foundry non ha conservato ${lost.join(", ")}.`);

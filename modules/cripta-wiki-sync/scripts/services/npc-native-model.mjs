@@ -1,5 +1,6 @@
 export const NPC_NATIVE_EDITOR_VERSION = 1;
 const protectedSegments = new Set(["__proto__", "prototype", "constructor"]);
+const actorDerivedFields=['system.attributes.prof','system.attributes.ac.value','system.attributes.init.total','system.attributes.spell.dc','system.attributes.spell.attack'];
 const effectFields = new Set(["name", "img", "disabled", "transfer", "origin", "duration", "changes", "statuses", "flags", "description", "system", "tint", "showIcon"]);
 const clone = value => value === undefined ? undefined : JSON.parse(JSON.stringify(value));
 const canonical = value => JSON.stringify(value, (_key, entry) => entry && typeof entry === "object" && !Array.isArray(entry) ? Object.fromEntries(Object.entries(entry).sort(([a],[b]) => a.localeCompare(b))) : entry);
@@ -38,7 +39,7 @@ export function nativeEditablePath(type, path, permissions = {}) {
   // Source identities and generated advancement records are managed by D&D5e.
   if (["source", "advancement", "sourceItem"].includes(parts[1])) return false;
   if (parts[1] === "activities" && parts.length === 4 && parts[3] === "type") return false;
-  if (type === "Actor" && path === "system.attributes.prof") return false;
+  if (type === "Actor" && actorDerivedFields.includes(path)) return false;
   if (type === "Actor" && permissions.sharedRuntime === false && (/^system\.attributes\.hp\.(value|temp)$/.test(path) || /^system\.spells\.[^.]+\.(value|spent)$/.test(path))) return false;
   return true;
 }
@@ -79,6 +80,23 @@ export function nativeDiff(base, next, type, permissions = {}, prefix = "") {
 }
 export function nativeApply(base, patches) { const next = clone(base); for (const patch of patches) nativeSet(next,patch.path,patch.value,patch.op === "delete"); return next; }
 export function nativePatchSatisfied(source, patch) { return patch.op === "delete" ? !nativeHas(source,patch.path) : nativeHas(source,patch.path) && nativeValuePreserved(nativeGet(source,patch.path),patch.value,patch.baseValue); }
+// Report paths rather than payloads: a parent patch may hide the one nested
+// field the installed schema discarded. Preserve the existing strict checks.
+export function nativePatchMissingPaths(source,patch) {
+ if(nativePatchSatisfied(source,patch))return [];
+ if(patch.op==='delete'||!nativeHas(source,patch.path))return [patch.path];
+ const result=[],visit=(actual,wanted,previous,path)=>{
+  if(nativeValuePreserved(actual,wanted,previous))return;
+  if(Array.isArray(wanted)&&Array.isArray(actual)){
+   if(wanted.length!==actual.length)result.push(`${path}.length`);
+   wanted.forEach((value,index)=>visit(actual[index],value,previous?.[index],`${path}.${index}`));
+  }else if(wanted&&typeof wanted==='object'&&!Array.isArray(wanted)&&actual&&typeof actual==='object'&&!Array.isArray(actual)){
+   for(const [key,value]of Object.entries(wanted))if(Object.hasOwn(actual,key))visit(actual[key],value,previous?.[key],`${path}.${key}`);else result.push(`${path}.${key}`);
+   if(previous&&typeof previous==='object')for(const key of Object.keys(previous))if(!Object.hasOwn(wanted,key)&&Object.hasOwn(actual,key))result.push(`${path}.${key}`);
+  }else result.push(path);
+ };
+ visit(nativeGet(source,patch.path),patch.value,patch.baseValue,patch.path);return result;
+}
 // Schemas may append defaults to new activities, damage parts or effect changes.
 // Every requested value must survive; additional default keys are acceptable.
 export function nativeValuePreserved(actual, wanted, previous) {
@@ -141,7 +159,7 @@ export function nativeValidateChanges(source, target, patches, permissions = {})
     || !nativeEqual(source.flags?.["khuzoe-automations"]?.midiRollConfig,next.flags?.["khuzoe-automations"]?.midiRollConfig))) throw new Error("Questa capacità contiene attività con identificativi duplicati. Correggile in Foundry prima di cambiarne le meccaniche.");
   const immutable = ["flags.core", "flags.cripta-wiki-sync"];
   if (target.type === "Actor") {
-    immutable.push("system.source","system.advancement","system.sourceItem","system.attributes.prof");
+    immutable.push("system.source","system.advancement","system.sourceItem",...actorDerivedFields);
     if (permissions.sharedRuntime === false) {
       immutable.push("system.attributes.hp.value","system.attributes.hp.temp");
       for (const slot of Object.keys(source.system?.spells || {})) immutable.push(`system.spells.${slot}.value`,`system.spells.${slot}.spent`);
@@ -201,4 +219,30 @@ export function nativeActivityTemplate(type, name = "Nuova attività") {
   if (type === "heal") activity.healing={number:1,denomination:8,bonus:"",types:["healing"],custom:{enabled:false,formula:""},scaling:{mode:"",number:null,formula:""}};
   if (type === "utility") activity.roll={prompt:false,visible:false,name:"",formula:""};
   return activity;
+}
+
+// D&D5e communication ranges are structured even when a previous AI proposal
+// supplied only the distance. Keep its value and use the source's known unit.
+export function nativeNormalizeActorRanges(before,after) {
+ const numberPaths=['system.attributes.hp.value','system.attributes.hp.max','system.attributes.hp.temp','system.attributes.hp.tempmax','system.attributes.hp.dt','system.details.cr','system.attributes.ac.flat',...Object.keys(nativeGet(after,'system.attributes.senses.ranges')||{}).map(key=>`system.attributes.senses.ranges.${key}`)];
+ const numberValue=(path)=>{
+  const value=nativeGet(after,path);if(typeof value!=='string'||nativeEqual(value,nativeGet(before,path)))return;
+  const text=value.trim();if(text==='')nativeSet(after,path,null);
+  else if(/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(text)&&Number.isFinite(Number(text)))nativeSet(after,path,Number(text));
+ };
+ for(const path of numberPaths)numberValue(path);
+ for(const key of ['walk','burrow','climb','fly','swim','bonus']){
+  const path=`system.attributes.movement.${key}`,value=nativeGet(after,path);
+  if(typeof value==='number'&&Number.isFinite(value)&&!nativeEqual(value,nativeGet(before,path)))nativeSet(after,path,String(value));
+ }
+ const path='system.traits.languages.communication',communication=nativeGet(after,path);
+ if(!communication||typeof communication!=='object'||Array.isArray(communication))return;
+ for(const [key,value]of Object.entries(communication)){
+  if(value&&typeof value==='object'&&!Array.isArray(value)){numberValue(`${path}.${key}.value`);continue;}
+  if(typeof value!=='number'||nativeEqual(value,nativeGet(before,`${path}.${key}`)))continue;
+  if(!Number.isFinite(value)||value<0)throw new Error(`${path}.${key}.value: la distanza deve essere un numero non negativo.`);
+  const units=nativeGet(before,`${path}.${key}.units`)||nativeGet(before,'system.attributes.movement.units');
+  if(typeof units!=='string'||!units.trim())throw new Error(`${path}.${key}: indica distanza e unità, per esempio {value:120,units:"ft"}.`);
+  nativeSet(after,`${path}.${key}`,{value,units});
+ }
 }

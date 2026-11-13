@@ -892,3 +892,149 @@
     animation: none;
   }
 }
+/* Automatic and GM-selected themes share the same presentation on every client. */
+.khbb-theme-field { position:absolute; inset:0; overflow:hidden; pointer-events:none;
+  opacity:var(--khbb-theme-strength, .28); }
+.khbb-theme-field::before, .khbb-theme-field::after { content:""; position:absolute; inset:-24px -160px;
+  pointer-events:none; background-repeat:repeat; background-size:160px 64px; }
+.khbb-theme-field::before { background-image:radial-gradient(ellipse at 50% 70%, rgba(var(--khbb-theme-rgb), .65), transparent 64%); }
+.khbb-theme-field::after { background-image:linear-gradient(115deg, transparent 42%, rgba(var(--khbb-theme-rgb), .7) 49%, transparent 56%); opacity:.45; }
+.khbb-theme-filaments { position:absolute; inset:0; width:100%; height:100%; overflow:visible; opacity:0; }
+.khbb-theme-bolt { fill:none; stroke:var(--khbb-theme-accent); stroke-width:1.2; vector-effect:non-scaling-stroke;
+  filter:drop-shadow(0 0 3px var(--khbb-theme-accent)); }
+.khbb-theme-bolt-secondary { opacity:.55; stroke-width:.7; }
+[data-khbb-theme="flame"] > .khbb-content .khbb-theme-field::before,
+.khbb-minion-bar[data-khbb-theme="flame"] .khbb-theme-field::before {
+  background-image:radial-gradient(ellipse at 18% 80%, #fff3bc 0 1px, #ff9b39aa 2px, transparent 7px),
+    radial-gradient(ellipse at 65% 45%, #ffda80 0 1px, #ff783366 3px, transparent 10px); }
+[data-khbb-theme="frost"] > .khbb-content .khbb-theme-field::before,
+.khbb-minion-bar[data-khbb-theme="frost"] .khbb-theme-field::before {
+  background-image:repeating-linear-gradient(125deg, transparent 0 26px, #e5faffcc 27px, transparent 29px 44px),
+    repeating-linear-gradient(55deg, transparent 0 40px, #bdeeff88 41px, transparent 42px 64px); }
+[data-khbb-theme="storm"] > .khbb-content .khbb-theme-filaments,
+.khbb-minion-bar[data-khbb-theme="storm"] .khbb-theme-filaments { opacity:.95; }
+[data-khbb-theme="venom"] > .khbb-content .khbb-theme-field::before,
+.khbb-minion-bar[data-khbb-theme="venom"] .khbb-theme-field::before {
+  background-image:radial-gradient(circle at 25% 65%, transparent 4px, #dcff9cbb 5px, transparent 7px),
+    radial-gradient(circle at 70% 35%, transparent 2px, #aeef78aa 3px, transparent 5px); }
+[data-khbb-theme="death"] > .khbb-content .khbb-theme-field::before,
+.khbb-minion-bar[data-khbb-theme="death"] .khbb-theme-field::before {
+  background-image:radial-gradient(ellipse at 20% 85%, #cbffe599, transparent 55%),
+    radial-gradient(ellipse at 80% 15%, #b5ffdb88, transparent 60%); filter:blur(4px); }
+[data-khbb-theme="radiant"] > .khbb-content .khbb-theme-field::before,
+.khbb-minion-bar[data-khbb-theme="radiant"] .khbb-theme-field::before {
+  background-image:radial-gradient(ellipse at 20% 45%, #fffce2 0 1px, #fff0b088 3px, transparent 12px),
+    repeating-linear-gradient(110deg, transparent 0 46px, #fff3bfaa 48px, transparent 52px 80px); }
+[data-khbb-theme="arcane"] > .khbb-content .khbb-theme-field::before,
+.khbb-minion-bar[data-khbb-theme="arcane"] .khbb-theme-field::before {
+  background-image:repeating-linear-gradient(45deg, transparent 0 20px, #f4d3ff88 21px, transparent 23px 48px),
+    repeating-linear-gradient(-45deg, transparent 0 32px, #d0acff66 33px, transparent 35px 64px); }
+[data-khbb-theme="nature"] > .khbb-content .khbb-theme-field::before,
+.khbb-minion-bar[data-khbb-theme="nature"] .khbb-theme-field::before {
+  background-image:radial-gradient(ellipse at 30% 50%, transparent 9px, #d2f1a4aa 10px, transparent 12px),
+    radial-gradient(ellipse at 75% 80%, transparent 6px, #b1e59688 7px, transparent 9px); }
+[data-khbb-theme="iron"] > .khbb-content .khbb-theme-field::before,
+.khbb-minion-bar[data-khbb-theme="iron"] .khbb-theme-field::before {
+  background-image:repeating-linear-gradient(120deg, transparent 0 28px, #e3edf566 29px, transparent 30px 40px); }
+[data-khbb-theme="neutral"] > .khbb-content .khbb-theme-field,
+.khbb-minion-bar[data-khbb-theme="neutral"] .khbb-theme-field { display:none; }
+#khbb-root [data-khbb-theme]:not(.khbb-status-defeated) > .khbb-content > .khbb-track,
+#khbb-root .khbb-minion-bar[data-khbb-theme]:not(.khbb-status-defeated) > .khbb-track {
+  border-color:rgba(var(--khbb-theme-rgb), .6);
+  box-shadow:inset 0 2px 7px #000b, 0 0 var(--khbb-theme-halo) rgba(var(--khbb-theme-rgb), .35); }
+#khbb-root .khbb-status-defeated > .khbb-content .khbb-theme-field,
+#khbb-root .khbb-minion-bar.khbb-status-defeated .khbb-theme-field { display:none; }
+#khbb-root[data-khbb-effects="off"] .khbb-theme-field { display:none; }
+#khbb-root[data-khbb-effects="off"] .khbb-track { box-shadow:inset 0 2px 7px #000b; }
+@media (prefers-reduced-motion: no-preference) {
+  #khbb-root[data-khbb-motion="on"]:not([data-khbb-effects="off"]) .khbb-theme-field::before {
+    animation:khbb-theme-drift var(--khbb-theme-duration, 8s) linear infinite; }
+  #khbb-root[data-khbb-motion="on"]:not([data-khbb-effects="off"]) .khbb-theme-field::after {
+    animation:khbb-theme-drift calc(var(--khbb-theme-duration, 8s) * 1.6) linear infinite reverse; }
+  #khbb-root[data-khbb-motion="on"]:not([data-khbb-effects="off"]) .khbb-theme-bolt {
+    animation:khbb-theme-charge 3.7s ease-in-out infinite alternate; }
+  #khbb-root[data-khbb-motion="on"]:not([data-khbb-effects="off"]) .khbb-theme-bolt-secondary { animation-delay:-1.9s; }
+  @keyframes khbb-theme-drift { to { transform:translateX(160px); } }
+  @keyframes khbb-theme-charge { 0%, 100% { opacity:.3; } 28% { opacity:.9; } 58% { opacity:.5; } 82% { opacity:1; } }
+}
+/* The theme chooser opens outside the bar so narrow screens retain HP width. */
+.khbb-boss-bar.khbb-controls-open, .khbb-boss-bar:focus-within { overflow:visible; z-index:10; }
+.khbb-color-panel.khbb-color-panel-open { position:absolute; right:8px; top:calc(100% - 2px);
+  z-index:30; display:flex; flex-wrap:wrap; width:min(460px, calc(100vw - 28px)); padding:9px;
+  border:1px solid #b69a5a88; border-radius:5px; background:#100e12f5; box-shadow:0 8px 20px #0009;
+  pointer-events:auto; color:#efe6d1; }
+#khbb-root.khbb-anchor-bottom .khbb-color-panel-open { top:auto; bottom:calc(100% - 2px); }
+.khbb-theme-control { display:flex; align-items:center; gap:6px; flex:1 1 210px; font-size:12px; }
+.khbb-theme-control select { width:100%; min-width:0; height:28px; margin:0; padding:2px 5px;
+  border:1px solid #b69a5a66; border-radius:3px; background:#211c22; color:#f4ecd9; font:inherit; }
+.khbb-color-reset { display:inline-grid; place-items:center; width:26px; height:24px; margin:0; padding:0;
+  border:1px solid #b69a5a66; border-radius:4px; background:#211c22; color:#efe6d1; cursor:pointer; }
+.khbb-theme-control select:focus-visible, .khbb-color-reset:focus-visible { outline:2px solid #d4c08a; outline-offset:2px; }
+/* Extra origins have their own surface texture as well as a narrow exterior. */
+[data-khbb-theme="void"] > .khbb-content .khbb-theme-field::before,
+.khbb-minion-bar[data-khbb-theme="void"] .khbb-theme-field::before {
+  background-image:radial-gradient(ellipse at 30% 50%, #070514ee 0 12px, #bea3ff99 14px, transparent 19px),
+    radial-gradient(ellipse at 80% 75%, #050411dd 0 8px, #a58ceaaa 10px, transparent 15px); }
+[data-khbb-theme="shadow"] > .khbb-content .khbb-theme-field::before,
+.khbb-minion-bar[data-khbb-theme="shadow"] .khbb-theme-field::before {
+  background-image:radial-gradient(ellipse at 25% 80%, #090a16ee, transparent 68%),
+    radial-gradient(ellipse at 75% 10%, #bec8ed88, transparent 54%); filter:blur(3px); }
+[data-khbb-theme="blood"] > .khbb-content .khbb-theme-field::before,
+.khbb-minion-bar[data-khbb-theme="blood"] .khbb-theme-field::before {
+  background-image:radial-gradient(ellipse at 20% 20%, #ffb6c5bb 0 1px, transparent 5px),
+    repeating-linear-gradient(95deg, transparent 0 38px, #430b1fbb 40px, #f27d9766 42px, transparent 45px 80px); }
+[data-khbb-theme="abyss"] > .khbb-content .khbb-theme-field::before,
+.khbb-minion-bar[data-khbb-theme="abyss"] .khbb-theme-field::before {
+  background-image:radial-gradient(ellipse at 60% 75%, #fca5caaa 0 1px, #ba3f5555 4px, transparent 13px),
+    repeating-linear-gradient(125deg, transparent 0 45px, #5c0b36aa 48px, #f5a9c988 50px, transparent 53px 80px); }
+/* Keep these decorations behind the solid track and outside its clipping box.
+   No wrapper is added: the existing damage/heal animation selectors still work. */
+.khbb-boss-bar { overflow:visible; }
+.khbb-content { position:relative; isolation:isolate; }
+.khbb-minion-bar { isolation:isolate; }
+.khbb-theme-exterior { position:absolute; z-index:-1; inset:calc(-1 * var(--khbb-outside-reach, 3px)) -4px;
+  pointer-events:none; user-select:none; opacity:var(--khbb-outside-opacity, .14);
+  color:var(--khbb-theme-accent); }
+.khbb-theme-exterior::before { content:""; position:absolute; inset:0; border-radius:50%; pointer-events:none;
+  background:radial-gradient(ellipse at center, transparent 52%, rgba(var(--khbb-theme-rgb), .22) 70%, transparent 90%);
+  filter:blur(2px); }
+.khbb-theme-exterior svg { display:block; width:100%; height:100%; overflow:visible; pointer-events:none; }
+.khbb-edge-arcs { --khbb-edge-travel:-83; fill:none; stroke:currentColor; stroke-width:.75; vector-effect:non-scaling-stroke;
+  stroke-dasharray:18 40 3 22; opacity:.5; filter:drop-shadow(0 0 1px currentColor); }
+.khbb-edge-mote { fill:currentColor; filter:drop-shadow(0 0 2px currentColor); }
+.khbb-edge-mote:nth-child(3n) { opacity:.5; }
+.khbb-theme-exterior[data-khbb-exterior="void"]::before {
+  background:radial-gradient(ellipse at center, transparent 48%, #090516bb 60%, #b49aeb55 74%, transparent 92%); }
+.khbb-theme-exterior[data-khbb-exterior="void"] .khbb-edge-arcs,
+.khbb-theme-exterior[data-khbb-exterior="storm"] .khbb-edge-arcs,
+.khbb-theme-exterior[data-khbb-exterior="abyss"] .khbb-edge-arcs { --khbb-edge-travel:-89; stroke-dasharray:35 30 6 18; opacity:1; }
+.khbb-theme-exterior[data-khbb-exterior="shadow"]::before,
+.khbb-theme-exterior[data-khbb-exterior="death"]::before {
+  background:radial-gradient(ellipse at center, transparent 45%, rgba(var(--khbb-theme-rgb), .4) 66%, transparent 88%); filter:blur(3px); }
+.khbb-theme-exterior[data-khbb-exterior="shadow"] .khbb-edge-arcs,
+.khbb-theme-exterior[data-khbb-exterior="death"] .khbb-edge-arcs,
+.khbb-theme-exterior[data-khbb-exterior="blood"] .khbb-edge-arcs { display:none; }
+.khbb-theme-exterior[data-khbb-exterior="shadow"] .khbb-edge-motes { opacity:.3; filter:blur(1px); }
+.khbb-theme-exterior[data-khbb-exterior="blood"] { --khbb-mote-shift:1.5px; }
+.khbb-theme-exterior[data-khbb-exterior="blood"] .khbb-edge-mote:nth-child(odd) { display:none; }
+.khbb-theme-exterior[data-khbb-exterior="frost"] .khbb-edge-mote,
+.khbb-theme-exterior[data-khbb-exterior="iron"] .khbb-edge-mote { fill:none; stroke:currentColor; stroke-width:.65; }
+.khbb-minion-bar > .khbb-theme-exterior { inset:-3px; opacity:calc(var(--khbb-outside-opacity, .14) * .55); }
+#khbb-root.khbb-multiple .khbb-boss-bar > .khbb-content > .khbb-theme-exterior { inset:-4px; }
+#khbb-root[data-khbb-effects="off"] .khbb-theme-exterior,
+#khbb-root .khbb-status-defeated > .khbb-content > .khbb-theme-exterior,
+#khbb-root .khbb-minion-bar.khbb-status-defeated > .khbb-theme-exterior { display:none; }
+@media (prefers-reduced-motion: no-preference) {
+  #khbb-root[data-khbb-motion="on"]:not([data-khbb-effects="off"]) .khbb-edge-arcs {
+    animation:khbb-edge-flow var(--khbb-outside-duration, 12s) linear infinite; }
+  #khbb-root[data-khbb-motion="on"]:not([data-khbb-effects="off"]) .khbb-edge-mote {
+    animation:khbb-edge-float var(--khbb-outside-duration, 12s) ease-in-out infinite alternate; }
+  #khbb-root[data-khbb-motion="on"]:not([data-khbb-effects="off"]) .khbb-edge-mote:nth-child(3n) { animation-delay:-3.7s; }
+  #khbb-root[data-khbb-motion="on"]:not([data-khbb-effects="off"]) .khbb-edge-mote:nth-child(3n + 1) { animation-delay:-1.9s; }
+  #khbb-root[data-khbb-motion="on"]:not([data-khbb-effects="off"]) .khbb-status-critical > .khbb-content > .khbb-theme-exterior::before,
+  #khbb-root[data-khbb-motion="on"]:not([data-khbb-effects="off"]) .khbb-minion-bar.khbb-status-critical > .khbb-theme-exterior::before {
+    animation:khbb-edge-breathe 4.5s ease-in-out infinite alternate; }
+  @keyframes khbb-edge-flow { to { stroke-dashoffset:var(--khbb-edge-travel, -83); } }
+  @keyframes khbb-edge-float { from { opacity:.45; transform:translateY(0); } to { opacity:.95; transform:translateY(var(--khbb-mote-shift, -1.5px)); } }
+  @keyframes khbb-edge-breathe { from { opacity:.55; transform:scaleY(.96); } to { opacity:.9; transform:scaleY(1.04); } }
+}

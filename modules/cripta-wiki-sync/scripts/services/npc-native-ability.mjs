@@ -1,4 +1,5 @@
 import {nativeActivityTemplate, nativeValidateValue} from "./npc-native-model.mjs";
+export {nativeAbilityAutomationWarnings,nativeEffectsAmbiguous} from './npc-native-automation.mjs';
 
 export const NATIVE_ABILITY_FORMAT = "npc-native-ability-v1";
 export const NATIVE_ABILITY_VERSION = 1;
@@ -47,7 +48,7 @@ const typeNames={attack:"Attacco",save:"Tiro salvezza",damage:"Danni",heal:"Cura
 
 export function compileNativeAbilityProposal(input) {
  schemaValue(input,NATIVE_ABILITY_SCHEMA);
- if(!input.activities.length||input.activities.length>8)throw new Error("La proposta deve contenere da 1 a 8 attività.");
+ if(input.activities.length>8||!input.activities.length&&!input.flavor.trim())throw new Error("Inserisci fino a 8 attività, oppure il testo completo del tratto da gestire manualmente.");
  const byKey=new Map(input.activities.map((activity,index)=>[activity.key,`KhzAiAct${String(index+1).padStart(8,"0")}`]));
  if(byKey.size!==input.activities.length||input.activities.some(a=>!/^[A-Za-z][A-Za-z0-9_-]{0,31}$/.test(a.key)))throw new Error("Le attività devono avere riferimenti distinti.");
  const activities={},rules={version:1,activities:{}};
@@ -97,7 +98,7 @@ export function validateNativeAbilityItem(item) {
  if(!Array.isArray(s.uses.recovery)||s.uses.recovery.length>1||s.uses.recovery.some(entry=>{keys(entry,["period","type"],"Recupero");return !["day","lr","sr"].includes(entry.period)||entry.type!=="recoverAll";}))throw new Error("Recupero utilizzi non valido.");
  keys(item.flags,["khuzoe-automations"],"Automazioni");keys(item.flags["khuzoe-automations"],["npcRules"],"Automazioni");
  const r=item.flags["khuzoe-automations"].npcRules;keys(r,["version","activities"],"Effetti");if(r.version!==1)throw new Error("Versione effetti non supportata.");
- keys(s.activities,Object.keys(s.activities||{}),"Attività");const entries=Object.entries(s.activities);if(!entries.length||entries.length>8)throw new Error("Inserisci da 1 a 8 attività.");
+ keys(s.activities,Object.keys(s.activities||{}),"Attività");const entries=Object.entries(s.activities);if(entries.length>8||!entries.length&&!s.description.value.replace(/<[^>]*>/g,'').trim())throw new Error("Inserisci fino a 8 attività, oppure il testo completo del tratto da gestire manualmente.");
  for(const [id,a]of entries) {
   keys(a,["_id","type","name","activation","consumption","description","duration","effects","range","target","uses","attack","save","damage","healing","roll","midiProperties"],"Attività");
   if(!/^[A-Za-z0-9]{16}$/.test(id)||a._id!==id||!types.includes(a.type))throw new Error("Identità o tipo dell’attività non validi.");text(a.name,"Nome attività",180);
@@ -133,6 +134,7 @@ export function validateNativeAbilityDraft(input) {
 }
 export function nativeAbilitySummary(draft) {
  const item=draft.item,lines=[];
+ if(!Object.keys(item.system.activities).length)lines.push('Tratto descrittivo da applicare manualmente dal GM.');
  const labels={acid:"acido",bludgeoning:"contundenti",cold:"da freddo",fire:"da fuoco",force:"da forza",lightning:"da fulmine",necrotic:"necrotici",piercing:"perforanti",poison:"da veleno",psychic:"psichici",radiant:"radiosi",slashing:"taglienti",thunder:"da tuono",str:"Forza",dex:"Destrezza",con:"Costituzione",int:"Intelligenza",wis:"Saggezza",cha:"Carisma",blinded:"Accecato",charmed:"Affascinato",deafened:"Assordato",frightened:"Spaventato",grappled:"Afferrato",incapacitated:"Incapacitato",invisible:"Invisibile",paralyzed:"Paralizzato",petrified:"Pietrificato",poisoned:"Avvelenato",prone:"Prono",restrained:"Trattenuto",stunned:"Stordito",unconscious:"Privo di sensi",action:"Azione",bonus:"Azione bonus",reaction:"Reazione",legendary:"Azione leggendaria",lair:"Azione di tana",special:"Speciale"};
  const expression=value=>value.custom?.enabled?value.custom.formula:`${value.number}d${value.denomination}${value.bonus?`${String(value.bonus).startsWith("-")?"":"+"}${value.bonus}`:""}`;
  if(item.system.uses.max)lines.push(`${item.system.uses.max} utilizzi · ${{day:"ogni giorno",lr:"riposo lungo",sr:"riposo breve"}[item.system.uses.recovery[0]?.period]||"recupero da impostare"}.`);

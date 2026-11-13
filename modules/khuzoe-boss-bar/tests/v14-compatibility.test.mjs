@@ -7,7 +7,7 @@ const moduleRoot = new URL("../", import.meta.url);
 
 test("manifest targets Foundry V14", () => {
   const manifest = JSON.parse(readFileSync(new URL("module.json", moduleRoot), "utf8"));
-  assert.equal(manifest.version, "0.3.0");
+  assert.equal(manifest.version, "0.4.1");
   assert.equal(manifest.compatibility.minimum, "14");
   assert.equal(manifest.compatibility.verified, "14.367");
   assert.equal(manifest.relationships.systems[0].id, "dnd5e");

@@ -1,8 +1,14 @@
-import {nativeGet,nativeHas,nativeSet,nativeEqual,nativeValidateChanges,nativePatchConflict,nativePatchSatisfied,nativeEditorSource,nativeValuePreserved,nativeTargetKey} from './npc-native-model.mjs';
+import {nativeGet,nativeHas,nativeSet,nativeEqual,nativeValidateChanges,nativePatchConflict,nativePatchSatisfied,nativePatchMissingPaths,nativeNormalizeActorRanges,nativeEditorSource,nativeTargetKey} from './npc-native-model.mjs';
 import {applyNpcNativeEditor} from './npc-native-editor.mjs';
+import {nativeUndoPatches} from './npc-native-undo.mjs';
 import {npcNativeSnapshotEnabled} from './npc-native-snapshot.mjs';
+import {nativePreserveActivityReferencePatches} from './npc-native-automation.mjs';
 
-const clone=structuredClone,sourceOf=document=>JSON.parse(JSON.stringify(document.toJSON?.()??document.toObject(true)));
+const clone=structuredClone,journalPath='flags.cripta-wiki-sync.nativeSheetJournal';
+const sourceOf=document=>{const source=JSON.parse(JSON.stringify(document.toJSON?.()??document.toObject(true)));if(source.flags?.['cripta-wiki-sync'])delete source.flags['cripta-wiki-sync'].nativeSheetJournal;return source;};
+const readJournal=actor=>nativeGet(actor.toJSON?.()??actor.toObject(true),journalPath);
+const writeJournal=(actor,state)=>actor.update({[journalPath]:state},{criptaWikiSyncCommand:true});
+const inFlight=new WeakMap();
 const receiptPath='flags.cripta-wiki-sync.nativeSheetReceipts';
 const resolve=(actor,target)=>target.type==='Actor'&&actor.id===target.id?actor:target.type==='Item'?actor.items.get(target.id):target.type==='ActiveEffect'?actor.effects.get(target.id):null;
 function comparable(value){const next=clone(value);const visit=entry=>{if(!entry||typeof entry!=='object')return;delete entry._stats;for(const child of Object.values(entry))visit(child);};visit(next);return next;}
@@ -18,30 +24,54 @@ function prepareItem(data){
  return result;
 }
 function strictDocument(document,data){
- const detached=new document.constructor(data,{parent:document.parent,pack:document.pack,strict:true});
+ const detached=new document.constructor(clone(data),{parent:document.parent,pack:document.pack,strict:true});
  return sourceOf(detached);
 }
+const creationFields=['_id','name','type','img','system','effects','flags','statuses','duration','disabled','transfer'];
+const creationMissingPaths=(saved,data)=>creationFields.filter(key=>Object.hasOwn(data,key)).flatMap(path=>nativePatchMissingPaths(saved,{path,op:'set',value:data[path]}));
 function strictNew(actor,type,data){
  const Class=globalThis.CONFIG?.[type]?.documentClass;
  if(!Class)throw new Error(`Modello ${type} non disponibile.`);
- const detached=new Class(data,{parent:actor,strict:true}),saved=sourceOf(detached);
- for(const key of ['_id','name','type','system','effects','flags','statuses','duration','disabled','transfer'])if(Object.hasOwn(data,key)&&!nativeValuePreserved(saved[key],data[key]))throw new Error(`Il modello non conserva ${data.name}: ${key}.`);
+ // Foundry takes ownership of constructor input (cleanData copy:false).
+ // Keep the reviewed source separate from pruned fields and undefined defaults.
+ const detached=new Class(clone(data),{parent:actor,strict:true}),missing=creationMissingPaths(sourceOf(detached),data);
+ if(missing.length)throw new Error(`Il modello non conserva ${data.name}: ${missing.slice(0,24).join(', ')}.`);
 }
-function rollbackPatches(before,after,type,patches){
- const paths=new Set(patches.map(patch=>patch.path));
- if(type==='Item'&&[...paths].some(path=>path==='effects'||path.startsWith('system.activities')||path.startsWith('flags.khuzoe-automations.npcRules'))){
-  for(const path of [...paths])if(path==='effects'||path.startsWith('system.activities')||path.startsWith('flags.khuzoe-automations.npcRules'))paths.delete(path);
-  for(const path of ['system.activities','effects','flags.khuzoe-automations.npcRules'])paths.add(path);
- }
- return [...paths].filter(path=>!nativeEqual(nativeGet(before,path),nativeGet(after,path))||nativeHas(before,path)!==nativeHas(after,path)).map(path=>({path,op:nativeHas(before,path)?'set':'delete',baseExists:nativeHas(after,path),...(nativeHas(after,path)?{baseValue:nativeGet(after,path)}:{}),...(nativeHas(before,path)?{value:nativeGet(before,path)}:{})}));
+async function restoreJournal(actor,state,services,permissions){
+ const failures=[],remaining=[];
+ for(const entry of [...state.entries].reverse())try{
+  const document=resolve(actor,entry.target);
+  if(entry.operation==='create'){
+   if(document){if(!nativeEqual(comparable(sourceOf(document)),comparable(entry.after||entry.document)))throw new Error('Il nuovo elemento è cambiato.');await actor.deleteEmbeddedDocuments(entry.target.type,[entry.target.id],{criptaWikiSyncCommand:true});}
+  }else if(entry.operation==='delete'){
+   if(!document)await actor.createEmbeddedDocuments(entry.target.type,[entry.before],{keepId:true,keepEmbeddedIds:true,criptaWikiSyncCommand:true});
+   else if(!nativeEqual(comparable(sourceOf(document)),comparable(entry.before)))throw new Error('Identificativo occupato dopo la rimozione.');
+  }else if(document){
+   const patches=nativeUndoPatches(entry.before,entry.expectedAfter||entry.after,sourceOf(document),entry.target.type,permissions);
+   if(patches.length){const result=await applyNpcNativeEditor(actor,{foundryActorId:actor.id,kind:entry.target.type==='Actor'?'actor.update':entry.target.type==='Item'?'item.update':'effect.update',nativeEditorVersion:1,target:entry.target,patches,nativePermissions:permissions},services);if(result.status!=='applied')throw new Error(result.error||'Ripristino non applicato.');}
+  }else throw new Error('Elemento da ripristinare mancante.');
+ }catch(error){remaining.unshift(entry);failures.push((entry.before?.name||entry.document?.name||entry.target.id)+': '+error.message);}
+ state.entries=remaining;state.phase='rollback';await writeJournal(actor,remaining.length?state:null);
+ return failures;
 }
-
+export function applyNpcNativeSheet(actor,command,services){
+ const task=(inFlight.get(actor)||Promise.resolve()).catch(()=>{}).then(()=>applySheet(actor,command,services));inFlight.set(actor,task);
+ return task.finally(()=>{if(inFlight.get(actor)===task)inFlight.delete(actor);});
+}
 // Validate every document before the first write. Foundry has no transaction
 // across documents: a journal restores only this group's writes on failure.
-export async function applyNpcNativeSheet(actor,command,services){
+async function applySheet(actor,command,services){
  if(command.nativeSheetVersion!==1||!npcNativeSnapshotEnabled(command.campaignId,actor)||command.target?.id!==actor.id)return{status:'failed',error:'Modifica completa non compatibile con questo NPC.'};
  const receipts=nativeGet(sourceOf(actor),receiptPath)||[];
- if(receipts.includes(command.id))return{status:'applied',actor};
+ if(receipts.includes(command.id)){if(readJournal(actor)?.commandId===command.id)try{await writeJournal(actor,null);}catch{}return{status:'applied',actor};}
+ const previous=readJournal(actor);
+ if(previous&&receipts.includes(previous.commandId)){
+  try{await writeJournal(actor,null);}catch(error){return{status:'failed',error:'Applicazione precedente completata; impossibile pulire il registro: '+error.message};}
+ }else if(previous){
+  if(previous.version!==1||!Array.isArray(previous.entries))return{status:'failed',error:'Registro di recupero non valido. Verifica la scheda in Foundry.'};
+  try{const failures=await restoreJournal(actor,previous,services,{...command.nativePermissions,isAdmin:false,embeddedEffects:true,sharedRuntime:actor.prototypeToken?.actorLink!==false});if(failures.length)return{status:'failed',error:'Ripristino incompleto: '+failures.join('; ')};}
+  catch(error){return{status:'failed',error:'Recupero della precedente applicazione non completato: '+error.message};}
+ }
  const operations=command.document?.operations,permissions={...command.nativePermissions,isAdmin:false,embeddedEffects:true,sharedRuntime:actor.prototypeToken?.actorLink!==false},planned=[],seen=new Set();
  try{
   if(command.document?.version!==1||!Array.isArray(operations)||!operations.length||operations.length>256)throw new Error('Gruppo di modifiche non valido.');
@@ -51,14 +81,21 @@ export async function applyNpcNativeSheet(actor,command,services){
    if(!target||!['Actor','Item','ActiveEffect'].includes(target.type)||!/^[A-Za-z0-9]{16}$/.test(target.id)||target.itemId||seen.has(key))throw new Error('Destinazione non valida o duplicata.');seen.add(key);
    if(operation.operation==='update'){
     if(!document)throw new Error('Un elemento non esiste più.');
-    const before=nativeEditorSource(sourceOf(document),target.type),next=nativeValidateChanges(before,target,operation.patches,permissions);
-    if(operation.patches.some(patch=>nativePatchConflict(before,patch)))return{status:'conflict',error:`${document.name}: alcuni campi sono cambiati. Nessuna modifica applicata.`};
+    const before=nativeEditorSource(sourceOf(document),target.type);let patches=operation.patches,next=nativeValidateChanges(before,target,patches,permissions);
+    if(target.type==='Actor'){
+     nativeNormalizeActorRanges(before,next);
+     patches=patches.map(patch=>patch.op==='set'?{...patch,value:nativeGet(next,patch.path)}:patch);
+     next=nativeValidateChanges(before,target,patches,permissions);
+    }
+    if(target.type==='Item'){patches=nativePreserveActivityReferencePatches(before,patches,permissions);next=nativeValidateChanges(before,target,patches,permissions);}
+    if(patches.some(patch=>nativePatchConflict(before,patch)))return{status:'conflict',error:`${document.name}: alcuni campi sono cambiati. Nessuna modifica applicata.`};
     const checked=strictDocument(document,next);
-    if(operation.patches.some(patch=>!nativePatchSatisfied(nativeEditorSource(checked,target.type),patch)))throw new Error(`${document.name}: il modello non conserva tutti i campi richiesti.`);
+    const missing=patches.flatMap(patch=>nativePatchMissingPaths(nativeEditorSource(checked,target.type),patch));
+    if(missing.length)throw new Error(`${document.name}: il modello non conserva tutti i campi richiesti (${[...new Set(missing)].slice(0,24).join(', ')}).`);
     // Preset validation also happens before any ordinary field is changed.
-    if(target.type==='Item')prepareItem(next);
-    planned.push({...operation,before,next});
-    if(target.type==='Actor')for(const patch of operation.patches)nativeSet(final,patch.path,patch.value,patch.op==='delete');
+    if(target.type==='Item'&&patches.some(patch=>patch.path==='effects'||patch.path.startsWith('system.activities')||patch.path.startsWith('flags.khuzoe-automations.npcRules')))prepareItem(next);
+    planned.push({...operation,patches,before,next});
+    if(target.type==='Actor')for(const patch of patches)nativeSet(final,patch.path,patch.value,patch.op==='delete');
     else {const list=target.type==='Item'?'items':'effects',index=final[list].findIndex(value=>value._id===target.id);final[list][index]=next;}
    }else if(operation.operation==='create'){
     if(target.type==='Actor'||document||operation.document?._id!==target.id||Object.hasOwn(operation.document,'ownership')||Object.hasOwn(operation.document,'_stats'))throw new Error('Identità del nuovo elemento non valida.');
@@ -70,44 +107,46 @@ export async function applyNpcNativeSheet(actor,command,services){
   }
   strictDocument(actor,final);
  }catch(error){return{status:'failed',error:`Proposta non applicata: ${error.message}`};}
- const journal=[];
+ const state={version:1,commandId:command.id,phase:'applying',entries:[]};
  try{
+  await writeJournal(actor,state);
   for(const operation of [...planned.filter(value=>value.operation==='create'),...planned.filter(value=>value.operation==='update'),...planned.filter(value=>value.operation==='delete')]){
-   const entry={...operation};journal.push(entry);
+   const current=resolve(actor,operation.target),entry={operation:operation.operation,target:clone(operation.target)};
    if(operation.operation==='create'){
-    await actor.createEmbeddedDocuments(operation.target.type,[operation.document],{keepId:true,keepEmbeddedIds:true,criptaWikiSyncCommand:true});
-    const saved=resolve(actor,operation.target);if(!saved)throw new Error('Il nuovo elemento non è stato restituito da Foundry.');entry.after=sourceOf(saved);
-    for(const key of ['name','type','system','effects','flags','statuses','duration','disabled','transfer'])if(Object.hasOwn(operation.document,key)&&!nativeValuePreserved(entry.after[key],operation.document[key]))throw new Error(`${operation.document.name}: Foundry non ha conservato ${key}.`);
-   }else if(operation.operation==='update'){
-    const result=await applyNpcNativeEditor(actor,{...command,nativeSheetVersion:undefined,nativeEditorVersion:1,kind:operation.target.type==='Actor'?'actor.update':operation.target.type==='Item'?'item.update':'effect.update',target:operation.target,patches:operation.patches,nativePermissions:permissions},services);
-    entry.after=sourceOf(resolve(actor,operation.target));
-    if(result.status!=='applied')throw new Error(result.error||'Un elemento non è stato aggiornato.');
+    if(current)throw new Error('Identificativo occupato prima della creazione.');entry.document=clone(operation.document);
    }else{
-    const current=resolve(actor,operation.target);
-    if(!current||!nativeEqual(comparable(sourceOf(current)),comparable(operation.before)))throw new Error('L’elemento da rimuovere è cambiato durante l’applicazione.');
-    await actor.deleteEmbeddedDocuments(operation.target.type,[operation.target.id],{criptaWikiSyncCommand:true});
-    if(resolve(actor,operation.target))throw new Error('Foundry non ha rimosso l’elemento richiesto.');
+    if(!current)throw new Error('Elemento rimosso durante l’applicazione.');
+    entry.before=sourceOf(current);
+    if(operation.operation==='update'){
+     if(operation.patches.some(patch=>nativePatchConflict(nativeEditorSource(entry.before,operation.target.type),patch)))throw new Error('Campi modificati durante l’applicazione.');
+     entry.expectedAfter=nativeValidateChanges(entry.before,operation.target,operation.patches,permissions);
+    }else if(!nativeEqual(comparable(entry.before),comparable(operation.before)))throw new Error('Elemento modificato prima della rimozione.');
    }
+   state.entries.push(entry);await writeJournal(actor,state);
+   if(operation.operation==='create'){
+    await actor.createEmbeddedDocuments(operation.target.type,[clone(entry.document)],{keepId:true,keepEmbeddedIds:true,criptaWikiSyncCommand:true});
+    const saved=resolve(actor,operation.target);if(!saved)throw new Error('Il nuovo elemento non è stato restituito da Foundry.');entry.after=sourceOf(saved);
+    const missing=creationMissingPaths(entry.after,entry.document);if(missing.length)throw new Error(entry.document.name+': Foundry non ha conservato '+missing.slice(0,24).join(', ')+'.');
+   }else if(operation.operation==='update'){
+    const result=await applyNpcNativeEditor(actor,{...command,kind:operation.target.type==='Actor'?'actor.update':operation.target.type==='Item'?'item.update':'effect.update',nativeSheetVersion:undefined,nativeEditorVersion:1,target:operation.target,patches:operation.patches,nativePermissions:permissions},services);
+    entry.after=sourceOf(resolve(actor,operation.target));if(result.status!=='applied')throw new Error(result.error||'Elemento non aggiornato.');
+   }else{
+    await actor.deleteEmbeddedDocuments(operation.target.type,[operation.target.id],{criptaWikiSyncCommand:true});if(resolve(actor,operation.target))throw new Error('Elemento non rimosso.');
+   }
+   entry.completed=true;await writeJournal(actor,state);
   }
   await actor.update({[receiptPath]:[...new Set([...(nativeGet(sourceOf(actor),receiptPath)||[]),command.id])].slice(-32)},{criptaWikiSyncCommand:true});
+  try{await writeJournal(actor,null);}catch{console.warn('Wiki Sync: applicazione completata; registro da pulire alla prossima lettura.');}
   return{status:'applied',actor};
  }catch(error){
-  const failures=[];
-  if((nativeGet(sourceOf(actor),receiptPath)||[]).includes(command.id))try{await actor.update({[receiptPath]:(nativeGet(sourceOf(actor),receiptPath)||[]).filter(id=>id!==command.id)},{criptaWikiSyncCommand:true});}catch(rollback){failures.push(`Ricevuta: ${rollback.message}`);}
-  for(const entry of journal.reverse())try{
-   const document=resolve(actor,entry.target);
-   if(entry.operation==='create'){
-    if(document){const written=entry.after||entry.document;if(!nativeValuePreserved(comparable(sourceOf(document)),comparable(written)))throw new Error('Il nuovo elemento è stato modificato da un’altra operazione.');await actor.deleteEmbeddedDocuments(entry.target.type,[entry.target.id],{criptaWikiSyncCommand:true});}
-   }else if(entry.operation==='delete'){
-    if(!document)await actor.createEmbeddedDocuments(entry.target.type,[entry.before],{keepId:true,keepEmbeddedIds:true,criptaWikiSyncCommand:true});
-    else if(!nativeEqual(comparable(sourceOf(document)),comparable(entry.before)))throw new Error('Identificativo occupato dopo la rimozione.');
-   }else if(document){
-    const after=entry.after||nativeEditorSource(sourceOf(document),entry.target.type),patches=rollbackPatches(entry.before,nativeEditorSource(after,entry.target.type),entry.target.type,entry.patches);
-    if(!patches.length)continue;
-    if(patches.some(patch=>nativePatchConflict(nativeEditorSource(sourceOf(document),entry.target.type),patch)))throw new Error('Campi modificati da un’altra operazione durante il ripristino.');
-    const result=await applyNpcNativeEditor(actor,{...command,nativeSheetVersion:undefined,nativeEditorVersion:1,kind:entry.target.type==='Actor'?'actor.update':entry.target.type==='Item'?'item.update':'effect.update',target:entry.target,patches,nativePermissions:permissions},services);if(result.status!=='applied')throw new Error(result.error);
-   }else throw new Error('Elemento da ripristinare mancante.');
-  }catch(rollback){failures.push(`${entry.before?.name||entry.document?.name||entry.target.id}: ${rollback.message}`);}
-  return{status:'failed',error:`${error.message} ${failures.length?`Ripristino incompleto: ${failures.join('; ')}. Verifica la scheda in Foundry.`:'Modifiche del gruppo annullate.'}`};
+  // The receipt is the commit marker. A hook may throw after it was saved;
+  // undoing here would contradict that durable acknowledgement on the next poll.
+  if((nativeGet(sourceOf(actor),receiptPath)||[]).includes(command.id)){
+   try{await writeJournal(actor,null);}catch{}
+   return{status:'applied',actor};
+  }
+  let failures=[];
+  try{failures=await restoreJournal(actor,state,services,permissions);}catch(rollback){failures.push(rollback.message);}
+  return{status:'failed',error:error.message+' '+(failures.length?'Ripristino incompleto: '+failures.join('; ')+'. Verifica la scheda in Foundry.':'Modifiche del gruppo annullate.')};
  }
 }

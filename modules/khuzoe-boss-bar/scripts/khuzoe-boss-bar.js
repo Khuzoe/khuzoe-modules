@@ -26,6 +26,182 @@ const lastCinematicEffect = new Map();
 const activeParticleGenerators = new Set();
 let lastGlobalCinematicEffect = { at: 0, priority: 0 };
 
+const BOSS_THEMES = Object.freeze({
+  neutral: { color:null, accent:"#d4c08a" },
+  flame: { color:"#e35d27", accent:"#ffc16b" },
+  frost: { color:"#53aacb", accent:"#c1f0ff" },
+  storm: { color:"#7664db", accent:"#d4ccff" },
+  venom: { color:"#7eae35", accent:"#c4ed75" },
+  death: { color:"#4f9990", accent:"#a5ebce" },
+  radiant: { color:"#cda249", accent:"#fff0b0" },
+  arcane: { color:"#a055cb", accent:"#e6b7ff" },
+  nature: { color:"#468950", accent:"#b3d887" },
+  iron: { color:"#758894", accent:"#d5e4ec" },
+  void: { color:"#40316e", accent:"#bda9ff", identityWeight:22 },
+  shadow: { color:"#404e72", accent:"#a5b2d7", identityWeight:22 },
+  blood: { color:"#a3213f", accent:"#f78c9d", identityWeight:22 },
+  abyss: { color:"#79324d", accent:"#ea9bcd", identityWeight:22 }
+});
+const DAMAGE_THEMES = Object.freeze({fire:"flame", cold:"frost", lightning:"storm", thunder:"storm",
+  poison:"venom", acid:"venom", necrotic:"death", radiant:"radiant", force:"arcane", psychic:"arcane"});
+const THEME_WORDS = Object.freeze({
+  flame:/\b(fire|flame|fiery|inferno|ember|burning|fuoco|fiamme?|ardente|incendio|drago rosso|red dragon)\b/,
+  frost:/\b(ice|frost|cold|frozen|glacial|ghiaccio|gelo|freddo|drago bianco|white dragon)\b/,
+  storm:/\b(lightning|thunder|storm|tempesta|fulmine|fulmini|tuono|drago blu|blue dragon)\b/,
+  venom:/\b(poison|venom|acid|toxic|veleno|velenoso|acido|drago verde|green dragon|drago nero|black dragon)\b/,
+  death:/\b(undead|lich|vampire|vampiro|necrotic|necrotico|non morto|non morti|spettrale|wraith|specter)\b/,
+  radiant:/\b(radiant|radiance|holy|angel|radiante|radioso|sacro|angelo|celestiale)\b/,
+  arcane:/\b(arcane|psychic|eldritch|psionic|arcano|psichico|psionico|aberrante|mind flayer|illithid)\b/,
+  nature:/\b(treant|dryad|druido|dryade|driade|sylvan|silvano|forest|foresta|thorn|spine)\b/,
+  iron:/\b(iron|steel|clockwork|mechanical|ferro|acciaio|meccanico|costrutto)\b/,
+  void:/\b(void|vuoto|far realms?|reame remoto|regni remoti|cosmic horror|orrore cosmico|star spawn|progenie stellare)\b/,
+  shadow:/\b(shadow|shadowfell|ombra|ombre|tenebra|tenebre|oscurita|darkness|shadar kai)\b/,
+  blood:/\b(blood|sangue|sanguigno|sanguigna|sanguinario|sanguinaria|vampire|vampiro|vampira)\b/,
+  abyss:/\b(abyss|abyssal|abissale|abissali|demonic|demoniaco|demoniaca|demone|demoni|demon|demonio)\b/
+});
+
+function validTheme(value, fallback = "auto") {
+  return typeof value === "string" && (value === "auto" || Object.hasOwn(BOSS_THEMES, value)) ? value : fallback;
+}
+
+function resolvedTheme(entry) {
+  const selected = validTheme(entry.theme);
+  return selected === "auto" ? validTheme(entry.autoTheme, "neutral").replace(/^auto$/, "neutral") : selected;
+}
+
+function themeText(value) {
+  return String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase().replace(/<[^>]*>/g, " ").replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ");
+}
+
+function themeValues(value) {
+  if (!value) return [];
+  if (typeof value === "string") return [value];
+  if (typeof value.values === "function") return Array.from(value.values());
+  return typeof value === "object" ? Object.values(value) : [];
+}
+
+// Only the GM evaluates actor data. The shared snapshot carries two allowlisted
+// theme IDs, never private descriptions, item lists, traits or HP totals.
+function inferActorTheme(actor) {
+  if (!actor) return "neutral";
+  const scores = Object.fromEntries(Object.keys(BOSS_THEMES).map(id => [id, 0]));
+  const type = actor.system?.details?.type;
+  const creatureType = themeText(typeof type === "string" ? type : type?.value).trim();
+  const identity = {undead:["death",12],celestial:["radiant",12],fiend:["flame",6],
+    aberration:["arcane",9],construct:["iron",9],plant:["nature",9],fey:["nature",6]};
+  if (identity[creatureType]) {
+    const [theme, score] = identity[creatureType];
+    scores[theme] += score;
+  }
+  const title = themeText([actor.name, type?.subtype, type?.custom].filter(Boolean).join(" "));
+  // A named origin is more specific than the generic creature family: a Void
+  // Lich remains a void creature even when it has the usual undead defenses.
+  const origins = Object.entries(THEME_WORDS).filter(([id, pattern]) => BOSS_THEMES[id].identityWeight && pattern.test(title));
+  if (origins.length === 1) return origins[0][0];
+  for (const [id, pattern] of Object.entries(THEME_WORDS)) if (pattern.test(title)) scores[id] += BOSS_THEMES[id].identityWeight ?? 7;
+  for (const [trait, weight] of [["di",5],["dr",2]]) {
+    // Multiple damage types sharing a theme count only once per trait.
+    const themes = new Set(themeValues(actor.system?.traits?.[trait]?.value).map(d => DAMAGE_THEMES[d]).filter(Boolean));
+    for (const id of themes) scores[id] += weight;
+  }
+  const offense = {}, names = {};
+  for (const item of themeValues(actor.items)) {
+    const types = new Set();
+    const addDamage = part => {
+      if (Array.isArray(part)) { if (typeof part[1] === "string") types.add(part[1]); }
+      else for (const damage of themeValues(part?.types)) types.add(damage);
+    };
+    for (const part of themeValues(item.system?.damage?.parts)) addDamage(part);
+    addDamage(item.system?.damage?.base);
+    for (const activity of themeValues(item.system?.activities)) {
+      for (const part of themeValues(activity.damage?.parts)) addDamage(part);
+    }
+    for (const id of new Set([...types].map(d => DAMAGE_THEMES[d]).filter(Boolean))) {
+      offense[id] = Math.min(6, (offense[id] || 0) + 2);
+    }
+    const name = themeText(item.name);
+    for (const [id, pattern] of Object.entries(THEME_WORDS)) {
+      if (pattern.test(name)) names[id] = Math.min(BOSS_THEMES[id].identityWeight ? 20 : 4,
+        (names[id] || 0) + (BOSS_THEMES[id].identityWeight ? 5 : 2));
+    }
+  }
+  for (const id of Object.keys(scores)) scores[id] += (offense[id] || 0) + (names[id] || 0);
+  const ranked = Object.entries(scores).filter(([id]) => id !== "neutral").sort((a,b) => b[1] - a[1]);
+  // A single resistance or generic spell is not enough. Ambiguous ties retain
+  // the existing portrait palette and neutral presentation.
+  return ranked[0][1] >= 6 && ranked[0][1] - ranked[1][1] >= 2 ? ranked[0][0] : "neutral";
+}
+
+function renderThemeControl(entry) {
+  const selected = validTheme(entry.theme);
+  const automatic = localize(`Themes.${validTheme(entry.autoTheme, "neutral") === "auto" ? "neutral" : validTheme(entry.autoTheme, "neutral")}`);
+  const options = ["auto", ...Object.keys(BOSS_THEMES)].map(id => {
+    const label = id === "auto" ? `${localize("Themes.auto")} · ${automatic}` : localize(`Themes.${id}`);
+    return `<option value="${id}"${selected === id ? " selected" : ""}>${escapeHtml(label)}</option>`;
+  }).join("");
+  return `<label class="khbb-theme-control"><span>${escapeHtml(localize("Controls.Theme"))}</span>
+    <select data-khbb-theme-select="${escapeHtml(entry.id)}" title="${escapeHtml(localize("Controls.ThemeHint"))}">${options}</select></label>`;
+}
+
+async function onRootChange(event) {
+  const select = event.target.closest("[data-khbb-theme-select]");
+  if (!select || !game.user?.isGM) return;
+  const theme = select.value;
+  if (validTheme(theme, "") !== theme) return;
+  const id = select.dataset.khbbThemeSelect;
+  const entries = getState().entries.map(entry => ({...entry,
+    ...(entry.id === id ? {theme} : {}),
+    minions:entry.minions.map(minion => minion.id === id ? {...minion, theme} : minion)
+  }));
+  if (!entriesChanged(getState().entries, entries)) return;
+  select.disabled = true;
+  try { await setState(entries); }
+  catch (error) { console.error(`${MODULE_ID} | Theme update failed`, error); ui.notifications.error(localize("Controls.ThemeFailed")); }
+  finally { select.disabled = false; }
+}
+
+function themeEnergy(pct) {
+  const health = clamp(Number(pct) || 0, 0, 1);
+  if (health === 0) return {strength:0, reach:0, duration:12};
+  const danger = 1 - health;
+  const phaseBoost = health <= .25 ? .12 : health <= .5 ? .04 : 0;
+  return {strength:Math.min(.6, .14 + .34 * danger + phaseBoost),
+    reach:3 + 4 * danger, duration:12 - 5 * danger};
+}
+
+function renderThemeExterior(entry) {
+  const theme = resolvedTheme(entry);
+  if (theme === "neutral" || entry.pct <= 0) return "";
+  // Deterministic geometry keeps every client consistent, without timers or HP
+  // data beyond the public percentage. All light stays in a narrow edge band.
+  let seed = 0;
+  for (const char of String(entry.id)) seed = (Math.imul(seed, 31) + char.charCodeAt(0)) >>> 0;
+  const random = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; };
+  const path = (base, sign) => Array.from({length:25}, (_, i) => {
+    const x = 4 + i / 24 * 992;
+    return `${i ? "L" : "M"}${x.toFixed(1)} ${(base + sign * random() * 5).toFixed(1)}`;
+  }).join("");
+  const motes = Array.from({length:14}, (_, i) => {
+    const x = 18 + random() * 964, y = i % 2 ? 55 + random() * 3 : 2 + random() * 3;
+    const r = .8 + random() * 1.1;
+    return `<circle class="khbb-edge-mote" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}"/>`;
+  }).join("");
+  return `<div class="khbb-theme-exterior" data-khbb-exterior="${theme}" aria-hidden="true">
+    <svg viewBox="0 0 1000 60" preserveAspectRatio="none" focusable="false">
+      <g class="khbb-edge-arcs"><path d="${path(7, -1)}"/><path d="${path(53, 1)}"/></g>
+      <g class="khbb-edge-motes">${motes}</g>
+    </svg></div>`;
+}
+
+function renderThemeField() {
+  return `<div class="khbb-theme-field" aria-hidden="true"><svg class="khbb-theme-filaments" viewBox="0 0 1000 60" preserveAspectRatio="none" focusable="false">
+    <path class="khbb-theme-bolt" d="M0 28L80 25L105 11L120 32L148 21L180 29L270 26L305 40L328 20L352 29L430 27L460 9L480 31L570 26L615 42L640 22L720 28L760 13L780 30L890 23L920 37L945 24L1000 28"/>
+    <path class="khbb-theme-bolt khbb-theme-bolt-secondary" d="M0 42L110 38L145 52L169 33L280 41L330 30L350 48L460 39L510 53L535 36L640 43L680 27L705 45L820 36L865 51L889 33L1000 40"/>
+  </svg></div>`;
+}
+
+
 Hooks.once("init", () => {
   registerSettings();
 });
@@ -33,6 +209,8 @@ Hooks.once("init", () => {
 Hooks.once("ready", () => {
   ensureRoot();
   renderBossBars();
+  if (game.user?.isGM && isPrimaryGM()) scheduleRefresh();
+  window.matchMedia?.("(prefers-reduced-motion: reduce)")?.addEventListener?.("change", () => renderBossBars());
   initializeLayoutTracking();
   window.addEventListener("resize", scheduleLayoutRefresh);
   document.addEventListener("click", onDocumentClick, true);
@@ -82,6 +260,13 @@ Hooks.on("deleteToken", tokenDocument => {
   if (!trackedCreatures().some(entry => entryMatchesToken(entry, tokenDocument))) return;
   scheduleRefresh();
 });
+
+for (const event of ["createItem", "updateItem", "deleteItem", "createActiveEffect", "updateActiveEffect", "deleteActiveEffect"]) {
+  Hooks.on(event, document => {
+    if (!game.user?.isGM || !isPrimaryGM()) return;
+    if (trackedCreatures().some(entry => entry.actorId === document.parent?.id)) scheduleRefresh();
+  });
+}
 
 function registerSettings() {
   game.settings.register(MODULE_ID, SETTING_STATE, {
@@ -272,6 +457,7 @@ function refreshEntry(entry, index) {
           name: entry.name || actor.name,
           img: entry.img || actor.img,
           pct: hp.ratio,
+          autoTheme: inferActorTheme(actor),
           sort: index,
           stale: false,
           updatedAt: Date.now()
@@ -312,6 +498,7 @@ function refreshMinion(minion, index) {
     name: minion.name || actor.name,
     img: minion.img || actor.img,
     pct: hp.ratio,
+    autoTheme: inferActorTheme(actor),
     sort: index,
     stale: false,
     updatedAt: Date.now()
@@ -337,6 +524,8 @@ function buildEntryFromTokenDocument(tokenDocument, index = 0, previous = {}) {
     name: tokenDocument.name || actor.name || previous.name || localize("Labels.Creature"),
     img: tokenDocument.texture?.src || actor.img || previous.img || "",
     color: previous.color || null,
+    theme: validTheme(previous.theme),
+    autoTheme: inferActorTheme(actor),
     minions: previous.minions || [],
     pct: hp.ratio,
     sort: index,
@@ -376,6 +565,7 @@ function ensureRoot() {
     root.setAttribute("aria-live", "polite");
     root.addEventListener("click", onRootClick);
     root.addEventListener("contextmenu", onRootContextMenu);
+    root.addEventListener("change", onRootChange);
     root.addEventListener("pointerdown", onDragStart);
     document.body.append(root);
   }
@@ -413,6 +603,7 @@ function syncRootAnchor(root) {
 function syncRootEffectMode(root) {
   const mode = configuredEffectMode();
   root.dataset.khbbEffects = mode;
+  root.dataset.khbbMotion = motionEffectsSuppressed() ? "off" : "on";
   return mode;
 }
 
@@ -600,7 +791,7 @@ function playBossBarEffects(entries) {
   if (!token) return;
 
   playCanvasShake(entry.effect);
-  playTokenParticleBurst(token, entry.effect);
+  playTokenParticleBurst(token, entry.effect, entry);
 }
 
 function resolveBossBarToken(entry) {
@@ -651,7 +842,7 @@ function particleProfile(kind) {
   return profiles[kind] ?? profiles.damage;
 }
 
-function playTokenParticleBurst(token, effect) {
+function playTokenParticleBurst(token, effect, entry = null) {
   const ParticleGenerator = globalThis.foundry?.canvas?.animation?.ParticleGenerator;
   const whiteTexture = globalThis.PIXI?.Texture?.WHITE;
   if (typeof ParticleGenerator !== "function" || !whiteTexture) return;
@@ -676,7 +867,8 @@ function playTokenParticleBurst(token, effect) {
       velocity: { speed: profile.speed, angle: [205, 335] },
       alpha: [0.38, 0.78],
       scale: profile.scale,
-      tint: profile.color,
+      tint: entry && (isHexColor(entry.color) || resolvedTheme(entry) !== "neutral")
+        ? Number.parseInt((entry.color || BOSS_THEMES[resolvedTheme(entry)].accent).slice(1), 16) : profile.color,
       blend: globalThis.PIXI?.BLEND_MODES?.ADD,
       elevation: Number(token.document?.elevation) || 0,
       sort: 1000
@@ -721,7 +913,7 @@ function renderBossBar(entry) {
       <button class="khbb-minion-add" type="button" data-khbb-add-minion="${escapeHtml(entry.id)}" title="${escapeHtml(localize("Controls.AddMinions"))}" aria-label="${escapeHtml(localize("Controls.AddMinions"))}">
         <i class="fas fa-user-plus" aria-hidden="true"></i>
       </button>
-      ${renderColorControls(entry.id, entry.color)}
+      ${renderColorControls(entry)}
       <button class="khbb-remove-bar" type="button" data-khbb-remove="${escapeHtml(entry.id)}" title="${escapeHtml(localize("Controls.RemoveOne"))}" aria-label="${escapeHtml(localize("Controls.RemoveOne"))}">
         <i class="fas fa-trash" aria-hidden="true"></i>
       </button>
@@ -735,9 +927,10 @@ function renderBossBar(entry) {
     : "";
 
   return `
-    <article class="khbb-boss-bar khbb-status-${status}${entry.stale ? " khbb-stale" : ""}${changeClass}${effectClass}" style="${escapeHtml(healthStyle(entry))};" aria-label="${escapeHtml(entry.name)}">
+    <article class="khbb-boss-bar khbb-status-${status}${entry.stale ? " khbb-stale" : ""}${changeClass}${effectClass}" data-khbb-theme="${resolvedTheme(entry)}" style="${escapeHtml(healthStyle(entry))};" aria-label="${escapeHtml(entry.name)}">
       <div class="khbb-portrait">${portrait}</div>
       <div class="khbb-content">
+        ${renderThemeExterior(entry)}
         ${renderHealthTrack(entry, "khbb-track")}
       </div>
       <div class="khbb-actions">
@@ -762,7 +955,7 @@ function renderMinionBar(bossId, minion) {
   const gmActions = game.user?.isGM
     ? `
       <div class="khbb-minion-actions">
-        ${renderColorControls(minion.id, minion.color)}
+        ${renderColorControls(minion)}
         <button class="khbb-minion-remove" type="button" data-khbb-boss="${escapeHtml(bossId)}" data-khbb-remove-minion="${escapeHtml(minion.id)}" title="${escapeHtml(localize("Controls.RemoveMinion"))}" aria-label="${escapeHtml(localize("Controls.RemoveMinion"))}">
           <i class="fas fa-times" aria-hidden="true"></i>
         </button>
@@ -771,23 +964,27 @@ function renderMinionBar(bossId, minion) {
     : "";
 
   return `
-    <div class="khbb-minion-bar khbb-status-${status}${minion.stale ? " khbb-stale" : ""}${changeClass}${effectClass}" style="${escapeHtml(healthStyle(minion))};" aria-label="${escapeHtml(minion.name)}">
+    <div class="khbb-minion-bar khbb-status-${status}${minion.stale ? " khbb-stale" : ""}${changeClass}${effectClass}" data-khbb-theme="${resolvedTheme(minion)}" style="${escapeHtml(healthStyle(minion))};" aria-label="${escapeHtml(minion.name)}">
+      ${renderThemeExterior(minion)}
       ${renderHealthTrack(minion, "khbb-track khbb-minion-track")}
       ${gmActions}
     </div>
   `;
 }
 
-function renderColorControls(entryId, color) {
+function renderColorControls(entry) {
+  const {id: entryId, color} = entry;
   return `
     <button class="khbb-color-bar" type="button" data-khbb-color="${escapeHtml(entryId)}" title="${escapeHtml(localize("Controls.Color"))}" aria-label="${escapeHtml(localize("Controls.Color"))}">
       <i class="fas fa-palette" aria-hidden="true"></i>
     </button>
     <div class="khbb-color-panel" data-khbb-color-panel="${escapeHtml(entryId)}">
-      <input class="khbb-color-input" type="color" data-khbb-color-input="${escapeHtml(entryId)}" value="${escapeHtml(color || "#b31d27")}" aria-label="${escapeHtml(localize("Controls.Color"))}">
+      ${renderThemeControl(entry)}
+      <input class="khbb-color-input" type="color" data-khbb-color-input="${escapeHtml(entryId)}" value="${escapeHtml(color || BOSS_THEMES[resolvedTheme(entry)].color || "#b31d27")}" aria-label="${escapeHtml(localize("Controls.Color"))}">
       <button class="khbb-color-confirm" type="button" data-khbb-color-confirm="${escapeHtml(entryId)}" title="${escapeHtml(localize("Controls.ConfirmColor"))}" aria-label="${escapeHtml(localize("Controls.ConfirmColor"))}">
         <i class="fas fa-check" aria-hidden="true"></i>
       </button>
+      <button class="khbb-color-reset" type="button" data-khbb-color-reset="${escapeHtml(entryId)}" title="${escapeHtml(localize("Controls.ThemeColor"))}" aria-label="${escapeHtml(localize("Controls.ThemeColor"))}"><i class="fas fa-rotate-left" aria-hidden="true"></i></button>
       <button class="khbb-color-default" type="button" data-khbb-color-default="${escapeHtml(entryId)}" title="${escapeHtml(localize("Controls.DefaultRed"))}" aria-label="${escapeHtml(localize("Controls.DefaultRed"))}"></button>
     </div>
   `;
@@ -796,7 +993,7 @@ function renderHealthTrack(entry, trackClass) {
   return `
     <div class="${trackClass}" aria-hidden="true">
       <div class="khbb-change"></div>
-      <div class="khbb-fill"></div>
+      <div class="khbb-fill">${renderThemeField()}</div>
       <div class="khbb-sheen"></div>
       <strong class="khbb-name">${escapeHtml(entry.name)}</strong>
     </div>
@@ -806,17 +1003,31 @@ function renderHealthTrack(entry, trackClass) {
 function healthStyle(entry) {
   const fill = `${Math.round(entry.pct * 1000) / 10}%`;
   const palette = getEntryPalette(entry);
+  const theme = BOSS_THEMES[resolvedTheme(entry)];
+  const accent = hexToRgb(theme.accent);
+  const danger = 1 - clamp(entry.pct, 0, 1);
+  const energy = themeEnergy(entry.pct);
   return [
     `--khbb-fill: ${fill}`,
     `--khbb-prev-fill: ${entry.previousFill || fill}`,
     `--khbb-bar-start: ${palette.start}`,
     `--khbb-bar-mid: ${palette.mid}`,
     `--khbb-bar-end: ${palette.end}`,
-    `--khbb-bar-glow: ${palette.glow}`
+    `--khbb-bar-glow: ${palette.glow}`,
+    `--khbb-theme-accent: ${theme.accent}`,
+    `--khbb-theme-rgb: ${accent.r}, ${accent.g}, ${accent.b}`,
+    `--khbb-theme-strength: ${(.28 + .38 * danger).toFixed(2)}`,
+    `--khbb-theme-halo: ${(3 + 6 * danger).toFixed(1)}px`,
+    `--khbb-theme-duration: ${(8 - 4 * danger).toFixed(1)}s`,
+    `--khbb-outside-opacity: ${energy.strength.toFixed(2)}`,
+    `--khbb-outside-reach: ${energy.reach.toFixed(1)}px`,
+    `--khbb-outside-duration: ${energy.duration.toFixed(1)}s`
   ].join("; ");
 }
 function getEntryPalette(entry) {
   if (isHexColor(entry.color)) return buildPalette(hexToRgb(entry.color));
+  const theme = BOSS_THEMES[resolvedTheme(entry)];
+  if (theme.color) return buildPalette(hexToRgb(theme.color));
   return paletteCache.get(entry.img) ?? defaultPalette();
 }
 
@@ -1447,6 +1658,13 @@ function onRootClick(event) {
     return;
   }
 
+  const colorReset = event.target.closest("[data-khbb-color-reset]");
+  if (colorReset) {
+    event.preventDefault();
+    updateEntryColor(colorReset.dataset.khbbColorReset, null);
+    return;
+  }
+
   const colorDefault = event.target.closest("[data-khbb-color-default]");
   if (colorDefault) {
     event.preventDefault();
@@ -1471,9 +1689,9 @@ function onRootContextMenu(event) {
 }
 
 async function updateEntryColor(entryId, color) {
-  if (!game.user?.isGM || !entryId || !isHexColor(color)) return;
+  if (!game.user?.isGM || !entryId || (color !== null && !isHexColor(color))) return;
 
-  const normalizedColor = color.toLowerCase();
+  const normalizedColor = color === null ? null : color.toLowerCase();
   let changed = false;
   const entries = getState().entries.map(entry => {
     if (entry.id === entryId) {
@@ -1515,6 +1733,8 @@ function creatureChanged(previousEntry, nextEntry) {
     || previousEntry.name !== nextEntry.name
     || previousEntry.img !== nextEntry.img
     || previousEntry.color !== nextEntry.color
+    || previousEntry.theme !== nextEntry.theme
+    || previousEntry.autoTheme !== nextEntry.autoTheme
     || previousEntry.pct !== nextEntry.pct
     || previousEntry.sort !== nextEntry.sort
     || previousEntry.stale !== nextEntry.stale) {
@@ -1534,7 +1754,9 @@ function mergeEntries(existingEntries, selectedEntries) {
   for (const selectedEntry of selectedEntries) {
     const previousEntry = merged.get(selectedEntry.id);
     const sort = previousEntry?.sort ?? merged.size;
-    merged.set(selectedEntry.id, normalizeEntry({ ...selectedEntry, sort }));
+    merged.set(selectedEntry.id, normalizeEntry({ ...selectedEntry, sort,
+      ...(previousEntry ? {color:previousEntry.color, theme:previousEntry.theme, minions:previousEntry.minions} : {})
+    }));
   }
 
   return Array.from(merged.values())
@@ -1548,7 +1770,9 @@ function mergeMinions(existingMinions = [], selectedMinions = []) {
   for (const selectedMinion of selectedMinions) {
     const previousMinion = merged.get(selectedMinion.id);
     const sort = previousMinion?.sort ?? merged.size;
-    merged.set(selectedMinion.id, normalizeMinion({ ...selectedMinion, sort }));
+    merged.set(selectedMinion.id, normalizeMinion({ ...selectedMinion, sort,
+      ...(previousMinion ? {color:previousMinion.color, theme:previousMinion.theme} : {})
+    }));
   }
 
   return Array.from(merged.values())
@@ -1639,6 +1863,8 @@ function normalizeCreature(entry) {
     actorId: entry.actorId ? String(entry.actorId) : null,
     name: String(entry.name || localize("Labels.Creature")),
     img: String(entry.img || ""),
+    theme: validTheme(entry.theme),
+    autoTheme: validTheme(entry.autoTheme, "neutral") === "auto" ? "neutral" : validTheme(entry.autoTheme, "neutral"),
     pct: Math.round(pct * 1000) / 1000,
     sort: Number(entry.sort) || 0,
     stale: Boolean(entry.stale),
