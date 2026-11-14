@@ -1,0 +1,12 @@
+# Khuzoe Assets Manager
+
+- App Windows separata da Khuzoe Updater, distribuita dal suo catalogo. Modificare l'Updater soltanto per integrazioni richieste. Non modificare moduli installati, database o impostazioni dei mondi Foundry.
+- Pubblicare i sorgenti in applications/khuzoe-assets-manager/source nel repository pubblico Khuzoe/khuzoe-modules. application.zip, application.json e release.json restano nella cartella superiore per l'Updater. Non includere sorgenti C#, test, strumenti di sviluppo o dati utente nel pacchetto runtime. Allineare application.json, app/version.txt, app/app.manifest e la versione del lettore a ogni release runtime. Una pubblicazione dei soli sorgenti/documenti non deve rigenerare release immutabili già distribuite.
+- C# 5 e .NET Framework 4.8, senza NuGet o runtime da installare manualmente.
+- Sezioni: musiche e visualizzatore scene. UI in italiano, percorso Foundry ricordato, strumenti preparati dall'app, nessun servizio residente.
+- Scene: soltanto lettura di copie temporanee stabili dei database LevelDB. Non aprire mai i database originali con classic-level. Rispettare i livelli v14 e non introdurre scritture ai mondi. Il lettore Node ha dipendenze fissate in engine/package-lock.json; npm ci --ignore-scripts --omit=dev è necessario solo per gli sviluppatori.
+- Gli MP3 vanno soltanto sotto `musics/` nella directory dati selezionata. Validare percorsi, collegamenti e nomi prima di scrivere. Non sovrascrivere file esistenti.
+- Chiavi segrete e codici personali non devono entrare in sorgenti, log, ZIP o repository. Sessioni protette con DPAPI, autenticazione verificata dal backend.
+- Le prove usano directory isolate sotto `build/` o directory temporanee. Non usare musiche o mondi veri come fixture.
+- Compilazione: `tools/build-app.ps1`; test: `tools/build-app.ps1 -Test`; pacchetto: `tools/package.ps1`.
+- Aumentare `app/version.txt` e allineare il manifest per ogni release distribuita.

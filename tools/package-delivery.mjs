@@ -15,7 +15,9 @@ async function collect(relative) {
     const name = relative ? `${relative}/${entry.name}` : entry.name;
     if (['node_modules', '.maintenance', '.git', 'LOCK', 'LOG', 'LOG.old'].includes(entry.name)) continue;
     if (name.startsWith('applications/') && ['build', 'dist'].includes(entry.name)) continue;
-    if (relative.startsWith('applications/') && !['application.json', 'release.json', 'application.zip'].includes(entry.name)) continue;
+    const sourceTree = /^applications\/[^/]+\/source(?:\/|$)/.test(name);
+    if (relative.startsWith('applications/') && !sourceTree && !['application.json', 'release.json', 'application.zip'].includes(entry.name)) continue;
+    if (sourceTree && (['build', 'dist', '.work'].includes(entry.name) || /^(session\.bin|settings\.json|library\.json|queue\.json)$/.test(entry.name))) continue;
     if (entry.isDirectory()) await collect(name);
     else if (entry.isFile()) projectFiles.set(name, await readFile(path.join(projectRoot, name)));
     else throw new Error('Collegamento non distribuibile: ' + name);

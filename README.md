@@ -34,7 +34,7 @@ Prima di cambiare file scarica, verifica ed estrae tutti i pacchetti necessari. 
 
 ## Per chi pubblica
 
-I sorgenti dell'Updater e dei moduli sono nel repository. Per **Assets Manager** si distribuisce soltanto il pacchetto già compilato: `applications/khuzoe-assets-manager/application.zip`, il suo manifest `application.json` e dimensione/impronta in `release.json`. I sorgenti della nuova app rimangono locali. Il publisher rifiuta pacchetti contenenti il progetto C#, script di sviluppo o sessioni utente; il workflow Windows ne verifica anche estrazione, versione dell'eseguibile e lettore scene prima di pubblicarli.
+I sorgenti dell'Updater, dei moduli e di **Assets Manager** sono nel repository. Il progetto completo di Assets Manager è in [`applications/khuzoe-assets-manager/source`](applications/khuzoe-assets-manager/source), con codice C#, lettore scene, test e strumenti di compilazione. Nella cartella superiore rimangono `application.zip`, `application.json` e `release.json`, usati dall'Updater. Il pacchetto per i DM contiene soltanto i file di esecuzione; i sorgenti si consultano separatamente su GitHub. Un workflow Windows compila e verifica il progetto sorgente a ogni modifica. Le release runtime già pubblicate restano immutabili.
 
 Leggi [CONFIGURAZIONE-GITHUB.md](CONFIGURAZIONE-GITHUB.md). Il repository previsto è `Khuzoe/khuzoe-modules` e contiene sia app sia sorgenti dei singoli moduli. L'app e i moduli hanno workflow e versioni indipendenti.
 

@@ -6,8 +6,8 @@
 - Installazione dell'app nella cartella dedicata, riconoscimento delle versioni, aggiornamento completo e rimozione dei file obsoleti, conservazione dei dati esterni al pacchetto, rifiuto di versioni o runtime alterati. Una fixture eseguibile tenuta aperta impedisce l'aggiornamento; nessun programma dell'utente viene terminato.
 - Avvio predisposto con il percorso Foundry già scelto. Assets Manager: 29 test C# superati e 5 test del lettore Node superati.
 - Publisher: 14 test superati. Verifica del pacchetto compilato senza leggere i sorgenti di Assets Manager, catalogo compatibile con i client precedenti, aumento versione indipendente, esclusione dei sorgenti C# e dei dati utente, manifest del lettore, caricamento degli asset prima della pubblicazione e riuso delle release immutabili.
-- Pacchetto runtime finale verificato con il lettore Windows incluso: due livelli, sei muri e tre luci recuperati da una copia di prova. Il progetto C# rimane locale; la directory pubblicabile dell'app contiene soltanto application.zip, application.json e release.json.
-- Verificati i compendi su copie temporanee con il CLI Foundry; i file dei moduli installati non sono stati modificati. I tre workflow YAML risultano validi.
+- Pacchetto runtime finale verificato con il lettore Windows incluso: due livelli, sei muri e tre luci recuperati da una copia di prova. I sorgenti completi sono pubblicati separatamente in applications/khuzoe-assets-manager/source; il pacchetto runtime e i manifest già distribuiti mantengono le stesse impronte.
+- Verificati i compendi su copie temporanee con il CLI Foundry; i file dei moduli installati non sono stati modificati. I workflow YAML risultano validi; il workflow dedicato ai sorgenti compila e verifica Assets Manager su Windows.
 - Il workflow di pubblicazione verifica tutti i pacchetti prima di caricarli e contiene una prova nativa di installazione dal catalogo pubblico dopo il deploy Pages. L'accesso Discord non fa parte di questa prova e non viene avviato automaticamente.
 
 ## Verifiche della consegna · 25 ottobre 2026

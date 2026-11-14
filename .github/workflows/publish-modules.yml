@@ -2,7 +2,7 @@ name: Pubblica moduli Khuzoe
 on:
   push:
     branches: [main]
-    paths: ['modules/**', 'applications/**', 'publisher.config.json', 'tools/publisher.mjs', '.github/workflows/publish-modules.yml']
+    paths: ['modules/**', 'applications/*/application.json', 'applications/*/release.json', 'applications/*/application.zip', 'publisher.config.json', 'tools/publisher.mjs', '.github/workflows/publish-modules.yml']
   workflow_dispatch:
 permissions:
   contents: write

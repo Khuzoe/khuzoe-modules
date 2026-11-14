@@ -1,0 +1,9 @@
+build/
+dist/
+*.user
+*.tmp
+session.bin
+settings.json
+library.json
+queue.json
+engine/node_modules/

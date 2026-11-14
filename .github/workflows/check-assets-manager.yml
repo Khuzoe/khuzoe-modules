@@ -1,0 +1,32 @@
+name: Verifica sorgenti Assets Manager
+on:
+  push:
+    branches: [main]
+    paths: ['applications/khuzoe-assets-manager/source/**', '.github/workflows/check-assets-manager.yml']
+  pull_request:
+    paths: ['applications/khuzoe-assets-manager/source/**', '.github/workflows/check-assets-manager.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: applications/khuzoe-assets-manager/source
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepara le dipendenze del lettore scene
+        working-directory: applications/khuzoe-assets-manager/source/engine
+        run: npm ci --ignore-scripts --omit=dev
+      - name: Verifica il lettore scene
+        working-directory: applications/khuzoe-assets-manager/source/engine
+        run: node --test reader.test.cjs
+      - name: Verifica l'app su dati di prova
+        run: ./tools/build-app.ps1 -Test
+      - name: Compila l'eseguibile dai sorgenti pubblici
+        run: ./tools/build-app.ps1

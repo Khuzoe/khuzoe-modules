@@ -13,3 +13,4 @@ applications/*/*
 !applications/*/application.json
 !applications/*/release.json
 !applications/*/application.zip
+!applications/*/source/
