@@ -19,13 +19,14 @@ namespace KhuzoeAssetsManager
         public int Count { get { return entries.Count; } }
         public SceneRasterCache() : this(24L * 1024 * 1024) { }
         internal SceneRasterCache(long budget) { this.budget = budget; }
-        public Image Get(Image source, double displayScale)
+        public Image Get(Image source, double displayScale, bool interactionPreview = false)
         {
             if (source == null || displayScale <= 0 || Double.IsNaN(displayScale) || Double.IsInfinity(displayScale)) return source;
+            Entry entry;
+            if (interactionPreview) { if (entries.TryGetValue(source, out entry)) { entry.Used = ++used; return entry.Image; } return source; }
             int divisor = 1;
             while (displayScale * divisor < 0.5 && Math.Max(source.Width, source.Height) / divisor > 64) divisor *= 2;
             if (divisor == 1) return source;
-            Entry entry;
             if (entries.TryGetValue(source, out entry) && entry.Divisor == divisor) { entry.Used = ++used; return entry.Image; }
             int width = Math.Max(1, source.Width / divisor), height = Math.Max(1, source.Height / divisor);
             long bytes = (long)width * height * 4;

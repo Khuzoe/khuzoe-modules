@@ -123,7 +123,8 @@ namespace KhuzoeAssetsManager
             if (before != null && gestureChanged && Draft != null) { Draft.Cancel(before); Scene = Draft.Scene; Level = Scene.Levels.FirstOrDefault(value => value.Id == Level.Id); }
             Capture = false; Cursor = Cursors.Default; Invalidate();
         }
-        protected override void OnMouseCaptureChanged(EventArgs e) { base.OnMouseCaptureChanged(e); if (!Capture && gesture != null) CancelEditorGesture(); }
+        protected override void OnMouseCaptureChanged(EventArgs e)
+        { base.OnMouseCaptureChanged(e); if (!Capture) { dragging = false; if (gesture != null) CancelEditorGesture(); Cursor = Cursors.Default; } }
         protected override bool IsInputKey(Keys keyData) { return Editing && new[] { Keys.Left, Keys.Right, Keys.Up, Keys.Down }.Contains(keyData & Keys.KeyCode) || base.IsInputKey(keyData); }
         protected override void OnKeyDown(KeyEventArgs e)
         {

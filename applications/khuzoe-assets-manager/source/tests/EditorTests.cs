@@ -195,6 +195,11 @@ namespace KhuzoeAssetsManager
                 Check(pane.Draft.Scene.Tiles.Count == 1, "UI image import failed: " + pane.StatusText);
                 new ImageProperties(pane.Draft).Rotation = -18; new ImageProperties(pane.Draft).Width = 420;
                 Application.DoEvents(); Screenshot(form, Path.Combine(storage.Root, "editor-image.png"));
+                var zoomPoint = new Point(pane.Canvas.Width / 2 + 35, pane.Canvas.Height / 2 - 20);
+                var zoomAnchor = pane.Canvas.ScenePoint(zoomPoint, false); Wheel(pane.Canvas, zoomPoint, 120); Wheel(pane.Canvas, zoomPoint, 120);
+                Screenshot(form, Path.Combine(storage.Root, "editor-wheel-preview.png")); Pump(() => !pane.Canvas.WheelPreviewActive);
+                Check(Math.Abs(pane.Canvas.ScenePoint(zoomPoint, false).X - zoomAnchor.X) < .01 && Math.Abs(pane.Canvas.ScenePoint(zoomPoint, false).Y - zoomAnchor.Y) < .01, "UI wheel zoom drifted from its anchor");
+                Screenshot(form, Path.Combine(storage.Root, "editor-wheel-quality.png")); pane.Canvas.Fit();
                 pane.Editor.SetTool(SceneEditTool.Wall); Mouse(pane.Canvas, "OnMouseDown", pane.Canvas.SceneScreen(600, 1200)); Mouse(pane.Canvas, "OnMouseMove", pane.Canvas.SceneScreen(1400, 1200)); Mouse(pane.Canvas, "OnMouseUp", pane.Canvas.SceneScreen(1400, 1200)); new WallProperties(pane.Draft).Door = EditorDoor.Porta; Application.DoEvents(); Screenshot(form, Path.Combine(storage.Root, "editor-wall.png"));
                 pane.Editor.SetTool(SceneEditTool.Light); Mouse(pane.Canvas, "OnMouseDown", pane.Canvas.SceneScreen(1200, 600)); Mouse(pane.Canvas, "OnMouseUp", pane.Canvas.SceneScreen(1200, 600)); new LightProperties(pane.Draft).Color = Color.MediumPurple; Application.DoEvents(); Screenshot(form, Path.Combine(storage.Root, "editor-light.png"));
                 form.Size = form.MinimumSize; Application.DoEvents(); Screenshot(form, Path.Combine(storage.Root, "editor-small.png"));

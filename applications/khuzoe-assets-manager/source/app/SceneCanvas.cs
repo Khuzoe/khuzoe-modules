@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -23,6 +24,10 @@ namespace KhuzoeAssetsManager
         double penScale;
         double scale = 1, panX, panY;
         bool fit = true, dragging;
+        bool wheelPreview, wheelFramePending;
+        readonly System.Windows.Forms.Timer wheelTimer = new System.Windows.Forms.Timer { Interval = 16 };
+        readonly Stopwatch wheelIdle = new Stopwatch();
+        internal bool WheelPreviewActive { get { return wheelPreview; } }
         Point previous;
         readonly ToolTip tooltip = new ToolTip();
         string tooltipText;
@@ -33,15 +38,18 @@ namespace KhuzoeAssetsManager
             SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw | ControlStyles.Selectable, true);
             BackColor = Color.FromArgb(17, 18, 22); Dock = DockStyle.Fill; TabStop = true; Settings = new SceneViewSettings();
             AccessibleName = "Anteprima scena"; AccessibleDescription = "Trascina per spostare la mappa e usa la rotella per ingrandirla.";
+            wheelTimer.Tick += WheelTick;
         }
         public void SetScene(SceneDetail scene, SceneLevel level, SceneImageSet images, bool refit)
         {
+            FinishWheelPreview();
             if (!Object.ReferenceEquals(Images, images)) { rasterCache.Clear(); backgroundCache.Clear(); foregroundCache.Clear(); }
             Scene = scene; Level = level; Images = images; layout = scene == null ? null : SceneLayout.From(scene);
             if (refit) Fit(); else Invalidate();
         }
         public void Fit()
         {
+            FinishWheelPreview();
             fit = true;
             if (layout != null && ClientSize.Width > 40 && ClientSize.Height > 40)
             {
@@ -50,18 +58,40 @@ namespace KhuzoeAssetsManager
             }
             Invalidate(); if (ZoomChanged != null) ZoomChanged(this, EventArgs.Empty);
         }
-        public void ChangeZoom(double factor) { ZoomAt(factor, new Point(Width / 2, Height / 2)); }
-        void ZoomAt(double factor, Point point)
+        public void ChangeZoom(double factor) { FinishWheelPreview(); ZoomAt(factor, new Point(Width / 2, Height / 2), false); }
+        void ZoomAt(double factor, Point point, bool wheel)
         {
             if (Scene == null) return;
             double next = Math.Max(0.00001, Math.Min(128, scale * factor));
             panX = point.X - (point.X - panX) * next / scale; panY = point.Y - (point.Y - panY) * next / scale;
-            scale = next; fit = false; Invalidate(); if (ZoomChanged != null) ZoomChanged(this, EventArgs.Empty);
+            scale = next; fit = false;
+            if (wheel) { wheelFramePending = true; if (!wheelTimer.Enabled) wheelTimer.Start(); } else Invalidate();
+            if (ZoomChanged != null) ZoomChanged(this, EventArgs.Empty);
         }
-        protected override void OnResize(EventArgs e) { base.OnResize(e); if (fit) Fit(); }
-        protected override void OnMouseWheel(MouseEventArgs e) { base.OnMouseWheel(e); ZoomAt(e.Delta > 0 ? 1.2 : 1 / 1.2, e.Location); }
+        void WheelTick(object sender, EventArgs e)
+        {
+            if (!wheelPreview || wheelIdle.ElapsedMilliseconds >= 150) FinishWheelPreview();
+            else if (wheelFramePending) { wheelFramePending = false; Invalidate(); }
+        }
+        void FinishWheelPreview()
+        {
+            bool repaint = wheelPreview;
+            if (wheelTimer != null) wheelTimer.Stop();
+            if (wheelIdle != null) wheelIdle.Reset();
+            wheelPreview = wheelFramePending = false;
+            if (repaint && !IsDisposed && !Disposing) Invalidate();
+        }
+        protected override void OnResize(EventArgs e) { FinishWheelPreview(); base.OnResize(e); if (fit) Fit(); }
+        protected override void OnVisibleChanged(EventArgs e) { if (!Visible) FinishWheelPreview(); base.OnVisibleChanged(e); }
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            base.OnMouseWheel(e); if (Scene == null || e.Delta == 0) return;
+            bool preview = !dragging && gesture == null;
+            if (preview) { wheelPreview = true; wheelIdle.Restart(); } else FinishWheelPreview();
+            ZoomAt(Math.Pow(1.2, e.Delta / 120.0), e.Location, preview);
+        }
         protected override void OnMouseDown(MouseEventArgs e)
-        { base.OnMouseDown(e); Focus(); if (EditorDown(e)) return; if (Scene != null && (e.Button == MouseButtons.Left || e.Button == MouseButtons.Middle)) { dragging = true; previous = e.Location; Capture = true; Cursor = Cursors.SizeAll; } }
+        { FinishWheelPreview(); base.OnMouseDown(e); Focus(); if (EditorDown(e)) return; if (Scene != null && (e.Button == MouseButtons.Left || e.Button == MouseButtons.Middle)) { dragging = true; previous = e.Location; Capture = true; Cursor = Cursors.SizeAll; } }
         protected override void OnMouseUp(MouseEventArgs e) { base.OnMouseUp(e); if (EditorUp(e)) return; dragging = false; Capture = false; Cursor = Cursors.Default; }
         protected override void OnMouseMove(MouseEventArgs e)
         {
@@ -88,7 +118,11 @@ namespace KhuzoeAssetsManager
         }
         protected override void OnPaint(PaintEventArgs e)
         {
-            base.OnPaint(e); var g = e.Graphics; g.Clear(BackColor); g.SmoothingMode = SmoothingMode.AntiAlias;
+            base.OnPaint(e); var g = e.Graphics; g.Clear(BackColor);
+            g.SmoothingMode = wheelPreview ? SmoothingMode.None : SmoothingMode.AntiAlias;
+            g.InterpolationMode = wheelPreview ? InterpolationMode.NearestNeighbor : InterpolationMode.Bilinear;
+            g.PixelOffsetMode = wheelPreview ? PixelOffsetMode.Half : PixelOffsetMode.Default;
+            g.CompositingQuality = wheelPreview ? CompositingQuality.HighSpeed : CompositingQuality.Default;
             if (Scene == null || Level == null || layout == null)
             {
                 using (var font = new Font("Segoe UI", 14F)) TextRenderer.DrawText(g, "Seleziona un mondo e una scena", font, ClientRectangle, Theme.Muted, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter); return;
@@ -200,7 +234,7 @@ namespace KhuzoeAssetsManager
             else if (texture.Fit == "cover") sx = sy = Math.Max(sx, sy);
             else if (texture.Fit == "width") sy = sx; else if (texture.Fit == "height") sx = sy;
             sx *= texture.ScaleX; sy *= texture.ScaleY; if (sx == 0 || sy == 0) return;
-            var preview = rasterCache.Get(image, Math.Max(Math.Abs(sx), Math.Abs(sy)) * scale);
+            var preview = rasterCache.Get(image, Math.Max(Math.Abs(sx), Math.Abs(sy)) * scale, wheelPreview);
             sx *= (double)image.Width / preview.Width; sy *= (double)image.Height / preview.Height; image = preview;
             var state = g.Save(); g.TranslateTransform((float)(x + texture.OffsetX), (float)(y + texture.OffsetY)); g.RotateTransform((float)texture.Rotation); g.ScaleTransform((float)sx, (float)sy);
             Color color = ParseColor(tint, Color.White);
@@ -217,13 +251,14 @@ namespace KhuzoeAssetsManager
         {
             if (image == null) return;
             double x = layout.MapX + layout.MapWidth / 2, y = layout.MapY + layout.MapHeight / 2;
+            if (wheelPreview) { DrawImage(graphics, image, x, y, layout.MapWidth, layout.MapHeight, Level.Textures, tint, 1); return; }
             if (!cache.TryDraw(graphics, ClientSize, image, Level.Textures, tint, panX, panY, scale, x, y, layout.MapWidth, layout.MapHeight,
                 target => DrawImage(target, image, x, y, layout.MapWidth, layout.MapHeight, Level.Textures, tint, 1)))
                 DrawImage(graphics, image, x, y, layout.MapWidth, layout.MapHeight, Level.Textures, tint, 1);
         }
         protected override void Dispose(bool disposing)
         {
-            if (disposing) { rasterCache.Dispose(); backgroundCache.Dispose(); foregroundCache.Dispose(); tooltip.Dispose(); foreach (var pen in wallPens.Values) pen.Dispose(); foreach (var brush in wallBrushes.Values) brush.Dispose(); foreach (var pen in indicatorPens.Values) pen.Dispose(); }
+            if (disposing) { wheelTimer.Stop(); wheelTimer.Dispose(); rasterCache.Dispose(); backgroundCache.Dispose(); foregroundCache.Dispose(); tooltip.Dispose(); foreach (var pen in wallPens.Values) pen.Dispose(); foreach (var brush in wallBrushes.Values) brush.Dispose(); foreach (var pen in indicatorPens.Values) pen.Dispose(); }
             base.Dispose(disposing);
         }
     }

@@ -1,7 +1,7 @@
 {
   "id": "khuzoe-assets-manager",
   "title": "Khuzoe Assets Manager",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "entryPoint": "KhuzoeAssetsManager.exe",
   "compatibility": { "minimum": "14", "maximum": "14" }
 }

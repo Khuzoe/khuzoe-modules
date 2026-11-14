@@ -1,8 +1,10 @@
-# Khuzoe Assets Manager · 0.4.1
+# Khuzoe Assets Manager · 0.4.2
 
 App Windows per preparare gli asset delle sessioni Foundry. Contiene le sezioni **Musiche** e **Scene**. Il progetto è separato da Khuzoe Updater.
 
-La 0.4.1 migliora la reattività dell'editor: riutilizza l'anteprima della mappa durante le modifiche, limita la memoria delle cache, evita copie della scena per la sola selezione e salva le bozze in background. Le bozze della 0.4.0 restano compatibili.
+La 0.4.2 migliora lo zoom con la rotellina: durante lo scorrimento usa un'anteprima rapida e ripristina la qualità completa dopo circa 150 ms di pausa. Supporta anche gli incrementi piccoli delle rotelline di precisione e mantiene lo zoom centrato sul puntatore. Le bozze delle versioni precedenti restano compatibili.
+
+Sono incluse le ottimizzazioni della 0.4.1: riutilizzo dell'anteprima della mappa durante le modifiche, cache con memoria limitata, selezione senza copie della scena e salvataggio delle bozze in background.
 
 ## Avvio
 
@@ -111,8 +113,8 @@ cd ..
 
 Nel clone del repository, esegui questi comandi dalla cartella `applications/khuzoe-assets-manager/source`. Per preparare una nuova release runtime: `./tools/prepare-updater-package.ps1 -PublisherRoot ../../..`. Per una copia di sviluppo esterna al repository, indica invece il percorso della cartella `khuzoe-updater`. Lo script compila in una cartella separata, verifica la versione e prepara `application.zip`, `application.json` e `release.json`; il publisher li distribuisce tramite il catalogo. La sola pubblicazione dei sorgenti non rigenera i pacchetti già pubblicati.
 
-Se l'eseguibile precedente è aperto, crea una build separata con `./tools/build-app.ps1 -OutputDirectory build/release-0.4.1` e confezionala con `./tools/package.ps1 -BuildDirectory build/release-0.4.1`. Per aggiornare manualmente l'app estrai l'intero nuovo pacchetto dopo aver chiuso la versione in esecuzione. Preferenze e sessione restano nella directory locale dell'utente.
+Se l'eseguibile precedente è aperto, crea una build separata con `./tools/build-app.ps1 -OutputDirectory build/release-0.4.2` e confezionala con `./tools/package.ps1 -BuildDirectory build/release-0.4.2`. Per aggiornare manualmente l'app estrai l'intero nuovo pacchetto dopo aver chiuso la versione in esecuzione. Preferenze e sessione restano nella directory locale dell'utente.
 
-Dopo la build dei test, `./dist/KhuzoeAssetsManager.Tests.exe --benchmark-editor 2000 build/perf-state` esegue una misura nativa su una scena sintetica con 2.000 muri, 40 luci e una mappa 4096×3072, senza aprire mondi reali. I tempi di ridisegno non comprendono la presentazione a schermo e non sono una misura degli FPS effettivi. `property-with-sync-save` mantiene intenzionalmente la scrittura sincrona nel benchmark per confrontare gli stessi passaggi; l'interfaccia usa invece la coda in background.
+Dopo la build dei test, `./dist/KhuzoeAssetsManager.Tests.exe --benchmark-editor 2000 build/perf-state` esegue una misura nativa su una scena sintetica con 2.000 muri, 40 luci e una mappa 4096×3072, senza aprire mondi reali. `wheel-zoom-frame` simula eventi reali del controllo rotellina, alternando zoom in/out intorno al puntatore. I tempi di ridisegno non comprendono la presentazione a schermo e non sono una misura degli FPS effettivi. `property-with-sync-save` mantiene intenzionalmente la scrittura sincrona nel benchmark per confrontare gli stessi passaggi; l'interfaccia usa invece la coda in background.
 
 Vedi `VERIFICHE.md` per gli esiti e i limiti delle prove. Le directory `build` e `dist` non sono sorgenti. I test usano installazioni Foundry simulate, senza modificare mondi, moduli o musiche reali.

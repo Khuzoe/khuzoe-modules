@@ -44,6 +44,9 @@ internal static class EditorPerformance
                 var store = new SceneDraftStore(new AppStorage(state)); draft.Changed += (s, e) => store.Save("performance", draft);
                 Measure("property-with-sync-save", 15, () => new LightProperties(draft).X = draft.Light.X + 1);
                 Measure("zoom-frame", 15, () => { canvas.ChangeZoom(1.001); paint(); });
+                canvas.Fit(); paint(); int wheel = 0; var anchor = new Point(canvas.Width / 2 + 70, canvas.Height / 2 - 30);
+                Measure("wheel-zoom-frame", 30, () => { typeof(SceneCanvas).GetMethod("OnMouseWheel", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(canvas, new object[] { new MouseEventArgs(MouseButtons.None, 0, anchor.X, anchor.Y, wheel++ % 2 == 0 ? 120 : -120) }); paint(); });
+                canvas.ChangeZoom(1); paint();
             }
             form.Close();
         }

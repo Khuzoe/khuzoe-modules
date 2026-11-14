@@ -1,4 +1,18 @@
-# Verifiche · build 0.4.1
+# Verifiche · build 0.4.2
+
+## Zoom con la rotellina — 14 novembre 2026
+
+- 43 test C# e 5 test Node superati. Le tre nuove prove verificano riutilizzo dei raster durante lo scorrimento, ancoraggio al puntatore, delta piccoli e multipli, delta nullo, limiti dello zoom, eventi accorpati, ripristino della qualità e uso immediato degli strumenti. Verificati anche cambio scena e perdita della cattura del mouse durante lo spostamento della vista.
+- Gli input aggiornano subito la posizione della vista; le richieste di ridisegno vengono accorpate tramite un timer dell'interfaccia a 16 ms. Durante la rotellina vengono riutilizzate le immagini disponibili e saltata la ricomposizione degli sfondi; campionamento rapido e contorni semplificati riducono il costo del fotogramma. Dopo circa 150 ms senza input torna il disegno completo. Il timer appartiene al controllo della scena e viene eliminato alla chiusura.
+- I documenti della scena, le coordinate degli elementi e la cronologia non cambiano durante lo zoom. Un clic su uno strumento interrompe l'anteprima rapida; cambio scena, ridimensionamento, occultamento del controllo e chiusura fermano il timer.
+- Benchmark nativo con gli eventi `OnMouseWheel` del controllo: 30 fotogrammi di zoom in/out alternato intorno allo stesso puntatore, dopo riscaldamento. Stessa fixture con 2.000 muri, 40 luci, mappa 4096×3072 e finestra 1040×780. Il dato comprende input e disegno del fotogramma, senza presentazione a schermo o cadenza del timer, e non misura gli FPS reali.
+
+| Rotellina: tempo per fotogramma | 0.4.1 | 0.4.2 |
+| --- | ---: | ---: |
+| Mediana | 48,81 ms | 17,01 ms |
+| 95° percentile | 51,56 ms | 18,35 ms |
+
+Il rendering a qualità completa resta quello dell'editor; la correzione riguarda il lavoro eseguito ripetutamente durante la rotellina. Non sono stati aperti o modificati mondi reali nelle prove.
 
 ## Reattività dell'editor — 14 novembre 2026
 

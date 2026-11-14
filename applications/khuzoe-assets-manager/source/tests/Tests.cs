@@ -39,7 +39,7 @@ namespace KhuzoeAssetsManager
             if (args.Length == 3 && args[0] == "--real-download") { return RunLive(() => RealDownload(args[1], args[2])); }
             root = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "build", "t-" + Guid.NewGuid().ToString("N").Substring(0, 8)));
             Directory.CreateDirectory(root);
-            try { Run().GetAwaiter().GetResult(); RunScenes().GetAwaiter().GetResult(); RunEditor().GetAwaiter().GetResult(); }
+            try { Run().GetAwaiter().GetResult(); RunScenes().GetAwaiter().GetResult(); RunEditor().GetAwaiter().GetResult(); RunWheel().GetAwaiter().GetResult(); }
             catch (Exception error) { Console.WriteLine("FAIL suite: " + error); failed++; }
             Console.WriteLine("RESULT: " + passed + " passed, " + failed + " failed");
             // Keep fixtures available for diagnosis; every run has an isolated directory.
