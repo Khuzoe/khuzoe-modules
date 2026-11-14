@@ -1,4 +1,4 @@
-# Khuzoe Assets Manager · 0.3.0
+# Khuzoe Assets Manager · 0.4.0
 
 App Windows per preparare gli asset delle sessioni Foundry. Contiene le sezioni **Musiche** e **Scene**. Il progetto è separato da Khuzoe Updater.
 
@@ -50,11 +50,27 @@ Foundry v14 importa i file audio della cartella e salta quelli già presenti nel
 5. Trascina per spostare la mappa; usa la rotella o **+ / −** per ingrandire. **Adatta** ripristina la vista completa.
 6. Premi **Aggiorna** per recuperare i nuovi salvataggi di Foundry. Durante la lettura lo stesso pulsante permette di annullarla.
 
-Questa scheda legge esclusivamente i dati: non crea né modifica scene, muri o luci e **non usa AI o crediti AI**. Il database originale non viene aperto dal motore LevelDB: l'app legge una copia temporanea controllata. Funziona anche con il mondo aperto, quando i file rimangono stabili per il tempo della copia. Se Foundry sta salvando o compattando il database, attendi e riprova con **Aggiorna**. L'ora della copia è visibile sotto la mappa; la vista non riceve aggiornamenti continui.
+I dati Foundry vengono letti da una copia temporanea controllata: il database originale non viene aperto dal motore LevelDB. Le modifiche nell'editor rimangono in bozze locali e **non vengono applicate a Foundry**. La scheda **non usa AI o crediti AI**. Funziona anche con il mondo aperto, quando i file rimangono stabili per il tempo della copia. Se Foundry sta salvando o compattando il database, attendi e riprova con **Aggiorna**. La vista non riceve aggiornamenti continui.
 
 L'anteprima mostra posizione e portata delle luci, senza simulare ombre, occlusione, animazioni o visione dei token. Non è un rendering del canvas di Foundry. I muri e le luci rispettano l'appartenenza ai livelli; gli elementi senza un livello specifico vengono inclusi in tutti i livelli.
 
 Sono visualizzabili immagini PNG, JPEG, WebP, GIF e BMP presenti nei dati Foundry o raggiungibili tramite HTTPS pubblico. Le immagini vengono ridotte per l'anteprima (massimo 4096 pixel per la mappa, 512 per ogni tile, fino a 96 tile per livello; limite 100 MiB per file). Video, SVG, URL autenticati e risorse interne all'applicazione Foundry esterne alla cartella dati non sono visualizzabili in questa versione. Un'immagine mancante viene segnalata: muri e luci restano consultabili. Non vengono inviati mappe o dati delle scene ad API AI o al sito Khuzoe; un eventuale fornitore di immagini remoto riceve la richiesta per la propria immagine.
+
+## Provare l'editor locale
+
+Apri una scena e premi **Modifica locale**, oppure **Bozza libera** per partire da uno spazio vuoto. L'elenco lascia spazio alla mappa e al pannello delle proprietà.
+
+- **Seleziona**: clicca un elemento per modificarne le proprietà a destra; trascinalo per spostarlo. Gli estremi dei muri si trascinano separatamente. Il quadratino di un'immagine ne modifica le dimensioni; tieni premuto Maiusc per conservarne le proporzioni.
+- **Muro**: trascina tra due punti per creare un segmento. Nelle proprietà scegli muro, porta o porta segreta, stato della porta e blocco di vista, movimento e luce.
+- **Luce**: clicca per aggiungere una sorgente. Modifica posizione, colore, raggi, angolo, rotazione e stato; trascina il quadratino esterno per regolare il raggio tenue. Le portate sono indicative: non vengono calcolate ombre e occlusione.
+- **+ Immagine**: scegli un'immagine dal computer, oppure trascina i file sulla mappa. Puoi spostarla, ridimensionarla, ruotarla e modificarne opacità, ordine e visibilità.
+- **Mappa**: seleziona lo sfondo del livello per spostarlo, scalarlo e ruotarlo. **Cambia immagine della mappa** sostituisce lo sfondo nella bozza.
+- **Sposta vista**, Spazio + trascinamento o pulsante centrale spostano la vista; la rotella modifica lo zoom. **Aggancio** allinea alla griglia quadrata; Maiusc lo sospende durante il trascinamento.
+- **Annulla / Ripeti**, **Duplica**, **Elimina** e **Ripristina** gestiscono le modifiche locali. Sulla mappa funzionano anche Ctrl+Z, Ctrl+Y, Ctrl+D, Canc ed Esc per annullare un gesto.
+
+Le bozze vengono salvate automaticamente sotto `%LOCALAPPDATA%\KhuzoeAssetsManager\scene-drafts`, separatamente dai mondi. **Torna all'elenco** mantiene la bozza; **Ripristina** torna alla scena letta inizialmente (o svuota la bozza libera). Se i dati originali cambiano in Foundry, la vecchia bozza non viene riapplicata automaticamente: l'app mostra un avviso prima che una nuova modifica la sostituisca. La cronologia annulla/ripeti rimane nella sessione corrente.
+
+Le immagini importate vengono lette dal percorso scelto e memorizzate nella cache per l'anteprima: non vengono copiate nella directory dati Foundry e gli originali non vengono modificati. Mantienile nel percorso scelto per riaprire la bozza. Non sono presenti un comando di applicazione a Foundry o sincronizzazione delle modifiche: questa versione serve a provare l'editor.
 
 ## Account e dati
 
@@ -64,7 +80,7 @@ Sono visualizzabili immagini PNG, JPEG, WebP, GIF e BMP presenti nei dati Foundr
 - Non vengono richieste password Discord nell'app e non vengono distribuiti client secret, chiavi AI o codici personali.
 - La sessione ricordata è protetta con Windows DPAPI per l'utente corrente, in `%LOCALAPPDATA%\KhuzoeAssetsManager\session.bin`.
 - **Esci dall'account** elimina questa sessione dal computer. Il backend attuale emette sessioni con scadenza di sette giorni; questa versione non aggiunge una nuova revoca remota al backend.
-- Cartella Foundry, categorie, raccolta, coda, ultimo mondo e filtri scene vengono conservati separatamente nello stesso percorso locale. Le copie e le anteprime delle scene restano nella cache dell'app; i file MP3 restano sotto `musics` nella directory dati selezionata.
+- Cartella Foundry, categorie, raccolta, coda, ultimo mondo, filtri scene e bozze vengono conservati separatamente nello stesso percorso locale. Le copie e le anteprime delle scene restano nella cache dell'app; i file MP3 restano sotto `musics` nella directory dati selezionata.
 - L'elenco dei brani e i percorsi locali non vengono inviati al sito. Il backend riceve le richieste di autenticazione; YouTube riceve le richieste relative ai video.
 
 Questa versione verifica l'identità Discord. Non introduce abbonamenti, crediti AI o controlli di ruolo aggiuntivi. Queste funzioni richiederanno regole esplicite sul backend quando verranno aggiunte.
@@ -93,6 +109,6 @@ cd ..
 
 Nel clone del repository, esegui questi comandi dalla cartella `applications/khuzoe-assets-manager/source`. Per preparare una nuova release runtime: `./tools/prepare-updater-package.ps1 -PublisherRoot ../../..`. Per una copia di sviluppo esterna al repository, indica invece il percorso della cartella `khuzoe-updater`. Lo script compila in una cartella separata, verifica la versione e prepara `application.zip`, `application.json` e `release.json`; il publisher li distribuisce tramite il catalogo. La sola pubblicazione dei sorgenti non rigenera i pacchetti già pubblicati.
 
-Se l'eseguibile precedente è aperto, crea una build separata con `./tools/build-app.ps1 -OutputDirectory build/release-0.3.0` e confezionala con `./tools/package.ps1 -BuildDirectory build/release-0.3.0`. Per aggiornare manualmente l'app estrai l'intero nuovo pacchetto dopo aver chiuso la versione in esecuzione. Preferenze e sessione restano nella directory locale dell'utente.
+Se l'eseguibile precedente è aperto, crea una build separata con `./tools/build-app.ps1 -OutputDirectory build/release-0.4.0` e confezionala con `./tools/package.ps1 -BuildDirectory build/release-0.4.0`. Per aggiornare manualmente l'app estrai l'intero nuovo pacchetto dopo aver chiuso la versione in esecuzione. Preferenze e sessione restano nella directory locale dell'utente.
 
 Vedi `VERIFICHE.md` per gli esiti e i limiti delle prove. Le directory `build` e `dist` non sono sorgenti. I test usano installazioni Foundry simulate, senza modificare mondi, moduli o musiche reali.

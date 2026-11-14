@@ -30,6 +30,19 @@ namespace KhuzoeAssetsManager
         readonly FlowLayoutPanel filters = new FlowLayoutPanel { Dock = DockStyle.Fill, WrapContents = true, Margin = Padding.Empty, Padding = new Padding(1, 3, 0, 0) };
         readonly CheckBox grid;
         readonly ToolTip tips = new ToolTip();
+        readonly SceneDraftStore draftStore;
+        readonly Dictionary<string, SceneDraft> drafts = new Dictionary<string, SceneDraft>();
+        readonly SceneEditorPanel editor;
+        readonly TableLayoutPanel content, viewport, viewerRows;
+        readonly SurfacePanel listCard;
+        readonly WebButton editToggle = new WebButton { Text = "Modifica locale", Width = 142, Height = 31 };
+        readonly WebButton blank = new WebButton { Text = "Bozza libera", Width = 115, Height = 31 };
+        readonly WebButton reset = new WebButton { Text = "Ripristina", Width = 100, Height = 31 };
+        readonly Label draftBadge = Theme.Label("Anteprima locale", 8.5F, Theme.Green, FontStyle.Regular);
+        SceneDraft draft;
+        string draftKey, imageSignature, draftNotice;
+        bool editMode;
+        bool draftSaved = true;
         CancellationTokenSource active;
         SceneSnapshot snapshot;
         SceneCatalog catalog;
@@ -39,16 +52,19 @@ namespace KhuzoeAssetsManager
         bool allowed, loaded, suppress;
         public bool IsBusy { get; private set; }
         public SceneCanvas Canvas { get { return canvas; } }
+        public SceneDraft Draft { get { return draft; } }
+        public SceneEditorPanel Editor { get { return editor; } }
         public string StatusText { get { return status.Text; } }
         public event EventHandler BusyChanged;
         public ScenesPanel(AppStorage storage, Preferences preferences, IToolProvider tools, Func<Task> requireLogin, Action chooseFolder)
         {
             this.storage = storage; this.preferences = preferences; this.requireLogin = requireLogin; this.chooseFolder = chooseFolder;
             repository = new SceneRepository(storage, tools, new ProcessRunner()); imageLoader = new SceneImages(storage, tools, new ProcessRunner());
+            draftStore = new SceneDraftStore(storage); editor = new SceneEditorPanel(canvas);
             Dock = DockStyle.Fill; BackColor = Theme.Background; Padding = new Padding(26, 15, 26, 20);
             var layout = Rows(72, 77, -1, 42); Controls.Add(layout);
             var heading = Rows(43, -1); heading.Controls.Add(Theme.Label("Scene", 25F, Theme.Text, FontStyle.Bold), 0, 0);
-            heading.Controls.Add(Theme.Label("Esplora le mappe e gli elementi già presenti nei tuoi mondi.", 10F, Theme.Muted, FontStyle.Regular), 0, 1); layout.Controls.Add(heading, 0, 0);
+            heading.Controls.Add(Theme.Label("Esplora i tuoi mondi e prepara modifiche in una bozza locale.", 10F, Theme.Muted, FontStyle.Regular), 0, 1); layout.Controls.Add(heading, 0, 0);
             var folder = new SurfacePanel { Dock = DockStyle.Fill, Padding = new Padding(14, 9, 12, 9), Margin = new Padding(0, 4, 0, 9) };
             var folderRow = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1, Margin = Padding.Empty };
             folderRow.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
@@ -56,10 +72,10 @@ namespace KhuzoeAssetsManager
             var folderLabels = Rows(20, -1); folderLabels.Controls.Add(Theme.Label("CARTELLA DATI FOUNDRY", 8F, Theme.Gold, FontStyle.Bold), 0, 0); path.AutoEllipsis = true; folderLabels.Controls.Add(path, 0, 1);
             var choose = new WebButton { Text = "Scegli cartella", Dock = DockStyle.Fill }; choose.Click += (s, e) => this.chooseFolder();
             folderRow.Controls.Add(folderLabels, 0, 0); folderRow.Controls.Add(choose, 1, 0); folder.Controls.Add(folderRow); layout.Controls.Add(folder, 0, 1);
-            var content = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1, Margin = Padding.Empty };
+            content = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1, Margin = Padding.Empty };
             content.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             content.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 250)); content.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); layout.Controls.Add(content, 0, 2);
-            var listCard = new SurfacePanel { Dock = DockStyle.Fill, Padding = new Padding(10), Margin = new Padding(0, 0, 12, 0) };
+            listCard = new SurfacePanel { Dock = DockStyle.Fill, Padding = new Padding(10), Margin = new Padding(0, 0, 12, 0) };
             var list = Rows(20, 36, 38, 23, 32, -1); list.Controls.Add(Theme.Label("MONDO", 8F, Theme.Gold, FontStyle.Bold), 0, 0);
             worlds.DropDownStyle = ComboBoxStyle.DropDownList; list.Controls.Add(worlds, 0, 1); refresh.Click += async (s, e) => { if (IsBusy) { if (active != null) active.Cancel(); return; } await RunAsync(LoadWorldAsync); }; list.Controls.Add(refresh, 0, 2);
             list.Controls.Add(Theme.Label("CERCA SCENA", 8F, Theme.Muted, FontStyle.Regular), 0, 3); list.Controls.Add(search, 0, 4);
@@ -67,7 +83,7 @@ namespace KhuzoeAssetsManager
             scenes.DrawMode = DrawMode.OwnerDrawFixed; scenes.ItemHeight = 57; scenes.IntegralHeight = false;
             scenes.DrawItem += DrawSceneItem; list.Controls.Add(scenes, 0, 5); listCard.Controls.Add(list); content.Controls.Add(listCard, 0, 0);
             var viewer = new SurfacePanel { Dock = DockStyle.Fill, Padding = new Padding(11), Margin = Padding.Empty };
-            var viewerRows = Rows(34, 49, -1, 31); var top = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 5, RowCount = 1, Margin = Padding.Empty };
+            viewerRows = Rows(34, 49, 38, 0, -1, 31); var top = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 5, RowCount = 1, Margin = Padding.Empty };
             top.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             top.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); top.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 60)); top.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 33)); top.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 33)); top.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 65));
             levels.DropDownStyle = ComboBoxStyle.DropDownList; top.Controls.Add(levels, 0, 0); zoom.TextAlign = ContentAlignment.MiddleCenter; top.Controls.Add(zoom, 1, 0);
@@ -82,7 +98,29 @@ namespace KhuzoeAssetsManager
             AddFilter("Tile", preferences.SceneView.Tiles, value => preferences.SceneView.Tiles = value, "Mostra gli elementi immagine del livello.");
             AddFilter("Primo piano", preferences.SceneView.Foreground, value => preferences.SceneView.Foreground = value, "Mostra l'immagine di primo piano del livello.");
             AddFilter("Disattivati", preferences.SceneView.Hidden, value => preferences.SceneView.Hidden = value, "Include luci disattivate ed elementi immagine nascosti.");
-            viewerRows.Controls.Add(filters, 0, 1); viewerRows.Controls.Add(canvas, 0, 2); detail.AutoEllipsis = true; viewerRows.Controls.Add(detail, 0, 3); viewer.Controls.Add(viewerRows); content.Controls.Add(viewer, 1, 0);
+            viewerRows.Controls.Add(filters, 0, 1);
+            var editBar = new FlowLayoutPanel { Dock = DockStyle.Fill, WrapContents = false, AutoScroll = true, Margin = Padding.Empty };
+            editToggle.AccessibleName = "Modifica locale"; editToggle.Click += (s, e) => SetEditMode(!editMode);
+            blank.AccessibleName = "Bozza libera"; blank.Click += (s, e) => OpenBlankDraft();
+            reset.Click += (s, e) => { if (draft != null) { canvas.CancelEditorGesture(); draft.Reset(); } };
+            draftBadge.Dock = DockStyle.None; draftBadge.Size = new Size(355, 31); draftBadge.AutoEllipsis = true;
+            foreach (Control control in new Control[] { editToggle, blank, reset, draftBadge }) { control.Margin = new Padding(1, 2, 5, 0); editBar.Controls.Add(control); }
+            viewerRows.Controls.Add(editBar, 0, 2); viewerRows.Controls.Add(editor.Toolbar, 0, 3); editor.Toolbar.Visible = false;
+            viewport = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1, Margin = Padding.Empty };
+            viewport.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); viewport.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); viewport.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 0));
+            viewport.Controls.Add(canvas, 0, 0); viewport.Controls.Add(editor, 1, 0); editor.Visible = false;
+            viewerRows.Controls.Add(viewport, 0, 4); detail.AutoEllipsis = true; viewerRows.Controls.Add(detail, 0, 5); viewer.Controls.Add(viewerRows); content.Controls.Add(viewer, 1, 0);
+            editor.Changed += (s, e) => DraftChanged();
+            editor.ImportImage += async (s, e) => await ImportImageAsync(false);
+            editor.ChangeMap += async (s, e) => await ImportImageAsync(true);
+            canvas.AllowDrop = true;
+            canvas.DragEnter += (s, e) => { e.Effect = allowed && editMode && !IsBusy && e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None; };
+            canvas.DragDrop += async (s, e) => {
+                if (!allowed || !editMode || IsBusy || !e.Data.GetDataPresent(DataFormats.FileDrop)) return;
+                var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                var point = canvas.ScenePoint(canvas.PointToClient(new Point(e.X, e.Y)), true);
+                foreach (string file in files.Take(12)) await ImportLocalImageAsync(file, false, point);
+            };
             status.AutoEllipsis = true; layout.Controls.Add(status, 0, 3);
             worlds.SelectedIndexChanged += async (s, e) => { if (!suppress && !IsBusy && allowed) await RunAsync(LoadWorldAsync); };
             scenes.SelectedIndexChanged += async (s, e) => { if (!suppress && !IsBusy && allowed) await RunAsync(LoadSceneAsync); };
@@ -134,6 +172,8 @@ namespace KhuzoeAssetsManager
             levels.Enabled = allowed && !IsBusy && current != null && current.Levels.Count > 1;
             filters.Enabled = allowed && current != null; grid.Enabled = current != null && current.GridType == 1;
             refresh.Enabled = allowed; refresh.Text = IsBusy ? "Annulla" : "Aggiorna";
+            editToggle.Enabled = reset.Enabled = allowed && !IsBusy && draft != null; blank.Enabled = allowed && !IsBusy;
+            editor.SetEditing(editMode && allowed && !IsBusy && draft != null);
         }
         async Task RunAsync(Func<CancellationToken, Task> action)
         {
@@ -195,27 +235,109 @@ namespace KhuzoeAssetsManager
             var scene = await Task.Run(() => repository.DetailAsync(snapshot, selected.Id, cancellation), cancellation);
             cancellation.ThrowIfCancellationRequested();
             if (scene.Schema != 1 || scene.Id != selected.Id || scene.Levels == null || scene.Levels.Count == 0) throw new IOException("I dati della scena non sono validi.");
-            current = scene; suppress = true; levels.DataSource = scene.Levels;
-            levels.SelectedItem = scene.Levels.FirstOrDefault(value => value.Id == scene.InitialLevel) ?? scene.Levels[0]; suppress = false;
+            AttachDraft(scene, (loadedRoot ?? root ?? "") + "|" + catalog.WorldId + "|" + scene.Id);
             await LoadLevelAsync(cancellation);
         }
         async Task LoadLevelAsync(CancellationToken cancellation)
         {
             var level = levels.SelectedItem as SceneLevel; if (level == null || current == null) return;
+            if (draft != null && (canvas.Level == null || canvas.Level.Id != level.Id)) draft.Select(SceneSelectionKind.None, null);
             var old = images; images = null; canvas.SetScene(current, level, null, true); if (old != null) old.Dispose();
             detail.Text = current.Name + " · " + current.Walls.Count(value => SceneDetail.Included(value.Levels, level.Id)) + " muri · " + current.Lights.Count(value => SceneDetail.Included(value.Levels, level.Id)) + " luci";
             var progress = Reporter(); var loadedImages = await Task.Run(() => imageLoader.LoadLevelAsync(loadedRoot, current, level, progress.Report, cancellation), cancellation);
             if (cancellation.IsCancellationRequested || IsDisposed) { loadedImages.Dispose(); cancellation.ThrowIfCancellationRequested(); return; }
             images = loadedImages; canvas.SetScene(current, level, images, false);
-            var warnings = current.Warnings.Concat(images.Warnings).Distinct().ToList();
-            string message = "Copia locale delle " + catalog.CapturedAt.ToLocalTime().ToString("HH:mm:ss") + " · i raggi delle luci indicano la portata, senza simulare ombre o occlusione.";
+            imageSignature = ImageSignature(current, level);
+            UpdateDraftBadge();
+            var warnings = (String.IsNullOrEmpty(draftNotice) ? new string[0] : new[] { draftNotice }).Concat(current.Warnings).Concat(images.Warnings).Distinct().ToList();
+            string message = "Solo anteprima: le modifiche restano nell'app. Le luci indicano la portata, senza ombre o occlusione.";
             status.Text = warnings.Count == 0 ? message : warnings[0] + (warnings.Count > 1 ? " (" + warnings.Count + " avvisi)" : "");
             tips.SetToolTip(status, String.Join("\n", warnings.Concat(new[] { message })));
         }
         void ClearScene()
         {
+            canvas.CancelEditorGesture(); editor.Bind(null); draft = null; draftKey = null; imageSignature = null; draftNotice = null;
             current = null; canvas.SetScene(null, null, null, true); if (images != null) { images.Dispose(); images = null; }
             suppress = true; levels.DataSource = null; suppress = false; detail.Text = "Mappa, muri e luci del livello selezionato";
+        }
+        void AttachDraft(SceneDetail source, string key)
+        {
+            var candidate = new SceneDraft(source); SceneDraft cached; draftNotice = null;
+            if (drafts.TryGetValue(key, out cached) && cached.OriginalHash == candidate.OriginalHash) candidate = cached;
+            else
+            {
+                try { if (!draftStore.Load(key, candidate)) draftNotice = "Bozza precedente non caricata: i dati Foundry sono cambiati o la bozza non è valida. Una nuova modifica la sostituirà."; }
+                catch (Exception error) { draftNotice = "Bozza locale non caricata: " + error.Message; }
+                drafts[key] = candidate;
+                while (drafts.Count > 8) drafts.Remove(drafts.Keys.First(value => value != key));
+            }
+            draft = candidate; draftKey = key; current = draft.Scene; draftSaved = true; draft.Select(SceneSelectionKind.None, null);
+            suppress = true; levels.DataSource = current.Levels; levels.SelectedItem = current.Levels.FirstOrDefault(value => value.Id == current.InitialLevel) ?? current.Levels[0]; suppress = false;
+            editor.Bind(draft); UpdateDraftBadge();
+        }
+        public void SetEditMode(bool value)
+        {
+            if (value && draft == null) return; canvas.CancelEditorGesture(); editMode = value;
+            content.SuspendLayout(); viewport.SuspendLayout();
+            listCard.Visible = !value; content.ColumnStyles[0].Width = value ? 0 : 250;
+            viewport.ColumnStyles[1].Width = value ? 240 : 0; editor.Visible = value; editor.Toolbar.Visible = value; viewerRows.RowStyles[3].Height = value ? 38 : 0;
+            editToggle.Text = value ? "Torna all'elenco" : "Modifica locale"; editToggle.Primary = value; editToggle.Invalidate();
+            if (value) foreach (var box in filters.Controls.OfType<CheckBox>().Where(box => new[] { "Muri", "Luci", "Tile", "Disattivati" }.Contains(box.Text))) box.Checked = true;
+            viewport.ResumeLayout(); content.ResumeLayout(); SetControls(); canvas.Fit();
+        }
+        public void OpenBlankDraft()
+        {
+            if (!allowed || IsBusy) return;
+            ClearScene(); suppress = true; scenes.SelectedIndex = -1; suppress = false;
+            var scene = new SceneDetail { Schema = 1, Id = "local-editor-scene", Name = "Bozza libera", Width = 2400, Height = 1600, Padding = 0.1, GridType = 1, GridSize = 100, GridDistance = 5, GridUnits = "m", InitialLevel = "local-editor-level" };
+            scene.Levels.Add(new SceneLevel { Id = scene.InitialLevel, Name = "Piano principale", BackgroundColor = "#343842" });
+            AttachDraft(scene, "local-editor"); loadedRoot = root ?? "";
+            images = new SceneImageSet(); canvas.SetScene(current, current.Levels[0], images, true);
+            foreach (var box in filters.Controls.OfType<CheckBox>().Where(value => value.Text == "Griglia")) box.Checked = true;
+            UpdateDraftBadge();
+            SetEditMode(true); status.Text = "Bozza libera nell'app. Ripristina per ricominciare; nessuna scena viene creata in Foundry.";
+            if (current.LocalAssets.Count > 0) BeginInvoke(new Action(async () => await RunAsync(LoadLevelAsync)));
+        }
+        static string ImageSignature(SceneDetail scene, SceneLevel level)
+        { return level.Id + "|" + level.Background + "|" + level.Foreground + "|" + Json.Write(scene.LocalAssets) + "|" + Json.Write(scene.Tiles.Where(value => SceneDetail.Included(value.Levels, level.Id)).Select(value => new { value.Id, value.Src }).ToList()); }
+        void UpdateDraftBadge()
+        {
+            draftBadge.Text = draft != null && draft.IsDirty ? (draftSaved ? "BOZZA LOCALE · salvata nell'app" : "BOZZA LOCALE · in memoria") : "FOUNDRY IN SOLA LETTURA";
+            draftBadge.ForeColor = draft != null && draft.IsDirty ? Theme.Gold : Theme.Green;
+            if (current != null && canvas.Level != null) detail.Text = current.Name + " · " + current.Walls.Count(value => SceneDetail.Included(value.Levels, canvas.Level.Id)) + " muri · " + current.Lights.Count(value => SceneDetail.Included(value.Levels, canvas.Level.Id)) + " luci · " + current.Tiles.Count(value => SceneDetail.Included(value.Levels, canvas.Level.Id)) + " immagini";
+        }
+        void DraftChanged()
+        {
+            if (draft == null || IsDisposed) return;
+            string levelId = canvas.Level == null ? current.InitialLevel : canvas.Level.Id;
+            current = draft.Scene;
+            suppress = true; levels.DataSource = current.Levels; levels.SelectedItem = current.Levels.FirstOrDefault(value => value.Id == levelId) ?? current.Levels[0]; suppress = false;
+            var level = (SceneLevel)levels.SelectedItem; canvas.SetScene(current, level, images, false);
+            try { draftStore.Save(draftKey, draft); draftSaved = true; } catch (Exception error) { draftSaved = false; status.Text = "Bozza in memoria, salvataggio locale non riuscito: " + error.Message; }
+            UpdateDraftBadge();
+            if (!IsBusy && imageSignature != ImageSignature(current, level) && IsHandleCreated) BeginInvoke(new Action(async () => { if (!IsDisposed) await RunAsync(LoadLevelAsync); }));
+        }
+        async Task ImportImageAsync(bool map)
+        {
+            if (!allowed || IsBusy || draft == null) return;
+            using (var dialog = new OpenFileDialog { Title = map ? "Scegli l'immagine della mappa per la bozza" : "Aggiungi un'immagine alla bozza", Filter = "Immagini|*.png;*.jpg;*.jpeg;*.webp;*.gif;*.bmp", CheckFileExists = true, Multiselect = false })
+            {
+                if (dialog.ShowDialog(FindForm()) != DialogResult.OK) return;
+                await ImportLocalImageAsync(dialog.FileName, map);
+            }
+        }
+        public Task ImportLocalImageAsync(string file, bool map, PointF? point = null)
+        {
+            return RunAsync(async cancellation => {
+                var progress = Reporter(); Size size;
+                using (var image = await imageLoader.LoadLocalAsync(file, progress.Report, cancellation)) size = image.Size;
+                cancellation.ThrowIfCancellationRequested();
+                string levelId = ((SceneLevel)levels.SelectedItem).Id;
+                if (map) draft.ChangeMap(file, levelId); else draft.AddImage(file, size, point ?? canvas.SceneCenter, levelId);
+                editor.SetTool(SceneEditTool.Select);
+                foreach (var box in filters.Controls.OfType<CheckBox>().Where(value => value.Text == "Tile")) box.Checked = true;
+                await LoadLevelAsync(cancellation);
+            });
         }
         public void CancelPending() { if (active != null) active.Cancel(); }
         protected override void Dispose(bool disposing)

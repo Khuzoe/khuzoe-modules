@@ -75,13 +75,19 @@ namespace KhuzoeAssetsManager
                 throw new IOException("Troppi reindirizzamenti dell'immagine.");
             }
         }
-        public async Task<Image> LoadAsync(string dataRoot, string source, ToolPaths paths, int maxEdge, CancellationToken cancellation)
+        public async Task<Image> LoadLocalAsync(string file, Action<string> progress, CancellationToken cancellation)
+        {
+            var paths = await tools.EnsureAsync(progress, cancellation).ConfigureAwait(false);
+            return await LoadAsync("", "khuzoe-local/import", paths, 1024, cancellation, new System.Collections.Generic.Dictionary<string, string> { { "khuzoe-local/import", file } }).ConfigureAwait(false);
+        }
+        public async Task<Image> LoadAsync(string dataRoot, string source, ToolPaths paths, int maxEdge, CancellationToken cancellation, System.Collections.Generic.IDictionary<string, string> localAssets = null)
         {
             if (String.IsNullOrWhiteSpace(source)) return null;
             string cache = Path.Combine(storage.Root, "scene-images"); FoundryPaths.NoLinks(cache); Directory.CreateDirectory(cache);
             string input, key; bool temporaryInput = false;
-            Uri remote;
-            if (Uri.TryCreate(source, UriKind.Absolute, out remote))
+            Uri remote = null; string explicitFile;
+            bool imported = localAssets != null && localAssets.TryGetValue(source, out explicitFile);
+            if (!imported && Uri.TryCreate(source, UriKind.Absolute, out remote))
             {
                 if (remote.Scheme != "https") throw new IOException("L'anteprima non carica immagini con protocolli non sicuri.");
                 key = Digest(source + "|" + maxEdge + "|" + (DateTime.UtcNow.Ticks / TimeSpan.FromMinutes(10).Ticks));
@@ -89,7 +95,8 @@ namespace KhuzoeAssetsManager
             }
             else
             {
-                input = SceneFiles.LocalAsset(dataRoot, source);
+                input = imported ? Path.GetFullPath(localAssets[source]) : SceneFiles.LocalAsset(dataRoot, source);
+                FoundryPaths.NoLinks(input);
                 if (!File.Exists(input)) throw new IOException("Immagine non trovata nei dati Foundry: " + source);
                 var info = new FileInfo(input); if (info.Length > 100L * 1024 * 1024) throw new IOException("L'immagine supera il limite di 100 MiB.");
                 key = Digest(input + "|" + info.Length + "|" + info.LastWriteTimeUtc.Ticks + "|" + maxEdge);
@@ -129,20 +136,21 @@ namespace KhuzoeAssetsManager
         }
         public async Task<SceneImageSet> LoadLevelAsync(string dataRoot, SceneDetail scene, SceneLevel level, Action<string> progress, CancellationToken cancellation)
         {
+            if (String.IsNullOrEmpty(level.Background) && String.IsNullOrEmpty(level.Foreground) && !scene.Tiles.Any(tile => SceneDetail.Included(tile.Levels, level.Id) && !String.IsNullOrEmpty(tile.Src))) return new SceneImageSet();
             var paths = await tools.EnsureAsync(progress, cancellation).ConfigureAwait(false); var result = new SceneImageSet();
             try
             {
                 progress("Caricamento della mappa…");
-                try { result.Background = await LoadAsync(dataRoot, level.Background, paths, 4096, cancellation).ConfigureAwait(false); }
+                try { result.Background = await LoadAsync(dataRoot, level.Background, paths, 4096, cancellation, scene.LocalAssets).ConfigureAwait(false); }
                 catch (IOException error) { result.Warnings.Add(error.Message); }
-                try { result.Foreground = await LoadAsync(dataRoot, level.Foreground, paths, 4096, cancellation).ConfigureAwait(false); }
+                try { result.Foreground = await LoadAsync(dataRoot, level.Foreground, paths, 4096, cancellation, scene.LocalAssets).ConfigureAwait(false); }
                 catch (IOException error) { result.Warnings.Add(error.Message); }
                 var tiles = scene.Tiles.Where(tile => SceneDetail.Included(tile.Levels, level.Id) && !String.IsNullOrEmpty(tile.Src)).OrderBy(tile => tile.Elevation).ThenBy(tile => tile.Sort).ToList();
                 if (tiles.Count > 96) result.Warnings.Add("Vengono mostrate le prime 96 immagini tile di questo livello.");
                 foreach (var tile in tiles.Take(96))
                 {
                     cancellation.ThrowIfCancellationRequested();
-                    try { var image = await LoadAsync(dataRoot, tile.Src, paths, 512, cancellation).ConfigureAwait(false); if (image != null) result.Tiles[tile.Id] = image; }
+                    try { var image = await LoadAsync(dataRoot, tile.Src, paths, 512, cancellation, scene.LocalAssets).ConfigureAwait(false); if (image != null) result.Tiles[tile.Id] = image; }
                     catch (IOException) { result.Warnings.Add("Un'immagine tile non è disponibile nell'anteprima."); }
                 }
                 return result;

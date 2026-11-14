@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 namespace KhuzoeAssetsManager
 {
-    public sealed class SceneCanvas : Control
+    public sealed partial class SceneCanvas : Control
     {
         public SceneDetail Scene { get; private set; }
         public SceneLevel Level { get; private set; }
@@ -53,11 +53,12 @@ namespace KhuzoeAssetsManager
         protected override void OnResize(EventArgs e) { base.OnResize(e); if (fit) Fit(); }
         protected override void OnMouseWheel(MouseEventArgs e) { base.OnMouseWheel(e); ZoomAt(e.Delta > 0 ? 1.2 : 1 / 1.2, e.Location); }
         protected override void OnMouseDown(MouseEventArgs e)
-        { base.OnMouseDown(e); Focus(); if (Scene != null && (e.Button == MouseButtons.Left || e.Button == MouseButtons.Middle)) { dragging = true; previous = e.Location; Capture = true; Cursor = Cursors.SizeAll; } }
-        protected override void OnMouseUp(MouseEventArgs e) { base.OnMouseUp(e); dragging = false; Capture = false; Cursor = Cursors.Default; }
+        { base.OnMouseDown(e); Focus(); if (EditorDown(e)) return; if (Scene != null && (e.Button == MouseButtons.Left || e.Button == MouseButtons.Middle)) { dragging = true; previous = e.Location; Capture = true; Cursor = Cursors.SizeAll; } }
+        protected override void OnMouseUp(MouseEventArgs e) { base.OnMouseUp(e); if (EditorUp(e)) return; dragging = false; Capture = false; Cursor = Cursors.Default; }
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
+            if (EditorMove(e)) return;
             if (dragging) { panX += e.X - previous.X; panY += e.Y - previous.Y; previous = e.Location; fit = false; Invalidate(); return; }
             string text = "";
             if (Scene != null && Level != null && Settings.Lights && Settings.Indicators)
@@ -94,7 +95,7 @@ namespace KhuzoeAssetsManager
                     {
                         Image image; if (!Images.Tiles.TryGetValue(tile.Id, out image)) continue;
                         var texture = tile.Textures ?? new SceneTexture();
-                        var copy = new SceneTexture { AnchorX = texture.AnchorX, AnchorY = texture.AnchorY, ScaleX = texture.ScaleX, ScaleY = texture.ScaleY, Fit = texture.Fit, Rotation = tile.Rotation };
+                        var copy = new SceneTexture { AnchorX = texture.AnchorX, AnchorY = texture.AnchorY, OffsetX = texture.OffsetX, OffsetY = texture.OffsetY, ScaleX = texture.ScaleX, ScaleY = texture.ScaleY, Fit = texture.Fit, Rotation = tile.Rotation + texture.Rotation };
                         DrawImage(g, image, tile.X, tile.Y, tile.Width, tile.Height, copy, tile.Tint, tile.Hidden ? Math.Min(0.25, tile.Alpha) : tile.Alpha);
                     }
                 if (Settings.Foreground) DrawImage(g, Images.Foreground, layout.MapX + layout.MapWidth / 2, layout.MapY + layout.MapHeight / 2, layout.MapWidth, layout.MapHeight, Level.Textures, Level.ForegroundTint, 1);
@@ -108,6 +109,7 @@ namespace KhuzoeAssetsManager
             using (var border = new Pen(Color.FromArgb(90, 180, 185, 195), (float)(1 / scale))) g.DrawRectangle(border, (float)layout.MapX, (float)layout.MapY, (float)layout.MapWidth, (float)layout.MapHeight);
             g.Restore(saved);
             if (Settings.Indicators) DrawIndicators(g);
+            DrawEditor(g);
         }
         void DrawGrid(Graphics g)
         {

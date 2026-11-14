@@ -139,7 +139,8 @@ namespace KhuzoeAssetsManager
         public List<SceneLight> Lights { get; set; }
         public List<SceneTile> Tiles { get; set; }
         public List<string> Warnings { get; set; }
-        public SceneDetail() { Levels = new List<SceneLevel>(); Walls = new List<SceneWall>(); Lights = new List<SceneLight>(); Tiles = new List<SceneTile>(); Warnings = new List<string>(); }
+        public Dictionary<string, string> LocalAssets { get; set; }
+        public SceneDetail() { Levels = new List<SceneLevel>(); Walls = new List<SceneWall>(); Lights = new List<SceneLight>(); Tiles = new List<SceneTile>(); Warnings = new List<string>(); LocalAssets = new Dictionary<string, string>(); }
         public static bool Included(string[] levels, string current) { return levels == null || levels.Length == 0 || levels.Contains(current); }
     }
     public sealed class SceneLayout

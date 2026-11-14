@@ -1,6 +1,6 @@
 {
   "name": "khuzoe-assets-scene-reader",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "description": "Read Foundry scene snapshots without opening the original database",
   "dependencies": { "classic-level": "3.0.0" },

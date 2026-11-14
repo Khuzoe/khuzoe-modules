@@ -31,13 +31,14 @@ namespace KhuzoeAssetsManager
             if (args.Length == 2 && args[0] == "--ui-fixture") { ShowFixture(args[1]); return 0; }
             if (args.Length == 2 && args[0] == "--render-fixture") { RenderFixture(args[1]); return 0; }
             if (args.Length == 2 && args[0] == "--render-scenes") { RenderScenes(args[1]); return 0; }
+            if (args.Length == 2 && args[0] == "--render-editor") { RenderEditor(args[1]); return 0; }
             if (args.Length == 2 && args[0] == "--scene-smoke") { return RunLive(() => SceneSmoke(args[1])); }
             if (args.Length == 2 && args[0] == "--prepare-tools") { return RunLive(() => PrepareTools(args[1])); }
             if (args.Length == 2 && args[0] == "--audio-smoke") { return RunLive(() => AudioSmoke(args[1])); }
             if (args.Length == 3 && args[0] == "--real-download") { return RunLive(() => RealDownload(args[1], args[2])); }
             root = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "build", "t-" + Guid.NewGuid().ToString("N").Substring(0, 8)));
             Directory.CreateDirectory(root);
-            try { Run().GetAwaiter().GetResult(); RunScenes().GetAwaiter().GetResult(); }
+            try { Run().GetAwaiter().GetResult(); RunScenes().GetAwaiter().GetResult(); RunEditor().GetAwaiter().GetResult(); }
             catch (Exception error) { Console.WriteLine("FAIL suite: " + error); failed++; }
             Console.WriteLine("RESULT: " + passed + " passed, " + failed + " failed");
             // Keep fixtures available for diagnosis; every run has an isolated directory.

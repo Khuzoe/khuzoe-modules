@@ -8,6 +8,8 @@ Assets Manager viene installato in `khuzoe-apps/khuzoe-assets-manager`, sotto la
 
 Il catalogo include **Khuzoe Tiles Creator** dalla versione **0.4.1** dell'Updater. Se usi la 0.4.0, premi prima **Aggiorna app**; poi puoi installare Tiles Creator dalla sua riga, insieme a Cripta Wiki Sync se necessario.
 
+Assets Manager **0.4.0** aggiunge l'editor locale della scheda **Scene**: premi **Modifica locale** su una scena esistente o **Bozza libera** per partire da zero. Puoi creare e modificare muri, luci e immagini, cambiare la mappa e provare le proprietà con annulla/ripeti. Le bozze rimangono nello stato dell'app: nessuna modifica viene applicata ai mondi Foundry. Vedi le [istruzioni dell'editor](applications/khuzoe-assets-manager/source/README.md#provare-leditor-locale).
+
 ## Per i DM
 
 1. Scarica `KhuzoeUpdater-Windows.zip` dalla release dell'app ed estrailo.

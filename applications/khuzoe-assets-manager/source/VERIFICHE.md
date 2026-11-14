@@ -1,4 +1,12 @@
-# Verifiche · build 0.3.0
+# Verifiche · build 0.4.0
+
+## Editor di bozze locali — 14 novembre 2026
+
+- Compilazione C# 5 con warning trattati come errori; 35 test C# e 5 test Node. I sei nuovi test coprono isolamento del clone, creazione e proprietà, annulla/ripeti, duplica/elimina/ripristina, valori invalidi, annullamento dei gesti, persistenza locale e rifiuto di bozze riferite a dati originali cambiati.
+- Gesti eseguiti sui controlli canvas Windows Forms: creazione di muri, aggiunta e spostamento di luci, selezione di immagini ruotate e ridimensionamento tramite maniglia. Il documento sorgente rimane invariato.
+- Importazione di un'immagine esterna con alias locale e caricamento dalla cache. Confronto delle impronte dei file originali e controllo della directory Foundry simulata: nessuna scrittura o modifica ai dati Foundry.
+- Fixture grafica nativa con Node e FFmpeg reali: importazione immagine, rotazione/dimensioni, muro con porta, luce colorata, proprietà, sostituzione della mappa, riapertura della bozza libera e annulla/ripeti. Rendering a 1280×920 e 1080×800, seguito da controllo visivo. Le impronte di tutti i file Foundry della fixture vengono confrontate prima e dopo.
+- Nessun accesso a mondi reali e nessuna sessione Discord reale usata nelle fixture. Il rendering delle luci resta illustrativo, senza ombre o occlusione. L'editor non contiene un comando per salvare o applicare modifiche a Foundry.
 
 ## Integrazione Updater · 14 novembre 2026
 
