@@ -20,6 +20,8 @@ namespace KhuzoeAssetsManager
         sealed class Step { public string Before, After, Name; }
         readonly List<Step> undo = new List<Step>(), redo = new List<Step>();
         readonly string original;
+        object selected;
+        public string CommittedSnapshot { get; private set; }
         public SceneDetail Scene { get; private set; }
         public SceneSelection Selection { get; private set; }
         public bool IsDirty { get; private set; }
@@ -29,39 +31,46 @@ namespace KhuzoeAssetsManager
         public event EventHandler Changed, SelectionChanged;
         public SceneDraft(SceneDetail scene)
         {
-            original = Json.Write(scene); OriginalHash = Digest(original); Scene = Copy(scene); Selection = new SceneSelection(SceneSelectionKind.None, null);
+            original = Json.Write(scene); CommittedSnapshot = original; OriginalHash = Digest(original); Scene = Json.Read<SceneDetail>(original); Selection = new SceneSelection(SceneSelectionKind.None, null);
         }
         public static string Digest(string text) { using (var hash = SHA256.Create()) return BitConverter.ToString(hash.ComputeHash(Encoding.UTF8.GetBytes(text))).Replace("-", "").ToLowerInvariant(); }
         public static SceneDetail Copy(SceneDetail scene) { return Json.Read<SceneDetail>(Json.Write(scene)); }
         public string Snapshot() { return Json.Write(Scene); }
         public void Select(SceneSelectionKind kind, string id)
-        { Selection = new SceneSelection(kind, id); if (SelectionChanged != null) SelectionChanged(this, EventArgs.Empty); }
-        public SceneWall Wall { get { return Scene.Walls.FirstOrDefault(value => Selection.Kind == SceneSelectionKind.Wall && value.Id == Selection.Id); } }
-        public SceneLight Light { get { return Scene.Lights.FirstOrDefault(value => Selection.Kind == SceneSelectionKind.Light && value.Id == Selection.Id); } }
-        public SceneTile Image { get { return Scene.Tiles.FirstOrDefault(value => Selection.Kind == SceneSelectionKind.Image && value.Id == Selection.Id); } }
+        { Selection = new SceneSelection(kind, id); RefreshSelection(); if (SelectionChanged != null) SelectionChanged(this, EventArgs.Empty); }
+        void RefreshSelection()
+        {
+            selected = Selection.Kind == SceneSelectionKind.Wall ? (object)Scene.Walls.FirstOrDefault(value => value.Id == Selection.Id)
+                : Selection.Kind == SceneSelectionKind.Light ? (object)Scene.Lights.FirstOrDefault(value => value.Id == Selection.Id)
+                : Selection.Kind == SceneSelectionKind.Image ? (object)Scene.Tiles.FirstOrDefault(value => value.Id == Selection.Id) : null;
+        }
+        public SceneWall Wall { get { return selected as SceneWall; } }
+        public SceneLight Light { get { return selected as SceneLight; } }
+        public SceneTile Image { get { return selected as SceneTile; } }
         public void Apply(string name, Action action)
         {
-            string before = Snapshot();
-            try { action(); Commit(before, name); } catch { Scene = Json.Read<SceneDetail>(before); throw; }
+            string before = CommittedSnapshot;
+            try { action(); Commit(before, name); } catch { Scene = Json.Read<SceneDetail>(before); RefreshSelection(); throw; }
         }
         public void Commit(string before, string name)
         {
             string after = Snapshot(); if (before == after) return;
             undo.Add(new Step { Before = before, After = after, Name = name }); redo.Clear();
             while (undo.Count > 30 || (undo.Count > 1 && undo.Sum(step => (long)step.Before.Length + step.After.Length) > 10 * 1024 * 1024)) undo.RemoveAt(0);
-            Notify();
+            Notify(after);
         }
-        public void Cancel(string before) { Scene = Json.Read<SceneDetail>(before); Notify(); }
-        public void Undo() { if (!CanUndo) return; var step = undo[undo.Count - 1]; undo.RemoveAt(undo.Count - 1); redo.Add(step); Scene = Json.Read<SceneDetail>(step.Before); Notify(); }
-        public void Redo() { if (!CanRedo) return; var step = redo[redo.Count - 1]; redo.RemoveAt(redo.Count - 1); undo.Add(step); Scene = Json.Read<SceneDetail>(step.After); Notify(); }
-        void Notify()
+        public void Cancel(string before) { Scene = Json.Read<SceneDetail>(before); Notify(before); }
+        public void Undo() { if (!CanUndo) return; var step = undo[undo.Count - 1]; undo.RemoveAt(undo.Count - 1); redo.Add(step); Scene = Json.Read<SceneDetail>(step.Before); Notify(step.Before); }
+        public void Redo() { if (!CanRedo) return; var step = redo[redo.Count - 1]; redo.RemoveAt(redo.Count - 1); undo.Add(step); Scene = Json.Read<SceneDetail>(step.After); Notify(step.After); }
+        void Notify(string snapshot)
         {
-            IsDirty = Snapshot() != original;
+            CommittedSnapshot = snapshot; IsDirty = snapshot != original; RefreshSelection();
             if (Selection.Kind != SceneSelectionKind.None && Selection.Kind != SceneSelectionKind.Map && Wall == null && Light == null && Image == null) Select(SceneSelectionKind.None, null);
             if (Changed != null) Changed(this, EventArgs.Empty);
         }
         public void Reset() { Apply("Ripristina scena", () => Scene = Json.Read<SceneDetail>(original)); Select(SceneSelectionKind.None, null); }
-        public void Restore(SceneDetail saved) { Scene = Copy(saved); IsDirty = Snapshot() != original; }
+        public void Restore(SceneDetail saved) { RestoreSnapshot(Json.Write(saved)); }
+        internal void RestoreSnapshot(string snapshot) { CommittedSnapshot = snapshot; Scene = Json.Read<SceneDetail>(snapshot); IsDirty = snapshot != original; RefreshSelection(); }
         public static string NewId() { return Guid.NewGuid().ToString("N").Substring(0, 16); }
         public SceneWall AddWall(PointF a, PointF b, string level)
         {
@@ -120,10 +129,12 @@ namespace KhuzoeAssetsManager
             draft.Restore(saved.Scene); return true;
         }
         public void Save(string key, SceneDraft draft)
+        { SaveSnapshot(key, draft.OriginalHash, draft.CommittedSnapshot, draft.IsDirty); }
+        public void SaveSnapshot(string key, string originalHash, string snapshot, bool dirty)
         {
             string file = FileName(key); FoundryPaths.NoLinks(file);
-            if (!draft.IsDirty) { if (File.Exists(file)) File.Delete(file); return; }
-            Json.Save(file, new SceneDraftRecord { Schema = 1, OriginalHash = draft.OriginalHash, Scene = draft.Scene });
+            if (!dirty) { if (File.Exists(file)) File.Delete(file); return; }
+            Json.SaveText(file, "{\"Schema\":1,\"OriginalHash\":" + Json.Write(originalHash) + ",\"Scene\":" + snapshot + "}");
         }
     }
 }

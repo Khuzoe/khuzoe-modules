@@ -15,7 +15,7 @@ namespace KhuzoeAssetsManager
         string gesture, beforeGesture;
         PointF startWorld, currentWorld, resizeOrigin;
         double[] startValues;
-        bool spaceDown;
+        bool spaceDown, gestureChanged;
         public PointF ScenePoint(Point point, bool snap)
         {
             double x = (point.X - panX) / scale, y = (point.Y - panY) / scale;
@@ -64,6 +64,7 @@ namespace KhuzoeAssetsManager
         {
             if (!Editing || Draft == null || Scene == null || Level == null || e.Button != MouseButtons.Left || Tool == SceneEditTool.Pan || spaceDown) return false;
             startWorld = currentWorld = ScenePoint(e.Location, true);
+            gestureChanged = false;
             if (Tool == SceneEditTool.Light) { Draft.AddLight(startWorld, Level.Id); Invalidate(); return true; }
             if (Tool == SceneEditTool.Wall) { gesture = "new-wall"; Capture = true; Invalidate(); return true; }
             if (Draft.Wall != null && Settings.Walls && Distance(Screen(Draft.Wall.X1, Draft.Wall.Y1), e.Location) < 10) gesture = "wall-a";
@@ -73,7 +74,7 @@ namespace KhuzoeAssetsManager
             else if (Draft.Selection.Kind == SceneSelectionKind.Map) gesture = "map";
             else { var hit = HitTestElement(e.Location); Draft.Select(hit.Kind, hit.Id); gesture = hit.Kind == SceneSelectionKind.None ? null : "move"; }
             if (gesture == null) { Invalidate(); return true; }
-            beforeGesture = Draft.Snapshot();
+            beforeGesture = Draft.CommittedSnapshot;
             if (Draft.Wall != null) startValues = new[] { Draft.Wall.X1, Draft.Wall.Y1, Draft.Wall.X2, Draft.Wall.Y2 };
             else if (Draft.Light != null) startValues = new[] { Draft.Light.X, Draft.Light.Y };
             else if (Draft.Image != null) { startValues = new[] { Draft.Image.X, Draft.Image.Y, Draft.Image.Width, Draft.Image.Height }; resizeOrigin = ImageCorners(Draft.Image)[0]; }
@@ -83,7 +84,8 @@ namespace KhuzoeAssetsManager
         bool EditorMove(MouseEventArgs e)
         {
             if (!Editing || gesture == null || Draft == null) return false;
-            currentWorld = ScenePoint(e.Location, true); double x = currentWorld.X - startWorld.X, y = currentWorld.Y - startWorld.Y;
+            var next = ScenePoint(e.Location, true); if (next == currentWorld) return true;
+            currentWorld = next; gestureChanged = true; double x = currentWorld.X - startWorld.X, y = currentWorld.Y - startWorld.Y;
             if (gesture == "wall-a") { Draft.Wall.X1 = currentWorld.X; Draft.Wall.Y1 = currentWorld.Y; }
             else if (gesture == "wall-b") { Draft.Wall.X2 = currentWorld.X; Draft.Wall.Y2 = currentWorld.Y; }
             else if (gesture == "light-radius") Draft.Light.Dim = Math.Round(Math.Sqrt(Math.Pow(currentWorld.X - Draft.Light.X, 2) + Math.Pow(currentWorld.Y - Draft.Light.Y, 2)) * Scene.GridDistance / Scene.GridSize, 1);
@@ -112,13 +114,13 @@ namespace KhuzoeAssetsManager
             if (gesture == null || e.Button != MouseButtons.Left) return false;
             EditorMove(e); string action = gesture, before = beforeGesture; gesture = null; beforeGesture = null; Capture = false; Cursor = Cursors.Default;
             if (action == "new-wall") { if (Math.Abs(startWorld.X - currentWorld.X) + Math.Abs(startWorld.Y - currentWorld.Y) >= 5) Draft.AddWall(startWorld, currentWorld, Level.Id); }
-            else if (before != null) Draft.Commit(before, "Trascina elemento");
+            else if (before != null && gestureChanged) Draft.Commit(before, "Trascina elemento");
             Invalidate(); return true;
         }
         public void CancelEditorGesture()
         {
             if (gesture == null) return; string before = beforeGesture; gesture = null; beforeGesture = null;
-            if (before != null && Draft != null) { Draft.Cancel(before); Scene = Draft.Scene; Level = Scene.Levels.FirstOrDefault(value => value.Id == Level.Id); }
+            if (before != null && gestureChanged && Draft != null) { Draft.Cancel(before); Scene = Draft.Scene; Level = Scene.Levels.FirstOrDefault(value => value.Id == Level.Id); }
             Capture = false; Cursor = Cursors.Default; Invalidate();
         }
         protected override void OnMouseCaptureChanged(EventArgs e) { base.OnMouseCaptureChanged(e); if (!Capture && gesture != null) CancelEditorGesture(); }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -14,6 +15,12 @@ namespace KhuzoeAssetsManager
         public SceneImageSet Images { get; private set; }
         public SceneViewSettings Settings { get; set; }
         SceneLayout layout;
+        readonly SceneRasterCache rasterCache = new SceneRasterCache();
+        readonly SceneBackdropCache backgroundCache = new SceneBackdropCache(), foregroundCache = new SceneBackdropCache();
+        readonly Dictionary<long, Pen> wallPens = new Dictionary<long, Pen>();
+        readonly Dictionary<int, SolidBrush> wallBrushes = new Dictionary<int, SolidBrush>();
+        readonly Dictionary<int, Pen> indicatorPens = new Dictionary<int, Pen>();
+        double penScale;
         double scale = 1, panX, panY;
         bool fit = true, dragging;
         Point previous;
@@ -29,6 +36,7 @@ namespace KhuzoeAssetsManager
         }
         public void SetScene(SceneDetail scene, SceneLevel level, SceneImageSet images, bool refit)
         {
+            if (!Object.ReferenceEquals(Images, images)) { rasterCache.Clear(); backgroundCache.Clear(); foregroundCache.Clear(); }
             Scene = scene; Level = level; Images = images; layout = scene == null ? null : SceneLayout.From(scene);
             if (refit) Fit(); else Invalidate();
         }
@@ -85,11 +93,12 @@ namespace KhuzoeAssetsManager
             {
                 using (var font = new Font("Segoe UI", 14F)) TextRenderer.DrawText(g, "Seleziona un mondo e una scena", font, ClientRectangle, Theme.Muted, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter); return;
             }
+            if (penScale != scale) { foreach (var pen in wallPens.Values) pen.Dispose(); wallPens.Clear(); penScale = scale; }
             var saved = g.Save(); g.TranslateTransform((float)panX, (float)panY); g.ScaleTransform((float)scale, (float)scale);
             using (var brush = new SolidBrush(ParseColor(Level.BackgroundColor, Color.FromArgb(50, 52, 60)))) g.FillRectangle(brush, (float)layout.MapX, (float)layout.MapY, (float)layout.MapWidth, (float)layout.MapHeight);
             if (Images != null)
             {
-                DrawImage(g, Images.Background, layout.MapX + layout.MapWidth / 2, layout.MapY + layout.MapHeight / 2, layout.MapWidth, layout.MapHeight, Level.Textures, Level.BackgroundTint, 1);
+                DrawBackdrop(g, Images.Background, Level.BackgroundTint, backgroundCache);
                 if (Settings.Tiles)
                     foreach (var tile in Scene.Tiles.Where(value => SceneDetail.Included(value.Levels, Level.Id) && (Settings.Hidden || !value.Hidden)).OrderBy(value => value.Elevation).ThenBy(value => value.Sort))
                     {
@@ -98,19 +107,31 @@ namespace KhuzoeAssetsManager
                         var copy = new SceneTexture { AnchorX = texture.AnchorX, AnchorY = texture.AnchorY, OffsetX = texture.OffsetX, OffsetY = texture.OffsetY, ScaleX = texture.ScaleX, ScaleY = texture.ScaleY, Fit = texture.Fit, Rotation = tile.Rotation + texture.Rotation };
                         DrawImage(g, image, tile.X, tile.Y, tile.Width, tile.Height, copy, tile.Tint, tile.Hidden ? Math.Min(0.25, tile.Alpha) : tile.Alpha);
                     }
-                if (Settings.Foreground) DrawImage(g, Images.Foreground, layout.MapX + layout.MapWidth / 2, layout.MapY + layout.MapHeight / 2, layout.MapWidth, layout.MapHeight, Level.Textures, Level.ForegroundTint, 1);
+                if (Settings.Foreground) DrawBackdrop(g, Images.Foreground, Level.ForegroundTint, foregroundCache);
             }
             if (Settings.Grid && Scene.GridType == 1) DrawGrid(g);
             if (Settings.Lights) DrawLights(g);
             if (Settings.Walls)
                 foreach (var wall in Scene.Walls.Where(value => SceneDetail.Included(value.Levels, Level.Id)))
-                    using (var pen = new Pen(WallColor(wall), (float)(2.1 / scale)))
-                    { if (wall.DoorState == 1 && wall.Door != 0) pen.DashStyle = DashStyle.Dash; g.DrawLine(pen, (float)wall.X1, (float)wall.Y1, (float)wall.X2, (float)wall.Y2); }
+                {
+                    if (!InView(wall.X1, wall.Y1, wall.X2, wall.Y2, 8)) continue;
+                    var color = WallColor(wall); bool dashed = wall.DoorState == 1 && wall.Door != 0;
+                    long key = ((long)(uint)color.ToArgb() << 1) | (dashed ? 1L : 0L); Pen pen;
+                    if (!wallPens.TryGetValue(key, out pen)) { pen = new Pen(color, (float)(2.1 / scale)); if (dashed) pen.DashStyle = DashStyle.Dash; wallPens[key] = pen; }
+                    g.DrawLine(pen, (float)wall.X1, (float)wall.Y1, (float)wall.X2, (float)wall.Y2);
+                }
             using (var border = new Pen(Color.FromArgb(90, 180, 185, 195), (float)(1 / scale))) g.DrawRectangle(border, (float)layout.MapX, (float)layout.MapY, (float)layout.MapWidth, (float)layout.MapHeight);
             g.Restore(saved);
             if (Settings.Indicators) DrawIndicators(g);
             DrawEditor(g);
         }
+        bool InView(double x1, double y1, double x2, double y2, double margin)
+        { return Math.Max(x1, x2) * scale + panX >= -margin && Math.Min(x1, x2) * scale + panX <= Width + margin && Math.Max(y1, y2) * scale + panY >= -margin && Math.Min(y1, y2) * scale + panY <= Height + margin; }
+        bool InView(PointF point, double margin) { return point.X >= -margin && point.X <= Width + margin && point.Y >= -margin && point.Y <= Height + margin; }
+        SolidBrush WallBrush(Color color)
+        { SolidBrush brush; if (!wallBrushes.TryGetValue(color.ToArgb(), out brush)) { brush = new SolidBrush(color); wallBrushes[color.ToArgb()] = brush; } return brush; }
+        Pen IndicatorPen(Color color)
+        { Pen pen; if (!indicatorPens.TryGetValue(color.ToArgb(), out pen)) { pen = new Pen(color, 2); indicatorPens[color.ToArgb()] = pen; } return pen; }
         void DrawGrid(Graphics g)
         {
             double step = Scene.GridSize; if (step * scale < 9) return;
@@ -138,6 +159,7 @@ namespace KhuzoeAssetsManager
         {
             if (radius <= 0) return;
             var rect = new RectangleF((float)(light.X - radius), (float)(light.Y - radius), (float)(radius * 2), (float)(radius * 2));
+            if (!InView(rect.Left, rect.Top, rect.Right, rect.Bottom, 2)) return;
             using (var fill = new SolidBrush(Color.FromArgb(alpha, color)))
             using (var pen = new Pen(Color.FromArgb(110, color), (float)(1 / scale)))
             {
@@ -152,23 +174,25 @@ namespace KhuzoeAssetsManager
                 foreach (var wall in Scene.Walls.Where(value => SceneDetail.Included(value.Levels, Level.Id)))
                 {
                     var a = Screen(wall.X1, wall.Y1); var b = Screen(wall.X2, wall.Y2); Color color = WallColor(wall);
-                    using (var brush = new SolidBrush(color)) { g.FillEllipse(brush, a.X - 2, a.Y - 2, 4, 4); g.FillEllipse(brush, b.X - 2, b.Y - 2, 4, 4); }
+                    var brush = WallBrush(color);
+                    if (InView(a, 3)) g.FillEllipse(brush, a.X - 2, a.Y - 2, 4, 4);
+                    if (InView(b, 3)) g.FillEllipse(brush, b.X - 2, b.Y - 2, 4, 4);
                     if (wall.Door != 0)
                     {
                         var midpoint = Screen((wall.X1 + wall.X2) / 2, (wall.Y1 + wall.Y2) / 2);
-                        using (var brush = new SolidBrush(Theme.Background)) using (var pen = new Pen(color, 2))
-                        { g.FillRectangle(brush, midpoint.X - 5, midpoint.Y - 6, 10, 12); g.DrawRectangle(pen, midpoint.X - 5, midpoint.Y - 6, 10, 12); }
+                        if (InView(midpoint, 7)) { g.FillRectangle(WallBrush(Theme.Background), midpoint.X - 5, midpoint.Y - 6, 10, 12); g.DrawRectangle(IndicatorPen(color), midpoint.X - 5, midpoint.Y - 6, 10, 12); }
                     }
                 }
             if (Settings.Lights)
                 foreach (var light in Scene.Lights.Where(value => SceneDetail.Included(value.Levels, Level.Id) && (Settings.Hidden || !value.Hidden)))
                 {
                     var point = Screen(light.X, light.Y); Color color = light.Hidden ? Theme.Muted : ParseColor(light.Color, Color.FromArgb(255, 224, 154));
+                    if (!InView(point, 9)) continue;
                     using (var fill = new SolidBrush(Theme.Background)) using (var pen = new Pen(color, 2))
                     { g.FillEllipse(fill, point.X - 6, point.Y - 6, 12, 12); g.DrawEllipse(pen, point.X - 6, point.Y - 6, 12, 12); g.DrawLine(pen, point.X - 3, point.Y + 8, point.X + 3, point.Y + 8); }
                 }
         }
-        static void DrawImage(Graphics g, Image image, double x, double y, double width, double height, SceneTexture texture, string tint, double alpha)
+        void DrawImage(Graphics g, Image image, double x, double y, double width, double height, SceneTexture texture, string tint, double alpha)
         {
             if (image == null || width <= 0 || height <= 0 || alpha <= 0) return;
             texture = texture ?? new SceneTexture(); double sx = width / image.Width, sy = height / image.Height;
@@ -176,15 +200,31 @@ namespace KhuzoeAssetsManager
             else if (texture.Fit == "cover") sx = sy = Math.Max(sx, sy);
             else if (texture.Fit == "width") sy = sx; else if (texture.Fit == "height") sx = sy;
             sx *= texture.ScaleX; sy *= texture.ScaleY; if (sx == 0 || sy == 0) return;
+            var preview = rasterCache.Get(image, Math.Max(Math.Abs(sx), Math.Abs(sy)) * scale);
+            sx *= (double)image.Width / preview.Width; sy *= (double)image.Height / preview.Height; image = preview;
             var state = g.Save(); g.TranslateTransform((float)(x + texture.OffsetX), (float)(y + texture.OffsetY)); g.RotateTransform((float)texture.Rotation); g.ScaleTransform((float)sx, (float)sy);
             Color color = ParseColor(tint, Color.White);
-            using (var attributes = new ImageAttributes())
+            var destination = new Rectangle((int)(-image.Width * texture.AnchorX), (int)(-image.Height * texture.AnchorY), image.Width, image.Height);
+            if (color.ToArgb() == Color.White.ToArgb() && alpha >= 1) g.DrawImage(image, destination, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel);
+            else using (var attributes = new ImageAttributes())
             {
                 attributes.SetColorMatrix(new ColorMatrix { Matrix00 = color.R / 255F, Matrix11 = color.G / 255F, Matrix22 = color.B / 255F, Matrix33 = (float)Math.Max(0, Math.Min(1, alpha)), Matrix44 = 1 });
-                g.DrawImage(image, new Rectangle((int)(-image.Width * texture.AnchorX), (int)(-image.Height * texture.AnchorY), image.Width, image.Height), 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, attributes);
+                g.DrawImage(image, destination, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, attributes);
             }
             g.Restore(state);
         }
-        protected override void Dispose(bool disposing) { if (disposing) tooltip.Dispose(); base.Dispose(disposing); }
+        void DrawBackdrop(Graphics graphics, Image image, string tint, SceneBackdropCache cache)
+        {
+            if (image == null) return;
+            double x = layout.MapX + layout.MapWidth / 2, y = layout.MapY + layout.MapHeight / 2;
+            if (!cache.TryDraw(graphics, ClientSize, image, Level.Textures, tint, panX, panY, scale, x, y, layout.MapWidth, layout.MapHeight,
+                target => DrawImage(target, image, x, y, layout.MapWidth, layout.MapHeight, Level.Textures, tint, 1)))
+                DrawImage(graphics, image, x, y, layout.MapWidth, layout.MapHeight, Level.Textures, tint, 1);
+        }
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) { rasterCache.Dispose(); backgroundCache.Dispose(); foregroundCache.Dispose(); tooltip.Dispose(); foreach (var pen in wallPens.Values) pen.Dispose(); foreach (var brush in wallBrushes.Values) brush.Dispose(); foreach (var pen in indicatorPens.Values) pen.Dispose(); }
+            base.Dispose(disposing);
+        }
     }
 }

@@ -1,6 +1,8 @@
-# Khuzoe Assets Manager · 0.4.0
+# Khuzoe Assets Manager · 0.4.1
 
 App Windows per preparare gli asset delle sessioni Foundry. Contiene le sezioni **Musiche** e **Scene**. Il progetto è separato da Khuzoe Updater.
+
+La 0.4.1 migliora la reattività dell'editor: riutilizza l'anteprima della mappa durante le modifiche, limita la memoria delle cache, evita copie della scena per la sola selezione e salva le bozze in background. Le bozze della 0.4.0 restano compatibili.
 
 ## Avvio
 
@@ -68,7 +70,7 @@ Apri una scena e premi **Modifica locale**, oppure **Bozza libera** per partire 
 - **Sposta vista**, Spazio + trascinamento o pulsante centrale spostano la vista; la rotella modifica lo zoom. **Aggancio** allinea alla griglia quadrata; Maiusc lo sospende durante il trascinamento.
 - **Annulla / Ripeti**, **Duplica**, **Elimina** e **Ripristina** gestiscono le modifiche locali. Sulla mappa funzionano anche Ctrl+Z, Ctrl+Y, Ctrl+D, Canc ed Esc per annullare un gesto.
 
-Le bozze vengono salvate automaticamente sotto `%LOCALAPPDATA%\KhuzoeAssetsManager\scene-drafts`, separatamente dai mondi. **Torna all'elenco** mantiene la bozza; **Ripristina** torna alla scena letta inizialmente (o svuota la bozza libera). Se i dati originali cambiano in Foundry, la vecchia bozza non viene riapplicata automaticamente: l'app mostra un avviso prima che una nuova modifica la sostituisca. La cronologia annulla/ripeti rimane nella sessione corrente.
+Le bozze vengono salvate automaticamente in background sotto `%LOCALAPPDATA%\KhuzoeAssetsManager\scene-drafts`, separatamente dai mondi. L'indicatore distingue il salvataggio in corso dalla bozza salvata e dagli eventuali errori; alla chiusura l'app completa le scritture già in coda. **Torna all'elenco** mantiene la bozza; **Ripristina** torna alla scena letta inizialmente (o svuota la bozza libera). Se i dati originali cambiano in Foundry, la vecchia bozza non viene riapplicata automaticamente: l'app mostra un avviso prima che una nuova modifica la sostituisca. La cronologia annulla/ripeti rimane nella sessione corrente.
 
 Le immagini importate vengono lette dal percorso scelto e memorizzate nella cache per l'anteprima: non vengono copiate nella directory dati Foundry e gli originali non vengono modificati. Mantienile nel percorso scelto per riaprire la bozza. Non sono presenti un comando di applicazione a Foundry o sincronizzazione delle modifiche: questa versione serve a provare l'editor.
 
@@ -109,6 +111,8 @@ cd ..
 
 Nel clone del repository, esegui questi comandi dalla cartella `applications/khuzoe-assets-manager/source`. Per preparare una nuova release runtime: `./tools/prepare-updater-package.ps1 -PublisherRoot ../../..`. Per una copia di sviluppo esterna al repository, indica invece il percorso della cartella `khuzoe-updater`. Lo script compila in una cartella separata, verifica la versione e prepara `application.zip`, `application.json` e `release.json`; il publisher li distribuisce tramite il catalogo. La sola pubblicazione dei sorgenti non rigenera i pacchetti già pubblicati.
 
-Se l'eseguibile precedente è aperto, crea una build separata con `./tools/build-app.ps1 -OutputDirectory build/release-0.4.0` e confezionala con `./tools/package.ps1 -BuildDirectory build/release-0.4.0`. Per aggiornare manualmente l'app estrai l'intero nuovo pacchetto dopo aver chiuso la versione in esecuzione. Preferenze e sessione restano nella directory locale dell'utente.
+Se l'eseguibile precedente è aperto, crea una build separata con `./tools/build-app.ps1 -OutputDirectory build/release-0.4.1` e confezionala con `./tools/package.ps1 -BuildDirectory build/release-0.4.1`. Per aggiornare manualmente l'app estrai l'intero nuovo pacchetto dopo aver chiuso la versione in esecuzione. Preferenze e sessione restano nella directory locale dell'utente.
+
+Dopo la build dei test, `./dist/KhuzoeAssetsManager.Tests.exe --benchmark-editor 2000 build/perf-state` esegue una misura nativa su una scena sintetica con 2.000 muri, 40 luci e una mappa 4096×3072, senza aprire mondi reali. I tempi di ridisegno non comprendono la presentazione a schermo e non sono una misura degli FPS effettivi. `property-with-sync-save` mantiene intenzionalmente la scrittura sincrona nel benchmark per confrontare gli stessi passaggi; l'interfaccia usa invece la coda in background.
 
 Vedi `VERIFICHE.md` per gli esiti e i limiti delle prove. Le directory `build` e `dist` non sono sorgenti. I test usano installazioni Foundry simulate, senza modificare mondi, moduli o musiche reali.

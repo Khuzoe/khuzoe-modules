@@ -1,4 +1,24 @@
-# Verifiche · build 0.4.0
+# Verifiche · build 0.4.1
+
+## Reattività dell'editor — 14 novembre 2026
+
+- 40 test C# e 5 test Node superati. Cinque prove nuove coprono scrittura asincrona ordinata e accorpamento delle modifiche, attesa delle scritture alla chiusura, recupero dopo errori, memoria e trasparenza delle anteprime, invalidazione dello sfondo quando cambiano texture/zoom/dimensioni e stabilità dell'ispettore con annulla/ripeti.
+- Selezionare un elemento e rilasciarlo o annullare senza spostarlo non ricrea il documento, non aggiunge cronologia e non avvia salvataggi. Le modifiche riutilizzano lo snapshot già serializzato; la scrittura riceve stringhe immutabili e non accede al modello mentre viene trascinato.
+- Le scritture locali passano da un solo worker. Le modifiche ancora in attesa alla stessa bozza vengono accorpate; un ripristino non può essere sovrascritto da un salvataggio precedente. Gli errori sono riportati nell'interfaccia e una modifica successiva può tentare di nuovo il salvataggio.
+- Il ridisegno riutilizza mappe raster alla risoluzione di visualizzazione e sfondi già composti quando la vista non cambia. Cache raster fino a 24 MiB, più un massimo di 8 MiB per ciascuno dei due sfondi a schermo; rilascio delle copie al cambio immagini e alla chiusura. I file originali e le immagini decodificate non vengono modificati dalle cache. Penne e pennelli dei muri vengono riutilizzati; gli elementi fuori vista vengono esclusi dal disegno.
+- Fixture nativa completata con importazione, rotazione/ridimensionamento, muri/porte, luci, sostituzione mappa, riapertura bozza libera, dimensione minima della finestra e chiusura immediata dopo una modifica. Ultima bozza presente su disco dopo la chiusura; tutti i file Foundry simulati hanno le stesse impronte prima e dopo.
+- Benchmark riproducibile in `tests/EditorPerformance.cs`: scena sintetica con 2.000 muri, 40 luci, sfondo 4096×3072 e finestra 1040×780. Confronto sequenziale nella stessa sessione Windows, eseguibili 0.4.0 e 0.4.1, riscaldamento prima delle misure. Sono tempi del codice di ridisegno e dei gesti, senza presentazione a schermo: non misurano gli FPS reali o le prestazioni di ogni PC. La prima preparazione di un'anteprima e il caricamento dei file restano operazioni distinte.
+
+| Mediana del benchmark | 0.4.0 | 0.4.1 |
+| --- | ---: | ---: |
+| Ridisegno della vista ferma | 76,83 ms | 20,91 ms |
+| Clic di selezione senza spostamento | 49,40 ms | 0,55 ms |
+| Gesto annullato senza spostamento | 80,67 ms | 0,57 ms |
+| Fotogramma durante trascinamento | 79,77 ms | 20,57 ms |
+| Fotogramma con variazione dello zoom | 81,88 ms | 38,66 ms |
+| Modifica proprietà più scrittura sincrona di confronto | 109,06 ms | 34,69 ms |
+
+Il confronto dell'ultima riga mantiene intenzionalmente la scrittura sincrona nel benchmark; nell'interfaccia 0.4.1 il disco viene invece gestito dalla coda in background. Il 95° percentile dei fotogrammi durante trascinamento passa da 89,03 a 21,09 ms. Le misure non comprendono un account Discord reale o download Internet.
 
 ## Editor di bozze locali — 14 novembre 2026
 

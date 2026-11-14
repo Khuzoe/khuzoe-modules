@@ -24,12 +24,14 @@ namespace KhuzoeAssetsManager
             return list == null ? Enumerable.Empty<Dictionary<string, object>>() : list.Cast<object>().OfType<Dictionary<string, object>>();
         }
         public static void Save(string filename, object value)
+        { SaveText(filename, Write(value)); }
+        public static void SaveText(string filename, string text)
         {
             Directory.CreateDirectory(Path.GetDirectoryName(filename));
             string temporary = filename + "." + Guid.NewGuid().ToString("N") + ".tmp";
             try
             {
-                File.WriteAllText(temporary, Write(value), new UTF8Encoding(false));
+                File.WriteAllText(temporary, text, new UTF8Encoding(false));
                 if (File.Exists(filename)) File.Replace(temporary, filename, null);
                 else File.Move(temporary, filename);
             }

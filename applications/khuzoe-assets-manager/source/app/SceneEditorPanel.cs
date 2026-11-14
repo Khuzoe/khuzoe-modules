@@ -15,7 +15,10 @@ namespace KhuzoeAssetsManager
         readonly ToolTip tips = new ToolTip();
         readonly System.Collections.Generic.Dictionary<SceneEditTool, WebButton> tools = new System.Collections.Generic.Dictionary<SceneEditTool, WebButton>();
         SceneDraft draft;
-        bool enabled;
+        bool enabled, inspectorPending;
+        SceneDraft inspectorDraft;
+        SceneSelectionKind inspectorKind;
+        string inspectorId;
         public FlowLayoutPanel Toolbar { get; private set; }
         public event EventHandler Changed, ImportImage, ChangeMap;
         public SceneEditorPanel(SceneCanvas canvas)
@@ -59,18 +62,24 @@ namespace KhuzoeAssetsManager
             if (draft != null) { draft.Changed += DraftChanged; draft.SelectionChanged += SelectionChanged; }
             UpdateInspector(); SetTool(SceneEditTool.Select);
         }
-        public void SetEditing(bool value) { enabled = value; canvas.Editing = value; Enabled = value; Toolbar.Enabled = value; UpdateInspector(); }
+        public void SetEditing(bool value) { if (enabled == value && Enabled == value && Toolbar.Enabled == value) return; enabled = value; canvas.Editing = value; Enabled = value; Toolbar.Enabled = value; UpdateInspector(); }
         void SelectionChanged(object sender, EventArgs e) { UpdateInspector(); canvas.Invalidate(); }
         void DraftChanged(object sender, EventArgs e)
         {
             if (Changed != null) Changed(this, EventArgs.Empty);
-            if (IsHandleCreated && !IsDisposed) BeginInvoke(new Action(() => { if (!IsDisposed) UpdateInspector(); }));
+            if (IsHandleCreated && !IsDisposed && !inspectorPending)
+            { inspectorPending = true; BeginInvoke(new Action(() => { inspectorPending = false; if (!IsDisposed) UpdateInspector(); })); }
         }
         void UpdateInspector()
         {
             if (IsDisposed) return;
             if (InvokeRequired) { BeginInvoke(new Action(UpdateInspector)); return; }
             undo.Enabled = enabled && draft != null && draft.CanUndo; redo.Enabled = enabled && draft != null && draft.CanRedo;
+            var kind = enabled && draft != null ? draft.Selection.Kind : SceneSelectionKind.None;
+            string id = kind == SceneSelectionKind.None ? null : draft.Selection.Id;
+            delete.Enabled = duplicate.Enabled = enabled && draft != null && (draft.Wall != null || draft.Light != null || draft.Image != null);
+            if (Object.ReferenceEquals(inspectorDraft, draft) && inspectorKind == kind && inspectorId == id) { properties.Refresh(); return; }
+            inspectorDraft = draft; inspectorKind = kind; inspectorId = id;
             object selected = null;
             if (draft != null && enabled)
             {
@@ -81,7 +90,6 @@ namespace KhuzoeAssetsManager
             }
             if (selected == null) title.Text = "Seleziona un elemento";
             properties.SelectedObject = selected;
-            delete.Enabled = duplicate.Enabled = enabled && draft != null && (draft.Wall != null || draft.Light != null || draft.Image != null);
         }
         protected override void Dispose(bool disposing) { if (disposing) { Bind(null); tips.Dispose(); Toolbar.Dispose(); } base.Dispose(disposing); }
     }

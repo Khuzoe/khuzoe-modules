@@ -31,6 +31,7 @@ namespace KhuzoeAssetsManager
         readonly CheckBox grid;
         readonly ToolTip tips = new ToolTip();
         readonly SceneDraftStore draftStore;
+        readonly SceneDraftSaver draftSaver;
         readonly Dictionary<string, SceneDraft> drafts = new Dictionary<string, SceneDraft>();
         readonly SceneEditorPanel editor;
         readonly TableLayoutPanel content, viewport, viewerRows;
@@ -43,6 +44,8 @@ namespace KhuzoeAssetsManager
         string draftKey, imageSignature, draftNotice;
         bool editMode;
         bool draftSaved = true;
+        bool draftPending;
+        long draftSaveRevision;
         CancellationTokenSource active;
         SceneSnapshot snapshot;
         SceneCatalog catalog;
@@ -60,7 +63,7 @@ namespace KhuzoeAssetsManager
         {
             this.storage = storage; this.preferences = preferences; this.requireLogin = requireLogin; this.chooseFolder = chooseFolder;
             repository = new SceneRepository(storage, tools, new ProcessRunner()); imageLoader = new SceneImages(storage, tools, new ProcessRunner());
-            draftStore = new SceneDraftStore(storage); editor = new SceneEditorPanel(canvas);
+            draftStore = new SceneDraftStore(storage); draftSaver = new SceneDraftSaver(draftStore); draftSaver.Completed += DraftSaved; editor = new SceneEditorPanel(canvas);
             Dock = DockStyle.Fill; BackColor = Theme.Background; Padding = new Padding(26, 15, 26, 20);
             var layout = Rows(72, 77, -1, 42); Controls.Add(layout);
             var heading = Rows(43, -1); heading.Controls.Add(Theme.Label("Scene", 25F, Theme.Text, FontStyle.Bold), 0, 0);
@@ -266,12 +269,12 @@ namespace KhuzoeAssetsManager
             if (drafts.TryGetValue(key, out cached) && cached.OriginalHash == candidate.OriginalHash) candidate = cached;
             else
             {
-                try { if (!draftStore.Load(key, candidate)) draftNotice = "Bozza precedente non caricata: i dati Foundry sono cambiati o la bozza non è valida. Una nuova modifica la sostituirà."; }
+                try { if (!draftSaver.RestorePending(key, candidate) && !draftStore.Load(key, candidate)) draftNotice = "Bozza precedente non caricata: i dati Foundry sono cambiati o la bozza non è valida. Una nuova modifica la sostituirà."; }
                 catch (Exception error) { draftNotice = "Bozza locale non caricata: " + error.Message; }
                 drafts[key] = candidate;
                 while (drafts.Count > 8) drafts.Remove(drafts.Keys.First(value => value != key));
             }
-            draft = candidate; draftKey = key; current = draft.Scene; draftSaved = true; draft.Select(SceneSelectionKind.None, null);
+            draft = candidate; draftKey = key; current = draft.Scene; draftSaveRevision = draftSaver.PendingRevision(key); draftPending = draftSaveRevision != 0; draftSaved = !draftPending && draftSaver.LastError(key) == null; draft.Select(SceneSelectionKind.None, null);
             suppress = true; levels.DataSource = current.Levels; levels.SelectedItem = current.Levels.FirstOrDefault(value => value.Id == current.InitialLevel) ?? current.Levels[0]; suppress = false;
             editor.Bind(draft); UpdateDraftBadge();
         }
@@ -302,7 +305,7 @@ namespace KhuzoeAssetsManager
         { return level.Id + "|" + level.Background + "|" + level.Foreground + "|" + Json.Write(scene.LocalAssets) + "|" + Json.Write(scene.Tiles.Where(value => SceneDetail.Included(value.Levels, level.Id)).Select(value => new { value.Id, value.Src }).ToList()); }
         void UpdateDraftBadge()
         {
-            draftBadge.Text = draft != null && draft.IsDirty ? (draftSaved ? "BOZZA LOCALE · salvata nell'app" : "BOZZA LOCALE · in memoria") : "FOUNDRY IN SOLA LETTURA";
+            draftBadge.Text = draft != null && draft.IsDirty ? (draftPending ? "BOZZA LOCALE · salvataggio in corso" : draftSaved ? "BOZZA LOCALE · salvata nell'app" : "BOZZA LOCALE · in memoria") : "FOUNDRY IN SOLA LETTURA";
             draftBadge.ForeColor = draft != null && draft.IsDirty ? Theme.Gold : Theme.Green;
             if (current != null && canvas.Level != null) detail.Text = current.Name + " · " + current.Walls.Count(value => SceneDetail.Included(value.Levels, canvas.Level.Id)) + " muri · " + current.Lights.Count(value => SceneDetail.Included(value.Levels, canvas.Level.Id)) + " luci · " + current.Tiles.Count(value => SceneDetail.Included(value.Levels, canvas.Level.Id)) + " immagini";
         }
@@ -311,12 +314,28 @@ namespace KhuzoeAssetsManager
             if (draft == null || IsDisposed) return;
             string levelId = canvas.Level == null ? current.InitialLevel : canvas.Level.Id;
             current = draft.Scene;
-            suppress = true; levels.DataSource = current.Levels; levels.SelectedItem = current.Levels.FirstOrDefault(value => value.Id == levelId) ?? current.Levels[0]; suppress = false;
+            if (!Object.ReferenceEquals(levels.DataSource, current.Levels))
+            { suppress = true; levels.DataSource = current.Levels; levels.SelectedItem = current.Levels.FirstOrDefault(value => value.Id == levelId) ?? current.Levels[0]; suppress = false; }
             var level = (SceneLevel)levels.SelectedItem; canvas.SetScene(current, level, images, false);
-            try { draftStore.Save(draftKey, draft); draftSaved = true; } catch (Exception error) { draftSaved = false; status.Text = "Bozza in memoria, salvataggio locale non riuscito: " + error.Message; }
+            draftSaveRevision = draftSaver.Queue(draftKey, draft); draftPending = true; draftSaved = false;
             UpdateDraftBadge();
             if (!IsBusy && imageSignature != ImageSignature(current, level) && IsHandleCreated) BeginInvoke(new Action(async () => { if (!IsDisposed) await RunAsync(LoadLevelAsync); }));
         }
+        void DraftSaved(SceneDraftSaveResult result)
+        {
+            if (!IsHandleCreated || IsDisposed || Disposing) return;
+            try
+            {
+                BeginInvoke(new Action(() => {
+                    if (IsDisposed || Disposing || result.Key != draftKey || result.Revision != draftSaveRevision) return;
+                    draftPending = false; draftSaved = result.Error == null;
+                    if (result.Error != null) status.Text = "Bozza in memoria, salvataggio locale non riuscito: " + result.Error.Message;
+                    UpdateDraftBadge();
+                }));
+            }
+            catch (InvalidOperationException) { }
+        }
+        public Task FlushDraftsAsync() { return draftSaver.FlushAsync(); }
         async Task ImportImageAsync(bool map)
         {
             if (!allowed || IsBusy || draft == null) return;
@@ -344,7 +363,7 @@ namespace KhuzoeAssetsManager
         {
             if (disposing)
             {
-                CancelPending(); ClearScene(); tips.Dispose();
+                CancelPending(); ClearScene(); draftSaver.Completed -= DraftSaved; draftSaver.Dispose(); tips.Dispose();
                 if (snapshot != null && !IsBusy) { try { snapshot.Dispose(); } catch (IOException) { } snapshot = null; }
             }
             base.Dispose(disposing);

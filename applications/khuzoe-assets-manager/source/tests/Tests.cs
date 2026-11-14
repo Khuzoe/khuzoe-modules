@@ -32,6 +32,7 @@ namespace KhuzoeAssetsManager
             if (args.Length == 2 && args[0] == "--render-fixture") { RenderFixture(args[1]); return 0; }
             if (args.Length == 2 && args[0] == "--render-scenes") { RenderScenes(args[1]); return 0; }
             if (args.Length == 2 && args[0] == "--render-editor") { RenderEditor(args[1]); return 0; }
+            if (args.Length > 0 && args[0] == "--benchmark-editor") return EditorPerformance.Run(args.Skip(1).ToArray());
             if (args.Length == 2 && args[0] == "--scene-smoke") { return RunLive(() => SceneSmoke(args[1])); }
             if (args.Length == 2 && args[0] == "--prepare-tools") { return RunLive(() => PrepareTools(args[1])); }
             if (args.Length == 2 && args[0] == "--audio-smoke") { return RunLive(() => AudioSmoke(args[1])); }
