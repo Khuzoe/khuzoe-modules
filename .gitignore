@@ -7,3 +7,9 @@ dist/
 **/LOG.old
 **/LOCK
 *.user
+applications/**/build/
+applications/**/dist/
+applications/*/*
+!applications/*/application.json
+!applications/*/release.json
+!applications/*/application.zip

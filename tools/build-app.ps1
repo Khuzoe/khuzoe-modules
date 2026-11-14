@@ -10,6 +10,7 @@ $version = (Get-Content -Raw -LiteralPath (Join-Path $projectRoot 'app\version.t
 $generatedRoot = Join-Path $projectRoot 'build'
 New-Item -ItemType Directory -Path $generatedRoot -Force | Out-Null
 $allowed = ($config.modules | ForEach-Object { '"' + $_ + '"' }) -join ', '
+$applications = ($config.applications | ForEach-Object { if ($_ -notmatch '^[a-z0-9-]+$') { throw 'Identificatore app non valido.' }; '"' + $_ + '"' }) -join ', '
 if ($config.pagesUrl -notmatch '^https://[a-zA-Z0-9./_-]+$' -or $config.repository -notmatch '^[a-zA-Z0-9_-]+/[a-zA-Z0-9_.-]+$' -or $version -notmatch '^\d+\.\d+\.\d+$') { throw 'Configurazione di compilazione non valida.' }
 $generated = @"
 using System.Reflection;
@@ -22,6 +23,7 @@ namespace KhuzoeUpdater {
     public const string Repository = "$($config.repository)";
     public const string CatalogUrl = "$($config.pagesUrl.TrimEnd('/'))/catalog.json";
     public static readonly string[] ModuleIds = new string[] { $allowed };
+    public static readonly string[] ApplicationIds = new string[] { $applications };
   }
 }
 "@
@@ -29,7 +31,7 @@ $generatedFile = Join-Path $generatedRoot 'BuildConfig.cs'
 [IO.File]::WriteAllText($generatedFile, $generated, [Text.UTF8Encoding]::new($false))
 $references = @('System.dll','System.Core.dll','System.Drawing.dll','System.Windows.Forms.dll','System.Web.Extensions.dll','System.Net.Http.dll','System.IO.Compression.dll','System.IO.Compression.FileSystem.dll','System.Management.dll')
 $arguments = @('/nologo','/optimize+','/utf8output','/warnaserror+') + @($references | ForEach-Object { '/reference:' + $_ })
-$sources = @((Join-Path $projectRoot 'app\Core.cs'), (Join-Path $projectRoot 'app\AppUpdates.cs'), $generatedFile)
+$sources = @((Join-Path $projectRoot 'app\Core.cs'), (Join-Path $projectRoot 'app\DesktopApplications.cs'), (Join-Path $projectRoot 'app\AppUpdates.cs'), $generatedFile)
 if ($Test) {
     $fixtureRoot = Join-Path $generatedRoot 'app-update-fixtures'
     New-Item -ItemType Directory -Path $fixtureRoot -Force | Out-Null
@@ -44,7 +46,7 @@ if ($Test) {
     & $compiler @arguments '/target:winexe' ('/out:' + (Join-Path $fixtureRoot 'helper-host.exe')) @sources (Join-Path $projectRoot 'app\MainForm.cs')
     if ($LASTEXITCODE -ne 0) { throw 'Compilazione supporto di prova non riuscita.' }
     $exe = Join-Path $outputRoot 'KhuzoeUpdater.Tests.exe'
-    & $compiler @arguments '/target:exe' "/out:$exe" @sources (Join-Path $projectRoot 'tests\CoreTests.cs') (Join-Path $projectRoot 'tests\AppUpdateTests.cs')
+    & $compiler @arguments '/target:exe' "/out:$exe" @sources (Join-Path $projectRoot 'tests\CoreTests.cs') (Join-Path $projectRoot 'tests\AppUpdateTests.cs') (Join-Path $projectRoot 'tests\DesktopApplicationTests.cs')
     if ($LASTEXITCODE -ne 0) { throw 'Compilazione test non riuscita.' }
     & $exe
     if ($LASTEXITCODE -ne 0) { throw 'Test non riusciti.' }

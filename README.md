@@ -1,6 +1,10 @@
 # Khuzoe Updater
 
-App Windows per installare e aggiornare i moduli Khuzoe in Foundry. Scegli la cartella una volta: **Aggiorna** aggiorna quelli già presenti; **Installa**, accanto a un modulo mancante, scarica l'ultima versione pubblicata.
+App Windows per installare e aggiornare i moduli Khuzoe e **Khuzoe Assets Manager**. Scegli la cartella una volta: **Aggiorna** aggiorna i componenti già presenti; **Installa**, accanto a un componente mancante, scarica l'ultima versione pubblicata.
+
+Dalla versione **0.5.0**, Assets Manager compare nello stesso elenco dei moduli: premi **Installa** e poi **Apri**. Le versioni successive vengono gestite dal normale pulsante **Aggiorna**. Chi usa un Updater precedente deve prima premere **Aggiorna app** in alto.
+
+Assets Manager viene installato in `khuzoe-apps/khuzoe-assets-manager`, sotto la cartella dati Foundry selezionata. L'Updater gli passa automaticamente questa cartella all'avvio. Non va abilitato in Gestione moduli: il pulsante **Apri** avvia l'app Windows. Per aggiornarlo chiudi Assets Manager; Foundry può rimanere aperto quando non stai aggiornando anche i moduli. Login Discord, preferenze, strumenti e raccolta sono conservati separatamente in `%LOCALAPPDATA%\KhuzoeAssetsManager`.
 
 Il catalogo include **Khuzoe Tiles Creator** dalla versione **0.4.1** dell'Updater. Se usi la 0.4.0, premi prima **Aggiorna app**; poi puoi installare Tiles Creator dalla sua riga, insieme a Cripta Wiki Sync se necessario.
 
@@ -29,6 +33,8 @@ Rispetta i file di blocco aggiornamento di Foundry (`<id>.lock`) e mantiene le v
 Prima di cambiare file scarica, verifica ed estrae tutti i pacchetti necessari. Il controllo SHA-256 verifica che i byte corrispondano al catalogo. Le cartelle temporanee sono nella cartella `modules` per poter spostare i file sullo stesso disco; vengono eliminate dopo l'operazione. Durante la sostituzione viene mantenuta una copia temporanea del singolo modulo, ripristinata solo se lo spostamento immediato fallisce. Non è un backup storico né un ripristino di un gruppo di moduli in caso di spegnimento del PC. Se un gruppo si interrompe, i moduli già installati restano aggiornati e quelli rimanenti possono essere ritentati. Non avviare Foundry durante l'aggiornamento.
 
 ## Per chi pubblica
+
+I sorgenti dell'Updater e dei moduli sono nel repository. Per **Assets Manager** si distribuisce soltanto il pacchetto già compilato: `applications/khuzoe-assets-manager/application.zip`, il suo manifest `application.json` e dimensione/impronta in `release.json`. I sorgenti della nuova app rimangono locali. Il publisher rifiuta pacchetti contenenti il progetto C#, script di sviluppo o sessioni utente; il workflow Windows ne verifica anche estrazione, versione dell'eseguibile e lettore scene prima di pubblicarli.
 
 Leggi [CONFIGURAZIONE-GITHUB.md](CONFIGURAZIONE-GITHUB.md). Il repository previsto è `Khuzoe/khuzoe-modules` e contiene sia app sia sorgenti dei singoli moduli. L'app e i moduli hanno workflow e versioni indipendenti.
 

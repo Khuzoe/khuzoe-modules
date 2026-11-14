@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using KhuzoeUpdater;
 
 internal static class CoreTests
@@ -37,20 +38,40 @@ internal static class CoreTests
         var catalog = Json.FileRead<Catalog>(catalogPath);
         Network.Validate(catalog);
         string output = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(catalogPath), "..", "packages"));
-        foreach (var release in catalog.modules)
+        foreach (var release in catalog.modules.Concat(catalog.applications ?? new List<Release>()))
         {
-            string package = Path.Combine(output, release.id, "module.zip");
+            string package = Path.Combine(output, release.id, release.IsApplication ? "application.zip" : "module.zip");
             Assert(new FileInfo(package).Length == release.size && Network.Hash(package) == release.sha256, "dimensione e integrità " + release.id);
             Installer.Extract(package, Path.Combine(root, "integration", release.id), release);
-            Assert(File.Exists(Path.Combine(root, "integration", release.id, "module.json")), "ZIP reale leggibile dall'app: " + release.id);
+            Assert(File.Exists(Path.Combine(root, "integration", release.id, Installer.ManifestName(release))), "ZIP reale leggibile dall'app: " + release.id);
         }
+    }
+    static async Task VerifyOnline(string root)
+    {
+        var catalog = await Network.Catalog();
+        var release = (catalog.applications ?? new List<Release>()).Single(value => value.id == "khuzoe-assets-manager");
+        string source = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "applications", "khuzoe-assets-manager", "application.json"));
+        Assert(release.version == Json.Str(Json.FileRead<Dictionary<string, object>>(source), "version"), "catalogo pubblicato con la versione Assets Manager prevista");
+        string data = Path.Combine(root, "Foundry", "Data");
+        foreach (string name in new[] { "modules", "worlds", "systems" }) Directory.CreateDirectory(Path.Combine(data, name));
+        var install = new Installation { ModulesPath = Path.Combine(data, "modules"), FoundryVersion = "14.367" };
+        var rows = Planner.Scan(install, catalog); var target = rows.Single(value => value.Release.id == release.id);
+        Assert(!target.IsInstalled && target.CanUpdate, "Assets Manager installabile dal catalogo online");
+        await Installer.Apply(install, rows, Console.WriteLine, new[] { target });
+        var installed = Planner.Scan(install, catalog).Single(value => value.Release.id == release.id);
+        Assert(installed.IsInstalled && installed.LocalVersion == release.version && !installed.CanUpdate, "download pubblico, SHA-256, estrazione e installazione Assets Manager completati");
+        var launch = DesktopApplications.LaunchInfo(install, installed);
+        Assert(launch.Arguments.Contains(data) && File.Exists(launch.FileName), "app pronta da aprire con la stessa cartella Foundry");
+        Assert(!Directory.EnumerateFileSystemEntries(install.ModulesPath).Any(), "nessun modulo installato automaticamente insieme all'app");
+        Console.WriteLine("ONLINE ASSETS INSTALL OK: " + release.version + "; nessun accesso Discord o avvio dell'app durante il test.");
     }
     public static int Main(string[] args)
     {
-        string root = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ".work", "khuzoe-tests-" + Guid.NewGuid().ToString("N")));
+        string root = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ".work", "t-" + Guid.NewGuid().ToString("N").Substring(0, 8)));
         Directory.CreateDirectory(root);
         try
         {
+            if (args.Length == 1 && args[0] == "--verify-online") { VerifyOnline(root).GetAwaiter().GetResult(); return 0; }
             Assert(Versioning.Compare("0.10.0", "0.9.9") > 0, "confronto numerico delle versioni");
             Assert(Versioning.Compare("14", "14.0") == 0, "versioni equivalenti");
             Assert(Versioning.Compare("v1.1.4", "1.1.4") == 0, "versione Socketlib con prefisso v");
@@ -165,6 +186,7 @@ internal static class CoreTests
             Assert(Json.FileRead<Preferences>(settings).ModulesPath == modules, "cartella memorizzata e risalvata");
             Assert(Network.Hash(valid).Length == 64, "impronta SHA-256 disponibile");
             AppUpdateTests.Run(root, Assert, Reject);
+            DesktopApplicationTests.Run(root, Assert, Reject);
             if (args.Length == 1) VerifyPackages(args[0], root);
             Console.WriteLine("PASS: " + passed + " controlli, solo cartelle temporanee.");
             return 0;

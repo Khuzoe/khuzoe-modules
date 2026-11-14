@@ -2,7 +2,7 @@ name: Pubblica moduli Khuzoe
 on:
   push:
     branches: [main]
-    paths: ['modules/**', 'publisher.config.json', 'tools/publisher.mjs', '.github/workflows/publish-modules.yml']
+    paths: ['modules/**', 'applications/**', 'publisher.config.json', 'tools/publisher.mjs', '.github/workflows/publish-modules.yml']
   workflow_dispatch:
 permissions:
   contents: write
@@ -14,7 +14,10 @@ concurrency:
 jobs:
   publish:
     if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
     environment:
       name: github-pages
       url: ${{ steps.pages.outputs.page_url }}
@@ -30,7 +33,14 @@ jobs:
         run: npm ci
       - name: Verifica i compendi pronti per la distribuzione
         run: node tools/verify-packs.mjs
-      - name: Prepara i singoli moduli
+      - name: Prepara tutti i pacchetti per la verifica locale
+        run: node tools/publisher.mjs preview
+      - name: Verifica i pacchetti con lo stesso motore dell'Updater
+        run: |
+          ./tools/build-app.ps1 -Test
+          ./dist/KhuzoeUpdater.Tests.exe ./build/publication/site/catalog.json
+          if ($LASTEXITCODE -ne 0) { throw 'Verifica pacchetti non riuscita.' }
+      - name: Confronta le versioni pubblicate e prepara solo quelle nuove
         run: node tools/publisher.mjs prepare
       - name: Pubblica ZIP e manifest nelle Releases
         run: node tools/publisher.mjs publish
@@ -43,3 +53,11 @@ jobs:
       - name: Aggiorna il catalogo solo dopo i pacchetti
         id: pages
         uses: actions/deploy-pages@v4
+      - name: Verifica installazione dal catalogo pubblico su cartella isolata
+        run: |
+          for ($attempt = 1; $attempt -le 6; $attempt++) {
+            ./dist/KhuzoeUpdater.Tests.exe --verify-online
+            if ($LASTEXITCODE -eq 0) { exit 0 }
+            if ($attempt -lt 6) { Start-Sleep -Seconds 5 }
+          }
+          throw 'Il catalogo pubblico non supera la verifica di installazione.'

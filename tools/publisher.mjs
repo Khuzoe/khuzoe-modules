@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { inflateRawSync } from 'node:zlib';
 import { readFile, readdir, mkdir, writeFile, lstat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -97,13 +98,81 @@ export async function collectModule(root, id, config) {
   for (const [name, data] of [...files].sort(([a], [b]) => a.localeCompare(b, 'en'))) hash.update(name + '\0').update(data).update('\0');
   return { manifest, files, tag, fingerprint: hash.digest('hex') };
 }
+export async function applicationMetadata(root, id, config) {
+  const source = JSON.parse(await readFile(path.join(root, 'application.json'), 'utf8'));
+  const release = JSON.parse(await readFile(path.join(root, 'release.json'), 'utf8'));
+  const version = source.version;
+  if (source.id !== id || !/^\d+\.\d+\.\d+$/.test(version) || !/^[A-Za-z0-9.-]+\.exe$/.test(source.entryPoint ?? '') || !source.compatibility?.minimum
+      || release.id !== id || release.version !== version || !/^[a-f0-9]{64}$/.test(release.sha256) || !Number.isSafeInteger(release.size) || release.size < 1 || release.size > 512 * 1024 * 1024)
+    throw new Error(`Manifest applicazione non valido: ${id}`);
+  const tag = `${id}-v${version}`;
+  const manifest = { ...source, url: `https://github.com/${config.repository}`, manifest: `${config.pagesUrl}/applications/${id}/application.json`,
+    download: `https://github.com/${config.repository}/releases/download/${tag}/application.zip` };
+  const fingerprint = sha256(Buffer.from(JSON.stringify(manifest) + '\0' + release.sha256));
+  return { manifest, tag, fingerprint, release };
+}
+export function validateApplicationArchive(archive, manifest) {
+  let end = -1;
+  for (let i = archive.length - 22; i >= Math.max(0, archive.length - 65557); i--) {
+    if (archive.readUInt32LE(i) === 0x06054b50 && i + 22 + archive.readUInt16LE(i + 20) === archive.length) { end = i; break; }
+  }
+  if (end < 0 || archive.readUInt32LE(end + 4) !== 0) throw new Error('Pacchetto applicazione ZIP non valido');
+  const count = archive.readUInt16LE(end + 10), start = archive.readUInt32LE(end + 16), length = archive.readUInt32LE(end + 12);
+  if (!count || count > 20000 || start + length !== end) throw new Error('Indice ZIP applicazione non valido');
+  const entries = new Map(), folded = new Set(); let offset = start;
+  for (let i = 0; i < count; i++) {
+    if (offset + 46 > end || archive.readUInt32LE(offset) !== 0x02014b50) throw new Error('Indice ZIP applicazione non valido');
+    const nameLength = archive.readUInt16LE(offset + 28), extra = archive.readUInt16LE(offset + 30), comment = archive.readUInt16LE(offset + 32);
+    const next = offset + 46 + nameLength + extra + comment;
+    if (next > end) throw new Error('Indice ZIP applicazione non valido');
+    const name = archive.subarray(offset + 46, offset + 46 + nameLength).toString('utf8').replaceAll('\\', '/');
+    if (!name.endsWith('/')) {
+      safeRelative(name);
+      if (folded.has(name.toLowerCase()) || (archive.readUInt16LE(offset + 8) & 1) || ((archive.readUInt32LE(offset + 38) >>> 16) & 0xf000) === 0xa000) throw new Error('ZIP applicazione con file duplicati, cifrati o collegamenti');
+      folded.add(name.toLowerCase());
+      const roots = ['application.json', manifest.entryPoint, manifest.entryPoint + '.config', 'README.md', 'THIRD_PARTY.md', 'VERIFICHE.md'];
+      if ((!roots.includes(name) && !name.startsWith('scene-reader/')) || /\.(cs|csproj|sln|ps1)$/i.test(name) || /(^|\/)(session\.bin|settings\.json|library\.json|queue\.json)$/i.test(name))
+        throw new Error(`File non runtime o sorgente privato nel pacchetto: ${name}`);
+      entries.set(name, { local: archive.readUInt32LE(offset + 42), size: archive.readUInt32LE(offset + 24), compressed: archive.readUInt32LE(offset + 20), method: archive.readUInt16LE(offset + 10) });
+    }
+    offset = next;
+  }
+  for (const name of ['application.json', manifest.entryPoint, manifest.entryPoint + '.config', 'scene-reader/reader.cjs', 'scene-reader/integrity.json']) if (!entries.has(name)) throw new Error(`File runtime mancante: ${name}`);
+  if (![...entries.keys()].some(name => name.endsWith('.node'))) throw new Error('Lettore scene incompleto');
+  function json(name) {
+    const entry = entries.get(name), local = entry.local;
+    if (entry.size > 1024 * 1024 || local + 30 > start || archive.readUInt32LE(local) !== 0x04034b50) throw new Error('Manifest ZIP non valido');
+    const begin = local + 30 + archive.readUInt16LE(local + 26) + archive.readUInt16LE(local + 28);
+    if (begin + entry.compressed > start) throw new Error('Manifest ZIP non valido');
+    const bytes = archive.subarray(begin, begin + entry.compressed);
+    const data = entry.method === 0 ? bytes : entry.method === 8 ? inflateRawSync(bytes, { maxOutputLength: 1024 * 1024 }) : null;
+    if (!data || data.length !== entry.size) throw new Error('Manifest ZIP non valido');
+    return JSON.parse(data);
+  }
+  const inside = json('application.json');
+  for (const key of ['id', 'version', 'entryPoint']) if (inside[key] !== manifest[key]) throw new Error('Il manifest nello ZIP non corrisponde alla pubblicazione');
+  const integrity = json('scene-reader/integrity.json');
+  if (!integrity['reader.cjs'] || Object.keys(integrity).some(name => !entries.has(`scene-reader/${safeRelative(name)}`))) throw new Error('Lettore scene incompleto');
+  return [...entries.keys()];
+}
+export async function collectApplication(root, metadata) {
+  const file = path.join(root, 'application.zip'), info = await lstat(file);
+  if (!info.isFile() || info.isSymbolicLink() || info.size !== metadata.release.size) throw new Error('Dimensione pacchetto applicazione non valida');
+  const archive = await readFile(file);
+  if (sha256(archive) !== metadata.release.sha256) throw new Error('Impronta pacchetto applicazione non valida');
+  validateApplicationArchive(archive, metadata.manifest);
+  return archive;
+}
 export async function prepare({ root = projectRoot, previous = null, output = path.join(root, 'build', 'publication') } = {}) {
   const config = JSON.parse(await readFile(path.join(root, 'publisher.config.json'), 'utf8'));
   if (!/^[A-Za-z0-9-]+\/[A-Za-z0-9_.-]+$/.test(config.repository) || !/^https:\/\/[a-zA-Z0-9.-]+\/[a-zA-Z0-9_.-]+$/.test(config.pagesUrl)) throw new Error('Repository o URL Pages non valido');
   if (!Array.isArray(config.modules) || new Set(config.modules).size !== config.modules.length || config.modules.some(id => !/^[a-z0-9-]+$/.test(id))) throw new Error('Elenco moduli non valido');
+  const appIds = config.applications ?? [];
+  if (!Array.isArray(appIds) || new Set(appIds).size !== appIds.length || appIds.some(id => !/^[a-z0-9-]+$/.test(id) || config.modules.includes(id))) throw new Error('Elenco applicazioni non valido');
   if (previous && (previous.schemaVersion !== 1 || previous.repository !== config.repository || !Array.isArray(previous.modules))) throw new Error('Catalogo precedente non valido');
   const before = new Map((previous?.modules ?? []).map(m => [m.id, m]));
   const releases = [], catalog = { schemaVersion: 1, repository: config.repository, modules: [] };
+  if (appIds.length) catalog.applications = [];
   const site = path.join(output, 'site');
   await mkdir(site, { recursive: true });
   for (const id of config.modules) {
@@ -130,6 +199,26 @@ export async function prepare({ root = projectRoot, previous = null, output = pa
     const dir = path.join(site, 'modules', id);
     await mkdir(dir, { recursive: true });
     await writeFile(path.join(dir, 'module.json'), files.get('module.json'));
+  }
+  const oldApps = new Map((previous?.applications ?? []).map(item => [item.id, item]));
+  for (const id of appIds) {
+    const appRoot = path.join(root, 'applications', id), metadata = await applicationMetadata(appRoot, id, config);
+    const { manifest, fingerprint, tag } = metadata, old = oldApps.get(id);
+    const comparison = old ? compare(manifest.version, old.version) : 1;
+    if (comparison < 0) throw new Error(`${id}: versione ${manifest.version} precedente a quella pubblicata ${old.version}`);
+    if (comparison === 0 && old.fingerprint !== fingerprint) throw new Error(`${id}: file cambiati senza aumentare la versione ${manifest.version}`);
+    let entry = old;
+    const archive = await collectApplication(appRoot, metadata);
+    if (comparison > 0) {
+      entry = { id, title: manifest.title, version: manifest.version, entryPoint: manifest.entryPoint, download: manifest.download, manifest: manifest.manifest,
+        sha256: sha256(archive), size: archive.length, fingerprint, compatibility: manifest.compatibility, relationships: {} };
+      const releaseDir = path.join(output, 'packages', id); await mkdir(releaseDir, { recursive: true });
+      await writeFile(path.join(releaseDir, 'application.zip'), archive); await writeFile(path.join(releaseDir, 'application.json'), JSON.stringify(manifest, null, 2) + '\n');
+      releases.push({ id, version: manifest.version, tag, sha256: entry.sha256, directory: `packages/${id}`, assets: ['application.zip', 'application.json'] });
+    }
+    catalog.applications.push(entry);
+    const dir = path.join(site, 'applications', id); await mkdir(dir, { recursive: true });
+    await writeFile(path.join(dir, 'application.json'), JSON.stringify(manifest, null, 2) + '\n');
   }
   await writeFile(path.join(site, 'catalog.json'), JSON.stringify(catalog, null, 2) + '\n');
   await writeFile(path.join(site, '.nojekyll'), '');
@@ -163,7 +252,7 @@ export async function publish(output, { token = process.env.GH_TOKEN, fetchImpl 
     }
     if (!response.ok) throw new Error(`Release ${item.tag}: HTTP ${response.status}`);
     release = await response.json();
-    for (const name of ['module.zip', 'module.json']) {
+    for (const name of item.assets ?? ['module.zip', 'module.json']) {
       const data = await readFile(path.join(output, item.directory, name));
       const existing = release.assets.find(a => a.name === name);
       if (existing) {
@@ -194,7 +283,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     const config = JSON.parse(await readFile(path.join(projectRoot, 'publisher.config.json'), 'utf8'));
     const previous = command === 'preview' ? null : await priorCatalog(config);
     const result = await prepare({ previous, output });
-    console.log(`${result.releases.length} pacchetti preparati; ${result.catalog.modules.length} moduli nel catalogo.`);
+    console.log(`${result.releases.length} pacchetti preparati; ${result.catalog.modules.length} moduli e ${result.catalog.applications?.length ?? 0} applicazioni nel catalogo.`);
   } else if (command === 'publish') await publish(output);
   else throw new Error(`Comando sconosciuto: ${command}`);
 }

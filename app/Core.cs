@@ -20,9 +20,12 @@ namespace KhuzoeUpdater
         public int schemaVersion { get; set; }
         public string repository { get; set; }
         public List<Release> modules { get; set; }
+        public List<Release> applications { get; set; }
     }
     public sealed class Release
     {
+        public bool IsApplication { get { return BuildConfig.ApplicationIds.Contains(id, StringComparer.Ordinal); } }
+        public string entryPoint { get; set; }
         public string id { get; set; }
         public string title { get; set; }
         public string version { get; set; }
@@ -284,7 +287,12 @@ namespace KhuzoeUpdater
             if (catalog == null || catalog.schemaVersion != 1 || catalog.modules == null ||
                 !String.Equals(catalog.repository, owner + "/" + repo, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidDataException("Catalogo Khuzoe non valido.");
-            foreach (var module in catalog.modules)
+            ValidateEntries(catalog.modules, allowed, seen, catalog.repository);
+            ValidateEntries(catalog.applications ?? new List<Release>(), new HashSet<string>(BuildConfig.ApplicationIds, StringComparer.Ordinal), seen, catalog.repository);
+        }
+        static void ValidateEntries(IEnumerable<Release> entries, HashSet<string> allowed, HashSet<string> seen, string repository)
+        {
+            foreach (var module in entries)
             {
                 if (!allowed.Contains(module.id) || !seen.Add(module.id) || !Versioning.Valid(module.version) ||
                     module.sha256 == null || !Regex.IsMatch(module.sha256, "^[a-fA-F0-9]{64}$") || module.size <= 0 || module.size > 512L * 1024 * 1024)
@@ -292,8 +300,9 @@ namespace KhuzoeUpdater
                 Uri download;
                 if (!Uri.TryCreate(module.download, UriKind.Absolute, out download) || download.Scheme != "https" ||
                     !download.Host.Equals("github.com", StringComparison.OrdinalIgnoreCase) ||
-                    !download.AbsolutePath.StartsWith("/" + catalog.repository + "/releases/download/", StringComparison.OrdinalIgnoreCase))
+                    !download.IsDefaultPort || download.UserInfo.Length != 0 || !download.AbsolutePath.StartsWith("/" + repository + "/releases/download/", StringComparison.OrdinalIgnoreCase))
                     throw new InvalidDataException("Il pacchetto non appartiene al repository Khuzoe configurato.");
+                if (module.IsApplication && module.entryPoint != DesktopApplications.EntryPoint(module)) throw new InvalidDataException("Eseguibile dell'app non valido.");
             }
         }
         public static async Task Download(Release release, string destination)
@@ -332,9 +341,9 @@ namespace KhuzoeUpdater
         public static List<ModuleStatus> Scan(Installation install, Catalog catalog)
         {
             var rows = new List<ModuleStatus>();
-            foreach (var release in catalog.modules)
+            foreach (var release in catalog.modules.Concat(catalog.applications ?? new List<Release>()))
             {
-                string path = Paths.Child(install.ModulesPath, release.id);
+                string path = Paths.Child(Installer.RootFor(install, release), release.id);
                 var row = new ModuleStatus { Release = release, DirectoryPath = path, Status = "Errore", IsInstalled = Directory.Exists(path) };
                 try
                 {
@@ -347,15 +356,16 @@ namespace KhuzoeUpdater
                     }
                     else
                     {
-                        var local = Json.FileRead<Dictionary<string, object>>(Path.Combine(path, "module.json"));
+                        var local = Json.FileRead<Dictionary<string, object>>(Path.Combine(path, Installer.ManifestName(release)));
                         if (Json.Str(local, "id") != release.id) throw new InvalidDataException("Identificatore locale diverso dal modulo previsto.");
                         row.LocalVersion = Json.Str(local, "version");
+                        if (release.IsApplication) DesktopApplications.ValidateLocal(path, release, row.LocalVersion);
                         int comparison = Versioning.Compare(row.LocalVersion, release.version);
                         row.Status = "Aggiornato";
                         if (comparison > 0) row.Detail = "Versione locale più recente: viene mantenuta.";
                         else if (comparison < 0)
                         {
-                            row.Detail = File.Exists(Path.Combine(path, release.id + ".lock")) ? "Modulo bloccato in Foundry. Sbloccalo prima di aggiornare." : CompatibilityError(install, release);
+                            row.Detail = !release.IsApplication && File.Exists(Path.Combine(path, release.id + ".lock")) ? "Modulo bloccato in Foundry. Sbloccalo prima di aggiornare." : CompatibilityError(install, release);
                             row.CanUpdate = row.Detail == null;
                             row.Status = row.CanUpdate ? "Da aggiornare" : "Errore";
                         }
@@ -499,6 +509,9 @@ namespace KhuzoeUpdater
     }
     public static class Installer
     {
+        public static string ManifestName(Release release) { return release.IsApplication ? "application.json" : "module.json"; }
+        public static string RootFor(Installation install, Release release)
+        { return release.IsApplication ? Paths.Child(Path.GetDirectoryName(Paths.Full(install.ModulesPath)), "khuzoe-apps") : install.ModulesPath; }
         public static void Extract(string zip, string destination, Release release)
         {
             Directory.CreateDirectory(destination);
@@ -519,13 +532,16 @@ namespace KhuzoeUpdater
                     entry.ExtractToFile(target, false);
                 }
             }
-            var manifest = Json.FileRead<Dictionary<string, object>>(Path.Combine(destination, "module.json"));
+            var manifest = Json.FileRead<Dictionary<string, object>>(Path.Combine(destination, ManifestName(release)));
             if (Json.Str(manifest, "id") != release.id || Json.Str(manifest, "version") != release.version)
                 throw new InvalidDataException("Il contenuto dello ZIP non corrisponde al modulo richiesto.");
+            if (release.IsApplication) DesktopApplications.ValidatePackage(destination, release);
         }
         public static void Replace(string modulesRoot, string staged, ModuleStatus row)
         {
+            Paths.NoLinks(modulesRoot); Directory.CreateDirectory(modulesRoot);
             string destination = Paths.Child(modulesRoot, row.Release.id);
+            if (row.Release.IsApplication) DesktopApplications.EnsureClosed(row);
             if (!row.IsInstalled)
             {
                 if (Directory.Exists(destination) || File.Exists(destination)) throw new IOException("Il percorso del modulo ora esiste già. Ricontrolla prima di installare; nessun file è stato sostituito.");
@@ -533,8 +549,8 @@ namespace KhuzoeUpdater
                 return;
             }
             if (!Directory.Exists(destination)) throw new IOException("Il modulo non è più installato: aggiornamento annullato.");
-            if (File.Exists(Path.Combine(destination, row.Release.id + ".lock"))) throw new IOException("Il modulo è stato bloccato in Foundry. Aggiorna l'elenco.");
-            string existing = Json.Str(Json.FileRead<Dictionary<string, object>>(Path.Combine(destination, "module.json")), "version");
+            if (!row.Release.IsApplication && File.Exists(Path.Combine(destination, row.Release.id + ".lock"))) throw new IOException("Il modulo è stato bloccato in Foundry. Aggiorna l'elenco.");
+            string existing = Json.Str(Json.FileRead<Dictionary<string, object>>(Path.Combine(destination, ManifestName(row.Release))), "version");
             if (existing != row.LocalVersion) throw new IOException("Il modulo è cambiato dopo il controllo. Aggiorna l'elenco.");
             // Temporary directory swap only; no version history or rollback UI.
             string previous = Paths.Child(modulesRoot, ".khuzoe-old-" + row.Release.id + "-" + Guid.NewGuid().ToString("N"));
@@ -553,7 +569,8 @@ namespace KhuzoeUpdater
         {
             var plan = Planner.BuildPlan(install, rows, requested ?? rows.Where(r => r.IsInstalled && r.CanUpdate));
             if (plan.Count == 0) return;
-            RunningFoundry.EnsureClosed();
+            if (plan.Any(row => !row.Release.IsApplication)) RunningFoundry.EnsureClosed();
+            foreach (var row in plan.Where(value => value.Release.IsApplication)) DesktopApplications.EnsureClosed(row);
             Paths.NoLinks(install.ModulesPath);
             string work = Paths.Child(install.ModulesPath, ".khuzoe-update-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(work);
@@ -568,12 +585,12 @@ namespace KhuzoeUpdater
                     Extract(zip, unpacked, row.Release);
                 }
                 // All packages must be valid before the first installed module is changed.
-                RunningFoundry.EnsureClosed();
+                if (plan.Any(row => !row.Release.IsApplication)) RunningFoundry.EnsureClosed();
                 foreach (var row in plan)
                 {
-                    RunningFoundry.EnsureClosed();
+                    if (!row.Release.IsApplication) RunningFoundry.EnsureClosed();
                     progress("Installazione: " + row.Release.title);
-                    Replace(install.ModulesPath, Paths.Child(work, row.Release.id), row);
+                    Replace(RootFor(install, row.Release), Paths.Child(work, row.Release.id), row);
                     row.LocalVersion = row.Release.version;
                     row.IsInstalled = true;
                     row.CanUpdate = false;

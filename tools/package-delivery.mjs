@@ -14,12 +14,14 @@ async function collect(relative) {
   for (const entry of await readdir(path.join(projectRoot, relative), { withFileTypes: true })) {
     const name = relative ? `${relative}/${entry.name}` : entry.name;
     if (['node_modules', '.maintenance', '.git', 'LOCK', 'LOG', 'LOG.old'].includes(entry.name)) continue;
+    if (name.startsWith('applications/') && ['build', 'dist'].includes(entry.name)) continue;
+    if (relative.startsWith('applications/') && !['application.json', 'release.json', 'application.zip'].includes(entry.name)) continue;
     if (entry.isDirectory()) await collect(name);
     else if (entry.isFile()) projectFiles.set(name, await readFile(path.join(projectRoot, name)));
     else throw new Error('Collegamento non distribuibile: ' + name);
   }
 }
-for (const folder of ['.github', 'app', 'modules', 'tests', 'tools']) await collect(folder);
+for (const folder of ['.github', 'app', 'applications', 'modules', 'tests', 'tools']) await collect(folder);
 for (const name of ['.gitignore', '.gitattributes', 'AGENTS.md', 'README.md', 'CONFIGURAZIONE-GITHUB.md', 'VERIFICHE.md', 'publisher.config.json']) projectFiles.set(name, await readFile(path.join(projectRoot, name)));
 const project = zip(projectFiles);
 await writeFile(path.join(dist, 'Khuzoe-Updater-progetto-GitHub.zip'), project);

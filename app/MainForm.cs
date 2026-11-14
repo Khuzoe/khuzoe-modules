@@ -178,7 +178,7 @@ namespace KhuzoeUpdater
             layout.Controls.Add(folderCard, 0, 2);
             var section = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, Margin = Padding.Empty, Padding = new Padding(0, 20, 0, 6) };
             section.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50)); section.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-            section.Controls.Add(new Label { Text = "Moduli", Font = new Font("Segoe UI", 15F, FontStyle.Bold), Dock = DockStyle.Fill }, 0, 0);
+            section.Controls.Add(new Label { Text = "Moduli e app", Font = new Font("Segoe UI", 15F, FontStyle.Bold), Dock = DockStyle.Fill }, 0, 0);
             summary.Dock = DockStyle.Fill; summary.TextAlign = ContentAlignment.MiddleRight; summary.ForeColor = Theme.Muted; summary.Font = new Font("Segoe UI", 9F);
             section.Controls.Add(summary, 1, 0); layout.Controls.Add(section, 0, 3);
             var tableCard = new SurfacePanel { Dock = DockStyle.Fill, Padding = new Padding(16, 8, 16, 8), Margin = Padding.Empty };
@@ -198,7 +198,7 @@ namespace KhuzoeUpdater
             grid.ColumnHeadersDefaultCellStyle.Padding = new Padding(12, 0, 0, 0);
             grid.ColumnHeadersHeight = 42; grid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             grid.DefaultCellStyle.ForeColor = Theme.Text; grid.ShowCellErrors = false; grid.ShowRowErrors = false;
-            grid.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Modulo", FillWeight = 42 });
+            grid.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Componente", FillWeight = 42 });
             grid.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Installato", FillWeight = 17 });
             grid.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Disponibile", FillWeight = 17 });
             grid.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Stato", FillWeight = 24 });
@@ -209,8 +209,11 @@ namespace KhuzoeUpdater
             grid.CellPainting += PaintStatus;
             grid.CellContentClick += async (s, e) =>
             {
-                if (!busy && e.ColumnIndex == 4 && e.RowIndex >= 0 && e.RowIndex < rows.Count && !rows[e.RowIndex].IsInstalled && rows[e.RowIndex].CanUpdate)
-                    await Apply(rows[e.RowIndex]);
+                if (busy || e.ColumnIndex != 4 || e.RowIndex < 0 || e.RowIndex >= rows.Count) return;
+                var row = rows[e.RowIndex];
+                if (!row.IsInstalled && row.CanUpdate) await Apply(row);
+                else if (row.Release.IsApplication && row.IsInstalled && row.Status != "Errore")
+                { try { DesktopApplications.Open(installation, row); } catch (Exception error) { ShowError(error); } }
             };
             grid.CellDoubleClick += (s, e) => { if (e.RowIndex >= 0 && e.RowIndex < rows.Count && !String.IsNullOrEmpty(rows[e.RowIndex].Detail)) MessageBox.Show(this, rows[e.RowIndex].Detail, rows[e.RowIndex].Release.title); };
             empty.Dock = DockStyle.Fill; empty.BackColor = Theme.Surface; empty.Padding = new Padding(20);
@@ -228,7 +231,7 @@ namespace KhuzoeUpdater
             bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 145));
             bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 145));
-            bottom.Controls.Add(new Label { Text = "Chiudi Foundry prima di aggiornare.", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, ForeColor = Theme.Muted, Font = new Font("Segoe UI", 9F) }, 0, 0);
+            bottom.Controls.Add(new Label { Text = "Chiudi Foundry per i moduli e Assets Manager per l'app.", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, ForeColor = Theme.Muted, Font = new Font("Segoe UI", 9F) }, 0, 0);
             refresh.Text = "Ricontrolla"; refresh.Dock = DockStyle.Fill; refresh.Margin = new Padding(5, 12, 8, 4);
             update.Text = "Aggiorna"; update.Dock = DockStyle.Fill; update.Margin = new Padding(5, 12, 0, 4);
             refresh.Click += async (s, e) => await Check();
@@ -383,12 +386,12 @@ namespace KhuzoeUpdater
             empty.Visible = rows.Count == 0;
             if (empty.Visible && installation != null)
             {
-                emptyTitle.Text = busy ? "Controllo degli aggiornamenti…" : "Nessun modulo da mostrare";
+                emptyTitle.Text = busy ? "Controllo degli aggiornamenti…" : "Nessun componente da mostrare";
                 emptyText.Text = busy ? "" : "Controlla la cartella selezionata o riprova.";
             }
             foreach (var row in rows)
             {
-                int index = grid.Rows.Add(row.Release.title, row.IsInstalled ? row.LocalVersion ?? "?" : "—", row.Release.version, row.Status, !row.IsInstalled && row.CanUpdate ? "Installa" : "");
+                int index = grid.Rows.Add(row.Release.title, row.IsInstalled ? row.LocalVersion ?? "?" : "-", row.Release.version, row.Status, !row.IsInstalled && row.CanUpdate ? "Installa" : row.Release.IsApplication && row.IsInstalled && row.Status != "Errore" ? "Apri" : "");
                 foreach (DataGridViewCell cell in grid.Rows[index].Cells) cell.ToolTipText = row.Detail ?? row.Status;
             }
             grid.ClearSelection();
@@ -407,8 +410,8 @@ namespace KhuzoeUpdater
                 rows = await Task.Run(() => Planner.Scan(installation, catalog));
                 Render();
                 int count = rows.Count(r => r.IsInstalled && r.CanUpdate), available = rows.Count(r => !r.IsInstalled && r.CanUpdate), errors = rows.Count(r => r.Status == "Errore");
-                message.Text = rows.Count == 0 ? "Nessun modulo disponibile nel catalogo." :
-                    count > 0 ? count + " moduli da aggiornare." : available > 0 ? "Premi Installa accanto ai moduli che vuoi aggiungere." : errors > 0 ? "Alcuni moduli richiedono attenzione: doppio clic sulla riga per i dettagli." : "Tutti i moduli sono aggiornati.";
+                message.Text = rows.Count == 0 ? "Nessun componente disponibile nel catalogo." :
+                    count > 0 ? count + " componenti da aggiornare." : available > 0 ? "Premi Installa accanto ai componenti che vuoi aggiungere." : errors > 0 ? "Alcuni componenti richiedono attenzione: doppio clic sulla riga per i dettagli." : "Tutti i componenti sono aggiornati.";
             }
             catch (Exception ex) { ShowError(ex); }
             finally { Busy(false); }
@@ -422,7 +425,7 @@ namespace KhuzoeUpdater
             {
                 var report = (IProgress<string>)progress;
                 await Task.Run(() => Installer.Apply(installation, rows, text => report.Report(text), target == null ? null : new[] { target }));
-                message.Text = target == null ? "Aggiornamento completato. Puoi aprire Foundry." : "Installazione completata. Abilita il modulo in Gestione moduli di Foundry.";
+                message.Text = target == null ? "Aggiornamento completato." : target.Release.IsApplication ? "Installazione completata. Premi Apri per usare " + target.Release.title + "." : "Installazione completata. Abilita il modulo in Gestione moduli di Foundry.";
             }
             catch (Exception ex) { ShowError(ex); }
             finally { Render(); Busy(false); }

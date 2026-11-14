@@ -1,6 +1,7 @@
 {
   "repository": "Khuzoe/khuzoe-modules",
   "pagesUrl": "https://khuzoe.github.io/khuzoe-modules",
+  "applications": ["khuzoe-assets-manager"],
   "modules": [
     "khuzoe-address-sender",
     "khuzoe-auras",

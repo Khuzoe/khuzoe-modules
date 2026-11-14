@@ -1,7 +1,9 @@
 # Khuzoe Updater e distribuzione moduli
 
 - Questo progetto contiene COPIE dei moduli presenti nel Foundry esterno. Non cancellare, sostituire o modificare le cartelle `../modules` nell'ambito di modifiche all'Updater o al publisher.
+- Sotto applications/<id> versionare soltanto application.zip (runtime compilato), application.json e release.json. I sorgenti di Assets Manager restano locali, fuori dal repository pubblico. Il catalogo espone le app in applications, separatamente da modules per mantenere compatibili gli Updater precedenti. Installarle solo sotto Data/khuzoe-apps/<id>. L'app aperta non va sostituita. La cartella Foundry si trasmette con --foundry-data; preferenze e sessioni restano in AppData.
 - Non pubblicare l'intera cartella dati Foundry; tenere fuori mondi, impostazioni, credenziali, file utente, cache, node_modules e backup.
+- Non versionare node_modules come sorgenti: gli ZIP delle applicazioni includono soltanto le dipendenze runtime necessarie, verificate e con le relative licenze. Il publisher usa i pacchetti già compilati e controlla dimensione, SHA-256 e contenuto, senza richiedere i sorgenti dell'app.
 - Configurazione di distribuzione: `publisher.config.json`. La build incorpora URL catalogo e identificatori nell'app. Dopo modifiche alla configurazione ricompilare e aumentare la versione app se cambia il binario distribuito.
 - Per ogni modifica runtime a `modules/<id>`, aumentare la versione di QUEL modulo, mantenendo l'identificatore. Il publisher rifiuta modifiche senza aumento versione.
 - I compendi sono distribuiti dalle revisioni compilate dichiarate nel manifest; non invocare automaticamente `build-packs.mjs`, che modifica versioni e percorsi. Verificare i compendi con `tools/verify-packs.mjs`.

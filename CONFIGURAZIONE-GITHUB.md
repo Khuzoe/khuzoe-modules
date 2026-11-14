@@ -40,6 +40,10 @@ Dalla versione 0.4.0, dopo questo primo download gli aggiornamenti successivi de
 
 ## Uso successivo
 
+Assets Manager usa lo stesso repository soltanto per la distribuzione binaria: sotto `applications/khuzoe-assets-manager` vanno `application.zip`, `application.json` e `release.json`. I sorgenti C# e gli strumenti di sviluppo dell'app restano locali. La release indipendente è `khuzoe-assets-manager-v<versione>`. Il workflow verifica il pacchetto compilato, lo pubblica nelle Releases e aggiorna la sezione `applications` del catalogo. Le versioni precedenti dell'Updater continuano a leggere la sezione `modules`; dalla 0.5.0 è disponibile anche l'app.
+
+La pubblicazione comprende una prova nativa di installazione dello ZIP pubblico in una cartella isolata dopo l'aggiornamento Pages. Non installa nulla nel Foundry reale del DM. Dalla cartella locale dei sorgenti Assets Manager esegui `tools/build-app.ps1 -Test`, quindi `tools/prepare-updater-package.ps1 -PublisherRoot ../khuzoe-updater`. Quest'ultimo aggiorna soltanto i tre file di distribuzione. Esegui poi i normali controlli del publisher dalla radice del repository dell'Updater. Una modifica al pacchetto compilato richiede un nuovo numero di versione dell'app.
+
 Per pubblicare Merchant, per esempio, si modificano i suoi file e si porta la versione da `1.21.2` a `1.21.3`, poi si invia a `main`. GitHub genera soltanto la nuova release Merchant. Il catalogo continua a contenere le versioni precedenti degli altri moduli.
 
 Non serve creare tag, ZIP o release a mano. Il workflow non pubblica automaticamente modifiche rimaste soltanto nelle cartelle del tuo Foundry locale: devono essere riportate nei sorgenti di questo repository e inviate a `main`.
