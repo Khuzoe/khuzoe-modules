@@ -21,21 +21,14 @@ namespace KhuzoeAssetsManager
             double x = (point.X - panX) / scale, y = (point.Y - panY) / scale;
             if (snap && SnapToGrid && Scene != null && Scene.GridType == 1 && (ModifierKeys & Keys.Shift) == 0)
             { x = Math.Round(x / Scene.GridSize) * Scene.GridSize; y = Math.Round(y / Scene.GridSize) * Scene.GridSize; }
-            return new PointF((float)Math.Max(0, Math.Min(layout == null ? 1000000 : layout.Width, x)), (float)Math.Max(0, Math.Min(layout == null ? 1000000 : layout.Height, y)));
+            return new PointF((float)Math.Max(-1000000, Math.Min(1000000, x)), (float)Math.Max(-1000000, Math.Min(1000000, y)));
         }
         public Point SceneScreen(double x, double y) { return Point.Round(Screen(x, y)); }
         public PointF SceneCenter { get { return layout == null ? new PointF(500, 500) : new PointF((float)(layout.MapX + layout.MapWidth / 2), (float)(layout.MapY + layout.MapHeight / 2)); } }
         public PointF[] ImageCorners(SceneTile tile)
         {
-            var texture = tile.Textures ?? new SceneTexture();
-            double width = tile.Width, height = tile.Height; Image image;
-            if (Images != null && Images.Tiles.TryGetValue(tile.Id, out image))
-            {
-                if (texture.Fit == "contain" || texture.Fit == "cover") { double s = texture.Fit == "contain" ? Math.Min(width / image.Width, height / image.Height) : Math.Max(width / image.Width, height / image.Height); width = s * image.Width; height = s * image.Height; }
-                else if (texture.Fit == "width") height = width * image.Height / image.Width;
-                else if (texture.Fit == "height") width = height * image.Width / image.Height;
-            }
-            return Corners(tile.X + texture.OffsetX, tile.Y + texture.OffsetY, width * texture.ScaleX, height * texture.ScaleY, texture.AnchorX, texture.AnchorY, tile.Rotation + texture.Rotation);
+            Image image; var native = Images != null && Images.Tiles.TryGetValue(tile.Id, out image) ? NativeSize(image) : new Size(Math.Max(1, (int)tile.Width), Math.Max(1, (int)tile.Height));
+            return new SceneImagePlacement(native, tile.X, tile.Y, tile.Width, tile.Height, TileTexture(tile)).Corners();
         }
         static PointF[] Corners(double x, double y, double width, double height, double anchorX, double anchorY, double rotation)
         {

@@ -39,11 +39,12 @@ namespace KhuzoeAssetsManager
             BackColor = Color.FromArgb(17, 18, 22); Dock = DockStyle.Fill; TabStop = true; Settings = new SceneViewSettings();
             AccessibleName = "Anteprima scena"; AccessibleDescription = "Trascina per spostare la mappa e usa la rotella per ingrandirla.";
             wheelTimer.Tick += WheelTick;
+            details = new SceneImageDetails(DetailsChanged);
         }
         public void SetScene(SceneDetail scene, SceneLevel level, SceneImageSet images, bool refit)
         {
             FinishWheelPreview();
-            if (!Object.ReferenceEquals(Images, images)) { rasterCache.Clear(); backgroundCache.Clear(); foregroundCache.Clear(); }
+            if (!Object.ReferenceEquals(Images, images)) { rasterCache.Clear(); backgroundCache.Clear(); foregroundCache.Clear(); details.Clear(); }
             Scene = scene; Level = level; Images = images; layout = scene == null ? null : SceneLayout.From(scene);
             if (refit) Fit(); else Invalidate();
         }
@@ -53,8 +54,9 @@ namespace KhuzoeAssetsManager
             fit = true;
             if (layout != null && ClientSize.Width > 40 && ClientSize.Height > 40)
             {
-                scale = Math.Max(0.00001, Math.Min((ClientSize.Width - 36) / layout.Width, (ClientSize.Height - 36) / layout.Height));
-                panX = (ClientSize.Width - layout.Width * scale) / 2; panY = (ClientSize.Height - layout.Height * scale) / 2;
+                var bounds = ContentBounds();
+                scale = Math.Max(0.00001, Math.Min((ClientSize.Width - 36) / Math.Max(1, bounds.Width), (ClientSize.Height - 36) / Math.Max(1, bounds.Height)));
+                panX = (ClientSize.Width - bounds.Width * scale) / 2 - bounds.Left * scale; panY = (ClientSize.Height - bounds.Height * scale) / 2 - bounds.Top * scale;
             }
             Invalidate(); if (ZoomChanged != null) ZoomChanged(this, EventArgs.Empty);
         }
@@ -87,12 +89,12 @@ namespace KhuzoeAssetsManager
         {
             base.OnMouseWheel(e); if (Scene == null || e.Delta == 0) return;
             bool preview = !dragging && gesture == null;
-            if (preview) { wheelPreview = true; wheelIdle.Restart(); } else FinishWheelPreview();
+            if (preview) { if (!wheelPreview) details.Suspend(); wheelPreview = true; wheelIdle.Restart(); } else FinishWheelPreview();
             ZoomAt(Math.Pow(1.2, e.Delta / 120.0), e.Location, preview);
         }
         protected override void OnMouseDown(MouseEventArgs e)
-        { FinishWheelPreview(); base.OnMouseDown(e); Focus(); if (EditorDown(e)) return; if (Scene != null && (e.Button == MouseButtons.Left || e.Button == MouseButtons.Middle)) { dragging = true; previous = e.Location; Capture = true; Cursor = Cursors.SizeAll; } }
-        protected override void OnMouseUp(MouseEventArgs e) { base.OnMouseUp(e); if (EditorUp(e)) return; dragging = false; Capture = false; Cursor = Cursors.Default; }
+        { FinishWheelPreview(); details.Suspend(); base.OnMouseDown(e); Focus(); if (EditorDown(e)) return; if (Scene != null && (e.Button == MouseButtons.Left || e.Button == MouseButtons.Middle)) { dragging = true; previous = e.Location; Capture = true; Cursor = Cursors.SizeAll; } }
+        protected override void OnMouseUp(MouseEventArgs e) { base.OnMouseUp(e); if (EditorUp(e)) return; dragging = false; Capture = false; Cursor = Cursors.Default; Invalidate(); }
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
@@ -128,6 +130,7 @@ namespace KhuzoeAssetsManager
                 using (var font = new Font("Segoe UI", 14F)) TextRenderer.DrawText(g, "Seleziona un mondo e una scena", font, ClientRectangle, Theme.Muted, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter); return;
             }
             if (penScale != scale) { foreach (var pen in wallPens.Values) pen.Dispose(); wallPens.Clear(); penScale = scale; }
+            PrepareDetails();
             var saved = g.Save(); g.TranslateTransform((float)panX, (float)panY); g.ScaleTransform((float)scale, (float)scale);
             using (var brush = new SolidBrush(ParseColor(Level.BackgroundColor, Color.FromArgb(50, 52, 60)))) g.FillRectangle(brush, (float)layout.MapX, (float)layout.MapY, (float)layout.MapWidth, (float)layout.MapHeight);
             if (Images != null)
@@ -169,8 +172,8 @@ namespace KhuzoeAssetsManager
         void DrawGrid(Graphics g)
         {
             double step = Scene.GridSize; if (step * scale < 9) return;
-            double left = Math.Max(0, -panX / scale), top = Math.Max(0, -panY / scale);
-            double right = Math.Min(layout.Width, (Width - panX) / scale), bottom = Math.Min(layout.Height, (Height - panY) / scale);
+            double left = -panX / scale, top = -panY / scale;
+            double right = (Width - panX) / scale, bottom = (Height - panY) / scale;
             using (var pen = new Pen(Color.FromArgb(45, 235, 235, 240), (float)(1 / scale)))
             {
                 for (double x = Math.Floor(left / step) * step; x <= right; x += step) g.DrawLine(pen, (float)x, (float)top, (float)x, (float)bottom);
@@ -229,23 +232,7 @@ namespace KhuzoeAssetsManager
         void DrawImage(Graphics g, Image image, double x, double y, double width, double height, SceneTexture texture, string tint, double alpha)
         {
             if (image == null || width <= 0 || height <= 0 || alpha <= 0) return;
-            texture = texture ?? new SceneTexture(); double sx = width / image.Width, sy = height / image.Height;
-            if (texture.Fit == "contain") sx = sy = Math.Min(sx, sy);
-            else if (texture.Fit == "cover") sx = sy = Math.Max(sx, sy);
-            else if (texture.Fit == "width") sy = sx; else if (texture.Fit == "height") sx = sy;
-            sx *= texture.ScaleX; sy *= texture.ScaleY; if (sx == 0 || sy == 0) return;
-            var preview = rasterCache.Get(image, Math.Max(Math.Abs(sx), Math.Abs(sy)) * scale, wheelPreview);
-            sx *= (double)image.Width / preview.Width; sy *= (double)image.Height / preview.Height; image = preview;
-            var state = g.Save(); g.TranslateTransform((float)(x + texture.OffsetX), (float)(y + texture.OffsetY)); g.RotateTransform((float)texture.Rotation); g.ScaleTransform((float)sx, (float)sy);
-            Color color = ParseColor(tint, Color.White);
-            var destination = new Rectangle((int)(-image.Width * texture.AnchorX), (int)(-image.Height * texture.AnchorY), image.Width, image.Height);
-            if (color.ToArgb() == Color.White.ToArgb() && alpha >= 1) g.DrawImage(image, destination, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel);
-            else using (var attributes = new ImageAttributes())
-            {
-                attributes.SetColorMatrix(new ColorMatrix { Matrix00 = color.R / 255F, Matrix11 = color.G / 255F, Matrix22 = color.B / 255F, Matrix33 = (float)Math.Max(0, Math.Min(1, alpha)), Matrix44 = 1 });
-                g.DrawImage(image, destination, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, attributes);
-            }
-            g.Restore(state);
+            DrawAsset(g, image, x, y, width, height, texture, tint, alpha);
         }
         void DrawBackdrop(Graphics graphics, Image image, string tint, SceneBackdropCache cache)
         {
@@ -258,7 +245,7 @@ namespace KhuzoeAssetsManager
         }
         protected override void Dispose(bool disposing)
         {
-            if (disposing) { wheelTimer.Stop(); wheelTimer.Dispose(); rasterCache.Dispose(); backgroundCache.Dispose(); foregroundCache.Dispose(); tooltip.Dispose(); foreach (var pen in wallPens.Values) pen.Dispose(); foreach (var brush in wallBrushes.Values) brush.Dispose(); foreach (var pen in indicatorPens.Values) pen.Dispose(); }
+            if (disposing) { wheelTimer.Stop(); wheelTimer.Dispose(); details.Dispose(); rasterCache.Dispose(); backgroundCache.Dispose(); foregroundCache.Dispose(); tooltip.Dispose(); foreach (var pen in wallPens.Values) pen.Dispose(); foreach (var brush in wallBrushes.Values) brush.Dispose(); foreach (var pen in indicatorPens.Values) pen.Dispose(); }
             base.Dispose(disposing);
         }
     }

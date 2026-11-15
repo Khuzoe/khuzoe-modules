@@ -404,7 +404,7 @@ namespace KhuzoeAssetsManager
         }
         async Task UpdateToolsAsync()
         {
-            if (working || analyzing || validating || (scenesPage != null && scenesPage.IsBusy)) throw new IOException("Attendi la fine delle operazioni prima di aggiornare gli strumenti.");
+            if (working || analyzing || validating || (scenesPage != null && (scenesPage.IsBusy || scenesPage.Canvas.IsLoadingImageDetail))) throw new IOException("Attendi la fine delle operazioni prima di aggiornare gli strumenti.");
             analyzing = true; active = CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token); UpdateAccess();
             try
             {

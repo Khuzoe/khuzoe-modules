@@ -114,6 +114,7 @@ namespace KhuzoeAssetsManager
             viewport.Controls.Add(canvas, 0, 0); viewport.Controls.Add(editor, 1, 0); editor.Visible = false;
             viewerRows.Controls.Add(viewport, 0, 4); detail.AutoEllipsis = true; viewerRows.Controls.Add(detail, 0, 5); viewer.Controls.Add(viewerRows); content.Controls.Add(viewer, 1, 0);
             editor.Changed += (s, e) => DraftChanged();
+            canvas.ImageDetailChanged += (s, e) => UpdateDraftBadge();
             editor.ImportImage += async (s, e) => await ImportImageAsync(false);
             editor.ChangeMap += async (s, e) => await ImportImageAsync(true);
             canvas.AllowDrop = true;
@@ -308,6 +309,8 @@ namespace KhuzoeAssetsManager
             draftBadge.Text = draft != null && draft.IsDirty ? (draftPending ? "BOZZA LOCALE · salvataggio in corso" : draftSaved ? "BOZZA LOCALE · salvata nell'app" : "BOZZA LOCALE · in memoria") : "FOUNDRY IN SOLA LETTURA";
             draftBadge.ForeColor = draft != null && draft.IsDirty ? Theme.Gold : Theme.Green;
             if (current != null && canvas.Level != null) detail.Text = current.Name + " · " + current.Walls.Count(value => SceneDetail.Included(value.Levels, canvas.Level.Id)) + " muri · " + current.Lights.Count(value => SceneDetail.Included(value.Levels, canvas.Level.Id)) + " luci · " + current.Tiles.Count(value => SceneDetail.Included(value.Levels, canvas.Level.Id)) + " immagini";
+            if (current != null && canvas.Level != null && canvas.IsLoadingImageDetail) detail.Text += " · caricamento dettaglio";
+            else if (current != null && canvas.Level != null && !String.IsNullOrEmpty(canvas.ImageDetailError)) { detail.Text += " · dettaglio non disponibile"; tips.SetToolTip(detail, canvas.ImageDetailError); }
         }
         void DraftChanged()
         {
@@ -349,10 +352,10 @@ namespace KhuzoeAssetsManager
         {
             return RunAsync(async cancellation => {
                 var progress = Reporter(); Size size;
-                using (var image = await imageLoader.LoadLocalAsync(file, progress.Report, cancellation)) size = image.Size;
+                using (var image = await imageLoader.LoadLocalAssetAsync(file, progress.Report, cancellation)) size = image.Source.NativeSize;
                 cancellation.ThrowIfCancellationRequested();
                 string levelId = ((SceneLevel)levels.SelectedItem).Id;
-                if (map) draft.ChangeMap(file, levelId); else draft.AddImage(file, size, point ?? canvas.SceneCenter, levelId);
+                if (map) draft.ChangeMap(file, levelId, size); else draft.AddImage(file, size, point ?? canvas.SceneCenter, levelId);
                 editor.SetTool(SceneEditTool.Select);
                 foreach (var box in filters.Controls.OfType<CheckBox>().Where(value => value.Text == "Tile")) box.Checked = true;
                 await LoadLevelAsync(cancellation);

@@ -174,8 +174,10 @@ namespace KhuzoeAssetsManager
         public Image Background { get; set; }
         public Image Foreground { get; set; }
         public Dictionary<string, Image> Tiles { get; private set; }
+        public Dictionary<Image, SceneImageSource> Sources { get; private set; }
         public List<string> Warnings { get; private set; }
-        public SceneImageSet() { Tiles = new Dictionary<string, Image>(); Warnings = new List<string>(); }
-        public void Dispose() { if (Background != null) Background.Dispose(); if (Foreground != null) Foreground.Dispose(); foreach (var image in Tiles.Values) image.Dispose(); Tiles.Clear(); }
+        public SceneImageSet() { Tiles = new Dictionary<string, Image>(); Sources = new Dictionary<Image, SceneImageSource>(); Warnings = new List<string>(); }
+        internal Image Register(SceneImageAsset asset) { if (asset == null) return null; var image = asset.Image; Sources[image] = asset.Source; asset.Image = null; return image; }
+        public void Dispose() { if (Background != null) Background.Dispose(); if (Foreground != null) Foreground.Dispose(); foreach (var image in Tiles.Values) image.Dispose(); Tiles.Clear(); Sources.Clear(); }
     }
 }

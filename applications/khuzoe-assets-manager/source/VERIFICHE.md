@@ -1,4 +1,12 @@
-# Verifiche · build 0.4.2
+# Verifiche · build 0.4.3
+
+## Qualità immagini e composizione — 15 novembre 2026
+
+- 50 test C# e 5 test Node. Le nuove prove verificano dimensioni native, coordinate esterne, griglia, trasformazioni inverse con rotazione/specchio, budget dei ritagli, esecuzione fuori dal thread UI, riuso/evizione, annullamento dei risultati dopo cambio scena e composizione senza raddoppiare l'opacità. La quota disco elimina soltanto i ritagli ricreabili con nomi propri della cache. Identità della scena normalizzata nell'ordine delle proprietà JSON; lettura del formato precedente delle bozze verificata.
+- Pipeline con FFmpeg reale: sorgente PNG 4096×3072, anteprima 1024×768 e ritaglio nativo 503×337 all'origine dispari (1231, 871). Confrontati campioni distribuiti del ritaglio con i pixel della sorgente: errore massimo ammesso di un livello su 255. Metadati nativi conservati al riuso della cache; impronta SHA-256 dell'originale invariata.
+- Fixture Windows Forms completata: importazione alla dimensione nativa, dettaglio a zoom 100%, griglia 140 pixel, immagine aggiunta affiancata al bordo destro in un elemento separato e adattamento della vista anche oltre i bordi. Originali e directory Foundry simulata invariati. Non sono state eseguite generazioni AI.
+- Anteprime con budget complessivo di 64 MiB; ritagli fino a 2 megapixel ciascuno e cache RAM di 64 MiB. Fino a otto immagini ricevono dettaglio per ogni vista, con priorità a quella selezionata. Un solo processo di decodifica alla volta, avviato in background dopo la navigazione; richieste superate annullate e risultati obsoleti scartati. Quota su disco di 256 MiB soltanto per i ritagli ricreabili. I decoder hanno limiti di durata, allocazione, thread e protocolli.
+- I pixel originali, la trasformazione di ogni immagine e le coordinate della scena restano distinti dalle dimensioni delle cache. Questo consente future selezioni interne/esterne e aggiunte generate come immagini indipendenti; selezione di aree e collegamenti AI restano sviluppi successivi.
 
 ## Zoom con la rotellina — 14 novembre 2026
 

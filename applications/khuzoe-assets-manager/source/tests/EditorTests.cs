@@ -15,6 +15,13 @@ namespace KhuzoeAssetsManager
     {
         static async Task RunEditor()
         {
+            await Test("Editor: identità scena indipendente dall'ordine JSON e bozze precedenti leggibili", () => Sync(() => {
+                Check(SceneDraft.SceneIdentity("{\"x\":1,\"nested\":{\"a\":2,\"b\":3}}") == SceneDraft.SceneIdentity("{\"nested\":{\"b\":3,\"a\":2},\"x\":1}"), "property order changed scene identity");
+                var storage = new AppStorage(NewDir("old-draft")); var source = DemoScene(); var draft = new SceneDraft(source); draft.AddLight(new PointF(600, 600), source.InitialLevel);
+                string directory = Path.Combine(storage.Root, "scene-drafts"); Directory.CreateDirectory(directory);
+                Json.Save(Path.Combine(directory, SceneDraft.Digest("old") + ".json"), new SceneDraftRecord { Schema = 1, OriginalHash = draft.LegacyOriginalHash, Scene = draft.Scene });
+                var loaded = new SceneDraft(source); Check(new SceneDraftStore(storage).Load("old", loaded) && loaded.Scene.Lights.Count == 2, "previous draft format was rejected");
+            }));
             await Test("Editor: clone, creazione e modifica senza mutare la scena originale", () => Sync(() => {
                 var source = DemoScene(); string original = Json.Write(source); var draft = new SceneDraft(source);
                 var light = draft.AddLight(new PointF(900, 600), source.InitialLevel); new LightProperties(draft).Color = Color.CornflowerBlue;
@@ -79,7 +86,7 @@ namespace KhuzoeAssetsManager
                             Mouse(canvas, "OnMouseDown", canvas.SceneScreen(light.X, light.Y)); Mouse(canvas, "OnMouseMove", canvas.SceneScreen(light.X + 120, light.Y + 100)); Mouse(canvas, "OnMouseUp", canvas.SceneScreen(1520, 1100)); Check(draft.Light != null && Math.Abs(draft.Light.X - 1520) < 12, "light drag failed");
                             var tile = draft.AddImage("fixture.png", new Size(200, 100), new PointF(1000, 1000), source.InitialLevel); new ImageProperties(draft).Rotation = 45; refresh();
                             Check(canvas.HitTestElement(canvas.SceneScreen(1000, 1000)).Id == tile.Id, "rotated image hit test failed");
-                            PointF corner = canvas.ImageCorners(tile)[2]; Mouse(canvas, "OnMouseDown", canvas.SceneScreen(corner.X, corner.Y)); Mouse(canvas, "OnMouseMove", canvas.SceneScreen(corner.X + 100, corner.Y + 150)); Mouse(canvas, "OnMouseUp", canvas.SceneScreen(corner.X + 100, corner.Y + 150)); Check(tile.Width > 560 && tile.Height > 280, "image resize handle did not change dimensions");
+                            PointF corner = canvas.ImageCorners(tile)[2]; Mouse(canvas, "OnMouseDown", canvas.SceneScreen(corner.X, corner.Y)); Mouse(canvas, "OnMouseMove", canvas.SceneScreen(corner.X + 100, corner.Y + 150)); Mouse(canvas, "OnMouseUp", canvas.SceneScreen(corner.X + 100, corner.Y + 150)); Check(tile.Width > 200 && tile.Height > 100, "image resize handle did not change dimensions");
                             Check(Json.Write(source) == baseline, "canvas gestures mutated original scene"); form.Close();
                         }
                         done.SetResult(true);
@@ -169,7 +176,7 @@ namespace KhuzoeAssetsManager
         sealed class ImageRunner : IProcessRunner
         {
             public Task<ProcessResult> RunAsync(string executable, IList<string> args, TimeSpan timeout, CancellationToken cancellation, Action<string> line)
-            { File.Copy(args[args.IndexOf("-i") + 1], args.Last()); return Task.FromResult(new ProcessResult { Output = "" }); }
+            { string file = args[args.IndexOf("-i") + 1]; File.Copy(file, args.Last()); using (var image = Image.FromFile(file)) return Task.FromResult(new ProcessResult { Output = "", Error = "[Parsed_showinfo_0 @ fixture] n:0 s:" + image.Width + "x" + image.Height }); }
         }
         static void RenderEditor(string location)
         {

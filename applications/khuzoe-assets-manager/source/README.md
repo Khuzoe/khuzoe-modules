@@ -1,8 +1,10 @@
-# Khuzoe Assets Manager · 0.4.2
+# Khuzoe Assets Manager · 0.4.3
 
 App Windows per preparare gli asset delle sessioni Foundry. Contiene le sezioni **Musiche** e **Scene**. Il progetto è separato da Khuzoe Updater.
 
-La 0.4.2 migliora lo zoom con la rotellina: durante lo scorrimento usa un'anteprima rapida e ripristina la qualità completa dopo circa 150 ms di pausa. Supporta anche gli incrementi piccoli delle rotelline di precisione e mantiene lo zoom centrato sul puntatore. Le bozze delle versioni precedenti restano compatibili.
+La 0.4.3 conserva le dimensioni originali delle immagini importate e carica in background il dettaglio della zona visibile quando ingrandisci. Le immagini si possono affiancare o sovrapporre anche fuori dai bordi della mappa, mantenendo gli originali separati. In **Mappa → Griglia** puoi regolare pixel per cella, distanza e unità. Le bozze precedenti mantengono posizioni e dimensioni già impostate.
+
+Durante lo zoom con la rotellina resta attiva l'anteprima rapida della 0.4.2; alla fine dello scorrimento l'editor recupera il dettaglio necessario. Gli incrementi piccoli e lo zoom centrato sul puntatore restano supportati.
 
 Sono incluse le ottimizzazioni della 0.4.1: riutilizzo dell'anteprima della mappa durante le modifiche, cache con memoria limitata, selezione senza copie della scena e salvataggio delle bozze in background.
 
@@ -58,7 +60,7 @@ I dati Foundry vengono letti da una copia temporanea controllata: il database or
 
 L'anteprima mostra posizione e portata delle luci, senza simulare ombre, occlusione, animazioni o visione dei token. Non è un rendering del canvas di Foundry. I muri e le luci rispettano l'appartenenza ai livelli; gli elementi senza un livello specifico vengono inclusi in tutti i livelli.
 
-Sono visualizzabili immagini PNG, JPEG, WebP, GIF e BMP presenti nei dati Foundry o raggiungibili tramite HTTPS pubblico. Le immagini vengono ridotte per l'anteprima (massimo 4096 pixel per la mappa, 512 per ogni tile, fino a 96 tile per livello; limite 100 MiB per file). Video, SVG, URL autenticati e risorse interne all'applicazione Foundry esterne alla cartella dati non sono visualizzabili in questa versione. Un'immagine mancante viene segnalata: muri e luci restano consultabili. Non vengono inviati mappe o dati delle scene ad API AI o al sito Khuzoe; un eventuale fornitore di immagini remoto riceve la richiesta per la propria immagine.
+Sono visualizzabili immagini PNG, JPEG, WebP, GIF e BMP presenti nei dati Foundry o raggiungibili tramite HTTPS pubblico, fino a 96 immagini per livello e 100 MiB per file. L'editor conserva le dimensioni native e usa copie leggere per la vista generale; quando ingrandisci, decodifica dall'originale il ritaglio della zona visibile. Il messaggio **caricamento dettaglio** nel piè di pagina indica il recupero in corso. Video, SVG, URL autenticati e risorse interne all'applicazione Foundry esterne alla cartella dati non sono visualizzabili in questa versione. Un'immagine mancante viene segnalata: muri e luci restano consultabili. Le mappe non vengono inviate ad API AI o al sito Khuzoe; un eventuale fornitore di immagini remoto riceve la richiesta per la propria immagine.
 
 ## Provare l'editor locale
 
@@ -67,14 +69,18 @@ Apri una scena e premi **Modifica locale**, oppure **Bozza libera** per partire 
 - **Seleziona**: clicca un elemento per modificarne le proprietà a destra; trascinalo per spostarlo. Gli estremi dei muri si trascinano separatamente. Il quadratino di un'immagine ne modifica le dimensioni; tieni premuto Maiusc per conservarne le proporzioni.
 - **Muro**: trascina tra due punti per creare un segmento. Nelle proprietà scegli muro, porta o porta segreta, stato della porta e blocco di vista, movimento e luce.
 - **Luce**: clicca per aggiungere una sorgente. Modifica posizione, colore, raggi, angolo, rotazione e stato; trascina il quadratino esterno per regolare il raggio tenue. Le portate sono indicative: non vengono calcolate ombre e occlusione.
-- **+ Immagine**: scegli un'immagine dal computer, oppure trascina i file sulla mappa. Puoi spostarla, ridimensionarla, ruotarla e modificarne opacità, ordine e visibilità.
-- **Mappa**: seleziona lo sfondo del livello per spostarlo, scalarlo e ruotarlo. **Cambia immagine della mappa** sostituisce lo sfondo nella bozza.
+- **+ Immagine**: scegli un'immagine dal computer, oppure trascina i file sulla mappa. Le nuove immagini partono dalle dimensioni native, con un pixel dell'originale per unità della scena. Puoi spostarle anche oltre i bordi della mappa, ridimensionarle, ruotarle e modificarne opacità, ordine e visibilità. **Adatta** include anche le immagini esterne.
+- **Mappa**: seleziona lo sfondo del livello per spostarlo, scalarlo e ruotarlo. La categoria **Griglia** regola pixel per cella, distanza e unità; la griglia quadrata segue anche la zona esterna. **Cambia immagine della mappa** sostituisce lo sfondo nella bozza. La prima mappa di una bozza libera vuota imposta anche le dimensioni native della scena; le sostituzioni successive conservano le coordinate esistenti.
 - **Sposta vista**, Spazio + trascinamento o pulsante centrale spostano la vista; la rotella modifica lo zoom. **Aggancio** allinea alla griglia quadrata; Maiusc lo sospende durante il trascinamento.
 - **Annulla / Ripeti**, **Duplica**, **Elimina** e **Ripristina** gestiscono le modifiche locali. Sulla mappa funzionano anche Ctrl+Z, Ctrl+Y, Ctrl+D, Canc ed Esc per annullare un gesto.
 
 Le bozze vengono salvate automaticamente in background sotto `%LOCALAPPDATA%\KhuzoeAssetsManager\scene-drafts`, separatamente dai mondi. L'indicatore distingue il salvataggio in corso dalla bozza salvata e dagli eventuali errori; alla chiusura l'app completa le scritture già in coda. **Torna all'elenco** mantiene la bozza; **Ripristina** torna alla scena letta inizialmente (o svuota la bozza libera). Se i dati originali cambiano in Foundry, la vecchia bozza non viene riapplicata automaticamente: l'app mostra un avviso prima che una nuova modifica la sostituisca. La cronologia annulla/ripeti rimane nella sessione corrente.
 
 Le immagini importate vengono lette dal percorso scelto e memorizzate nella cache per l'anteprima: non vengono copiate nella directory dati Foundry e gli originali non vengono modificati. Mantienile nel percorso scelto per riaprire la bozza. Non sono presenti un comando di applicazione a Foundry o sincronizzazione delle modifiche: questa versione serve a provare l'editor.
+
+Le immagini restano elementi indipendenti con posizione, dimensioni, rotazione, opacità e ordine. Le future selezioni potranno usare aree nelle coordinate della scena, comprese aree parzialmente o completamente esterne alla mappa. Il risultato di una futura generazione AI potrà diventare una nuova immagine collocata nell'area richiesta, conservando la mappa di partenza e la cronologia. La selezione di aree e il collegamento ai servizi AI saranno funzionalità successive.
+
+Le anteprime hanno un budget complessivo di 64 MiB. Per ogni vista il recupero del dettaglio dà priorità all'immagine selezionata e aggiorna fino a otto immagini; la cache dei ritagli ha un budget di 64 MiB. I ritagli vengono prodotti uno alla volta in background e le copie su disco ricreabili hanno una quota di 256 MiB. Un ingrandimento oltre il dettaglio contenuto nell'originale mostra comunque i pixel della sorgente; il caricamento non inventa dettagli aggiuntivi.
 
 ## Account e dati
 
@@ -113,7 +119,7 @@ cd ..
 
 Nel clone del repository, esegui questi comandi dalla cartella `applications/khuzoe-assets-manager/source`. Per preparare una nuova release runtime: `./tools/prepare-updater-package.ps1 -PublisherRoot ../../..`. Per una copia di sviluppo esterna al repository, indica invece il percorso della cartella `khuzoe-updater`. Lo script compila in una cartella separata, verifica la versione e prepara `application.zip`, `application.json` e `release.json`; il publisher li distribuisce tramite il catalogo. La sola pubblicazione dei sorgenti non rigenera i pacchetti già pubblicati.
 
-Se l'eseguibile precedente è aperto, crea una build separata con `./tools/build-app.ps1 -OutputDirectory build/release-0.4.2` e confezionala con `./tools/package.ps1 -BuildDirectory build/release-0.4.2`. Per aggiornare manualmente l'app estrai l'intero nuovo pacchetto dopo aver chiuso la versione in esecuzione. Preferenze e sessione restano nella directory locale dell'utente.
+Se l'eseguibile precedente è aperto, crea una build separata con `./tools/build-app.ps1 -OutputDirectory build/release-0.4.3` e confezionala con `./tools/package.ps1 -BuildDirectory build/release-0.4.3`. Per aggiornare manualmente l'app estrai l'intero nuovo pacchetto dopo aver chiuso la versione in esecuzione. Preferenze e sessione restano nella directory locale dell'utente.
 
 Dopo la build dei test, `./dist/KhuzoeAssetsManager.Tests.exe --benchmark-editor 2000 build/perf-state` esegue una misura nativa su una scena sintetica con 2.000 muri, 40 luci e una mappa 4096×3072, senza aprire mondi reali. `wheel-zoom-frame` simula eventi reali del controllo rotellina, alternando zoom in/out intorno al puntatore. I tempi di ridisegno non comprendono la presentazione a schermo e non sono una misura degli FPS effettivi. `property-with-sync-save` mantiene intenzionalmente la scrittura sincrona nel benchmark per confrontare gli stessi passaggi; l'interfaccia usa invece la coda in background.
 

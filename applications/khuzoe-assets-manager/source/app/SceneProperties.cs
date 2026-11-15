@@ -62,6 +62,9 @@ namespace KhuzoeAssetsManager
         readonly string level;
         public MapProperties(SceneDraft draft, string level) : base(draft) { this.level = level; }
         SceneTexture Texture { get { return Draft.Scene.Levels.First(value => value.Id == level).Textures; } }
+        [Category("Griglia"), DisplayName("Pixel / cella")] public double GridSize { get { return Draft.Scene.GridSize; } set { double n = SceneDraft.Number(value, 1, 10000); Set(() => Draft.Scene.GridSize = n); } }
+        [Category("Griglia"), DisplayName("Distanza / cella")] public double GridDistance { get { return Draft.Scene.GridDistance; } set { double n = SceneDraft.Number(value, .001, 100000); Set(() => Draft.Scene.GridDistance = n); } }
+        [Category("Griglia"), DisplayName("Unità")] public string GridUnits { get { return Draft.Scene.GridUnits; } set { if (String.IsNullOrWhiteSpace(value) || value.Length > 24) throw new ArgumentException("Indica un'unità di misura breve."); Set(() => Draft.Scene.GridUnits = value.Trim()); } }
         [Category("Mappa"), DisplayName("Spostamento X")] public double X { get { return Texture.OffsetX; } set { double n = Position(value); Set(() => Texture.OffsetX = n); } }
         [Category("Mappa"), DisplayName("Spostamento Y")] public double Y { get { return Texture.OffsetY; } set { double n = Position(value); Set(() => Texture.OffsetY = n); } }
         [Category("Mappa"), DisplayName("Scala X")] public double ScaleX { get { return Texture.ScaleX; } set { double n = SceneDraft.Number(value, 0.01, 20); Set(() => Texture.ScaleX = n); } }

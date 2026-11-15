@@ -28,12 +28,20 @@ namespace KhuzoeAssetsManager
         public bool CanUndo { get { return undo.Count > 0; } }
         public bool CanRedo { get { return redo.Count > 0; } }
         public string OriginalHash { get; private set; }
+        internal string LegacyOriginalHash { get; private set; }
         public event EventHandler Changed, SelectionChanged;
         public SceneDraft(SceneDetail scene)
         {
-            original = Json.Write(scene); CommittedSnapshot = original; OriginalHash = Digest(original); Scene = Json.Read<SceneDetail>(original); Selection = new SceneSelection(SceneSelectionKind.None, null);
+            original = Json.Write(scene); CommittedSnapshot = original; LegacyOriginalHash = Digest(original); OriginalHash = SceneIdentity(original); Scene = Json.Read<SceneDetail>(original); Selection = new SceneSelection(SceneSelectionKind.None, null);
         }
         public static string Digest(string text) { using (var hash = SHA256.Create()) return BitConverter.ToString(hash.ComputeHash(Encoding.UTF8.GetBytes(text))).Replace("-", "").ToLowerInvariant(); }
+        internal static string SceneIdentity(string text) { return Digest(Json.Write(Ordered(Json.Read<object>(text)))); }
+        static object Ordered(object value)
+        {
+            var map = value as IDictionary<string, object>;
+            if (map != null) { var sorted = new SortedDictionary<string, object>(StringComparer.Ordinal); foreach (var pair in map) sorted[pair.Key] = Ordered(pair.Value); return sorted; }
+            var list = value as System.Collections.IEnumerable; return list != null && !(value is string) ? list.Cast<object>().Select(Ordered).ToArray() : value;
+        }
         public static SceneDetail Copy(SceneDetail scene) { return Json.Read<SceneDetail>(Json.Write(scene)); }
         public string Snapshot() { return Json.Write(Scene); }
         public void Select(SceneSelectionKind kind, string id)
@@ -84,14 +92,20 @@ namespace KhuzoeAssetsManager
         }
         public SceneTile AddImage(string file, Size size, PointF point, string level)
         {
-            string alias = "khuzoe-local/" + NewId(); double width = Math.Min(700, Scene.Width * 0.35);
+            if (size.Width < 1 || size.Height < 1 || size.Width > 1000000 || size.Height > 1000000) throw new ArgumentException("Dimensioni originali non valide.");
+            string alias = "khuzoe-local/" + NewId(); double width = size.Width;
             var tile = new SceneTile { Id = NewId(), X = point.X, Y = point.Y, Width = width, Height = width * size.Height / Math.Max(1, size.Width), Rotation = 0, Alpha = 1, Tint = "#ffffff", Src = alias, Textures = new SceneTexture(), Levels = new[] { level }, Sort = Scene.Tiles.Count == 0 ? 0 : Scene.Tiles.Max(value => value.Sort) + 1 };
             Apply("Nuova immagine", () => { Scene.LocalAssets[alias] = Path.GetFullPath(file); Scene.Tiles.Add(tile); }); Select(SceneSelectionKind.Image, tile.Id); return tile;
         }
-        public void ChangeMap(string file, string levelId)
+        public void ChangeMap(string file, string levelId, Size? nativeSize = null)
         {
             string alias = "khuzoe-local/" + NewId();
-            Apply("Cambia mappa", () => { Scene.LocalAssets[alias] = Path.GetFullPath(file); Scene.Levels.First(value => value.Id == levelId).Background = alias; }); Select(SceneSelectionKind.Map, levelId);
+            Apply("Cambia mappa", () => {
+                var level = Scene.Levels.First(value => value.Id == levelId);
+                if (nativeSize.HasValue && Scene.Id == "local-editor-scene" && String.IsNullOrEmpty(level.Background) && Scene.Tiles.Count == 0 && Scene.Walls.Count == 0 && Scene.Lights.Count == 0)
+                { Scene.Width = nativeSize.Value.Width; Scene.Height = nativeSize.Value.Height; }
+                Scene.LocalAssets[alias] = Path.GetFullPath(file); level.Background = alias;
+            }); Select(SceneSelectionKind.Map, levelId);
         }
         public void DeleteSelection()
         {
@@ -125,7 +139,7 @@ namespace KhuzoeAssetsManager
             string file = FileName(key); FoundryPaths.NoLinks(file); if (!File.Exists(file)) return true;
             if (new FileInfo(file).Length > 8 * 1024 * 1024) return false;
             var saved = Json.Read<SceneDraftRecord>(File.ReadAllText(file, Encoding.UTF8));
-            if (saved == null || saved.Schema != 1 || saved.OriginalHash != draft.OriginalHash || saved.Scene == null || saved.Scene.Id != draft.Scene.Id || saved.Scene.Levels == null || saved.Scene.Levels.Count == 0 || saved.Scene.Walls == null || saved.Scene.Lights == null || saved.Scene.Tiles == null || saved.Scene.LocalAssets == null) return false;
+            if (saved == null || (saved.Schema != 1 && saved.Schema != 2) || (saved.OriginalHash != draft.OriginalHash && !(saved.Schema == 1 && saved.OriginalHash == draft.LegacyOriginalHash)) || saved.Scene == null || saved.Scene.Id != draft.Scene.Id || saved.Scene.Levels == null || saved.Scene.Levels.Count == 0 || saved.Scene.Walls == null || saved.Scene.Lights == null || saved.Scene.Tiles == null || saved.Scene.LocalAssets == null) return false;
             draft.Restore(saved.Scene); return true;
         }
         public void Save(string key, SceneDraft draft)
@@ -134,7 +148,7 @@ namespace KhuzoeAssetsManager
         {
             string file = FileName(key); FoundryPaths.NoLinks(file);
             if (!dirty) { if (File.Exists(file)) File.Delete(file); return; }
-            Json.SaveText(file, "{\"Schema\":1,\"OriginalHash\":" + Json.Write(originalHash) + ",\"Scene\":" + snapshot + "}");
+            Json.SaveText(file, "{\"Schema\":2,\"OriginalHash\":" + Json.Write(originalHash) + ",\"Scene\":" + snapshot + "}");
         }
     }
 }
