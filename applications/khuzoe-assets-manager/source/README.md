@@ -2,6 +2,12 @@
 
 App Windows per preparare gli asset delle sessioni Foundry. Contiene le sezioni **Musiche** e **Scene**. Il progetto è separato da Khuzoe Updater.
 
+La 0.5.0 aggiunge **Area** e **Muri AI** all'editor. Con Area trascini un rettangolo nelle coordinate della scena, anche esterno alla mappa; Esc lo rimuove. Muri AI propone l'analisi dell'intera composizione o dell'area selezionata. La funzione richiede l'attivazione del servizio del sito: aprire la finestra verifica solo la disponibilità, senza inviare immagini o consumare AI.
+
+Premi **Avvia analisi AI** per inviare la cattura al sito con l'accesso Discord. Il servizio controlla i permessi DM/admin, analizza le porzioni della mappa e restituisce segmenti. **Controlla muri** apre un'anteprima separata: sposta gli estremi, elimina o aggiungi segmenti, modifica proprietà e porte. I muri esistenti sono riferimenti grigi; quelli suggeriti come incerti sono arancioni. **Aggiungi alla bozza** inserisce i nuovi muri in un'unica operazione annullabile, conservando quelli già presenti. Nessuna scrittura a Foundry.
+
+**Recupera risultato** riprende un'analisi già inviata, anche dopo aver chiuso la finestra o l'app, senza avviare una nuova analisi. **Interrompi analisi** ferma i ritagli successivi; il lavoro già inviato può avere un costo. Sono revisionabili anche risultati parziali. Chiudere la finestra interrompe l'attesa locale; il lavoro già inviato continua sul sito ed è recuperabile. Il risultato di una versione diversa della scena non è confermabile automaticamente. Il modello si configura sul sito, separatamente dalla release Windows. Riconoscimento sperimentale: precisione e costo effettivo vanno misurati su mappe reali.
+
 La 0.4.3 conserva le dimensioni originali delle immagini importate e carica in background il dettaglio della zona visibile quando ingrandisci. Le immagini si possono affiancare o sovrapporre anche fuori dai bordi della mappa, mantenendo gli originali separati. In **Mappa → Griglia** puoi regolare pixel per cella, distanza e unità. Le bozze precedenti mantengono posizioni e dimensioni già impostate.
 
 Durante lo zoom con la rotellina resta attiva l'anteprima rapida della 0.4.2; alla fine dello scorrimento l'editor recupera il dettaglio necessario. Gli incrementi piccoli e lo zoom centrato sul puntatore restano supportati.
@@ -56,11 +62,11 @@ Foundry v14 importa i file audio della cartella e salta quelli già presenti nel
 5. Trascina per spostare la mappa; usa la rotella o **+ / −** per ingrandire. **Adatta** ripristina la vista completa.
 6. Premi **Aggiorna** per recuperare i nuovi salvataggi di Foundry. Durante la lettura lo stesso pulsante permette di annullarla.
 
-I dati Foundry vengono letti da una copia temporanea controllata: il database originale non viene aperto dal motore LevelDB. Le modifiche nell'editor rimangono in bozze locali e **non vengono applicate a Foundry**. La scheda **non usa AI o crediti AI**. Funziona anche con il mondo aperto, quando i file rimangono stabili per il tempo della copia. Se Foundry sta salvando o compattando il database, attendi e riprova con **Aggiorna**. La vista non riceve aggiornamenti continui.
+I dati Foundry vengono letti da una copia temporanea controllata: il database originale non viene aperto dal motore LevelDB. Le modifiche nell'editor rimangono in bozze locali e **non vengono applicate a Foundry**. La consultazione e le modifiche manuali **non usano AI o crediti AI**. Soltanto **Avvia analisi AI** richiama il servizio a pagamento. Funziona anche con il mondo aperto, quando i file rimangono stabili per il tempo della copia. Se Foundry sta salvando o compattando il database, attendi e riprova con **Aggiorna**. La vista non riceve aggiornamenti continui.
 
 L'anteprima mostra posizione e portata delle luci, senza simulare ombre, occlusione, animazioni o visione dei token. Non è un rendering del canvas di Foundry. I muri e le luci rispettano l'appartenenza ai livelli; gli elementi senza un livello specifico vengono inclusi in tutti i livelli.
 
-Sono visualizzabili immagini PNG, JPEG, WebP, GIF e BMP presenti nei dati Foundry o raggiungibili tramite HTTPS pubblico, fino a 96 immagini per livello e 100 MiB per file. L'editor conserva le dimensioni native e usa copie leggere per la vista generale; quando ingrandisci, decodifica dall'originale il ritaglio della zona visibile. Il messaggio **caricamento dettaglio** nel piè di pagina indica il recupero in corso. Video, SVG, URL autenticati e risorse interne all'applicazione Foundry esterne alla cartella dati non sono visualizzabili in questa versione. Un'immagine mancante viene segnalata: muri e luci restano consultabili. Le mappe non vengono inviate ad API AI o al sito Khuzoe; un eventuale fornitore di immagini remoto riceve la richiesta per la propria immagine.
+Sono visualizzabili immagini PNG, JPEG, WebP, GIF e BMP presenti nei dati Foundry o raggiungibili tramite HTTPS pubblico, fino a 96 immagini per livello e 100 MiB per file. L'editor conserva le dimensioni native e usa copie leggere per la vista generale; quando ingrandisci, decodifica dall'originale il ritaglio della zona visibile. Il messaggio **caricamento dettaglio** nel piè di pagina indica il recupero in corso. Video, SVG, URL autenticati e risorse interne all'applicazione Foundry esterne alla cartella dati non sono visualizzabili in questa versione. Un'immagine mancante viene segnalata: muri e luci restano consultabili. Durante la consultazione le mappe non vengono inviate ad API AI o al sito Khuzoe; un eventuale fornitore di immagini remoto riceve la richiesta per la propria immagine. Avvia analisi AI invia al sito e al suo fornitore solo la cattura dell'area scelta, senza percorsi locali o documenti Foundry.
 
 ## Provare l'editor locale
 
@@ -78,7 +84,7 @@ Le bozze vengono salvate automaticamente in background sotto `%LOCALAPPDATA%\Khu
 
 Le immagini importate vengono lette dal percorso scelto e memorizzate nella cache per l'anteprima: non vengono copiate nella directory dati Foundry e gli originali non vengono modificati. Mantienile nel percorso scelto per riaprire la bozza. Non sono presenti un comando di applicazione a Foundry o sincronizzazione delle modifiche: questa versione serve a provare l'editor.
 
-Le immagini restano elementi indipendenti con posizione, dimensioni, rotazione, opacità e ordine. Le future selezioni potranno usare aree nelle coordinate della scena, comprese aree parzialmente o completamente esterne alla mappa. Il risultato di una futura generazione AI potrà diventare una nuova immagine collocata nell'area richiesta, conservando la mappa di partenza e la cronologia. La selezione di aree e il collegamento ai servizi AI saranno funzionalità successive.
+Le immagini restano elementi indipendenti con posizione, dimensioni, rotazione, opacità e ordine. Le future selezioni potranno usare aree nelle coordinate della scena, comprese aree parzialmente o completamente esterne alla mappa. Il risultato di una futura generazione AI potrà diventare una nuova immagine collocata nell'area richiesta, conservando la mappa di partenza e la cronologia. La selezione rettangolare e il collegamento per il riconoscimento muri sono introdotti nella 0.5.0; la generazione di nuove immagini rimane uno sviluppo successivo.
 
 Le anteprime hanno un budget complessivo di 64 MiB. Per ogni vista il recupero del dettaglio dà priorità all'immagine selezionata e aggiorna fino a otto immagini; la cache dei ritagli ha un budget di 64 MiB. I ritagli vengono prodotti uno alla volta in background e le copie su disco ricreabili hanno una quota di 256 MiB. Un ingrandimento oltre il dettaglio contenuto nell'originale mostra comunque i pixel della sorgente; il caricamento non inventa dettagli aggiuntivi.
 
@@ -93,7 +99,7 @@ Le anteprime hanno un budget complessivo di 64 MiB. Per ogni vista il recupero d
 - Cartella Foundry, categorie, raccolta, coda, ultimo mondo, filtri scene e bozze vengono conservati separatamente nello stesso percorso locale. Le copie e le anteprime delle scene restano nella cache dell'app; i file MP3 restano sotto `musics` nella directory dati selezionata.
 - L'elenco dei brani e i percorsi locali non vengono inviati al sito. Il backend riceve le richieste di autenticazione; YouTube riceve le richieste relative ai video.
 
-Questa versione verifica l'identità Discord. Non introduce abbonamenti, crediti AI o controlli di ruolo aggiuntivi. Queste funzioni richiederanno regole esplicite sul backend quando verranno aggiunte.
+Questa versione verifica l'identità Discord. Non introduce abbonamenti o un portafoglio di crediti. Il riconoscimento muri richiede i permessi DM/admin verificati sul backend e usa le API AI del sito.
 
 ## Aggiornamenti e limiti
 
@@ -119,7 +125,7 @@ cd ..
 
 Nel clone del repository, esegui questi comandi dalla cartella `applications/khuzoe-assets-manager/source`. Per preparare una nuova release runtime: `./tools/prepare-updater-package.ps1 -PublisherRoot ../../..`. Per una copia di sviluppo esterna al repository, indica invece il percorso della cartella `khuzoe-updater`. Lo script compila in una cartella separata, verifica la versione e prepara `application.zip`, `application.json` e `release.json`; il publisher li distribuisce tramite il catalogo. La sola pubblicazione dei sorgenti non rigenera i pacchetti già pubblicati.
 
-Se l'eseguibile precedente è aperto, crea una build separata con `./tools/build-app.ps1 -OutputDirectory build/release-0.4.3` e confezionala con `./tools/package.ps1 -BuildDirectory build/release-0.4.3`. Per aggiornare manualmente l'app estrai l'intero nuovo pacchetto dopo aver chiuso la versione in esecuzione. Preferenze e sessione restano nella directory locale dell'utente.
+Se l'eseguibile precedente è aperto, crea una build separata con `./tools/build-app.ps1 -OutputDirectory build/release-0.5.0` e confezionala con `./tools/package.ps1 -BuildDirectory build/release-0.5.0`. Per aggiornare manualmente l'app estrai l'intero nuovo pacchetto dopo aver chiuso la versione in esecuzione. Preferenze e sessione restano nella directory locale dell'utente.
 
 Dopo la build dei test, `./dist/KhuzoeAssetsManager.Tests.exe --benchmark-editor 2000 build/perf-state` esegue una misura nativa su una scena sintetica con 2.000 muri, 40 luci e una mappa 4096×3072, senza aprire mondi reali. `wheel-zoom-frame` simula eventi reali del controllo rotellina, alternando zoom in/out intorno al puntatore. I tempi di ridisegno non comprendono la presentazione a schermo e non sono una misura degli FPS effettivi. `property-with-sync-save` mantiene intenzionalmente la scrittura sincrona nel benchmark per confrontare gli stessi passaggi; l'interfaccia usa invece la coda in background.
 

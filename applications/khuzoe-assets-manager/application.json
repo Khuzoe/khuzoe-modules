@@ -1,7 +1,7 @@
 {
   "id": "khuzoe-assets-manager",
   "title": "Khuzoe Assets Manager",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "entryPoint": "KhuzoeAssetsManager.exe",
   "compatibility": {
     "minimum": "14",
@@ -9,5 +9,5 @@
   },
   "url": "https://github.com/Khuzoe/khuzoe-modules",
   "manifest": "https://khuzoe.github.io/khuzoe-modules/applications/khuzoe-assets-manager/application.json",
-  "download": "https://github.com/Khuzoe/khuzoe-modules/releases/download/khuzoe-assets-manager-v0.4.3/application.zip"
+  "download": "https://github.com/Khuzoe/khuzoe-modules/releases/download/khuzoe-assets-manager-v0.5.0/application.zip"
 }

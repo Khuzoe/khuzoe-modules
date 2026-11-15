@@ -98,7 +98,7 @@ namespace KhuzoeAssetsManager
             Font = new Font("Segoe UI", 9.5F); AutoScaleMode = AutoScaleMode.Dpi;
             MinimumSize = new Size(1080, 800); Size = new Size(1280, 920); StartPosition = FormStartPosition.CenterScreen;
             BuildLayout();
-            scenesPage = new ScenesPanel(storage, preferences, sceneTools ?? tools, RequireLoginAsync, ChooseFoundry) { Visible = false };
+            scenesPage = new ScenesPanel(storage, preferences, sceneTools ?? tools, RequireLoginAsync, ChooseFoundry, auth as IWallService) { Visible = false };
             scenesPage.BusyChanged += (sender, args) => UpdateAccess(); workspace.Controls.Add(scenesPage); scenesPage.SetDataRoot(preferences.DataRoot);
             musicNavigation.Click += (sender, args) => ShowSection(false); scenesNavigation.Click += (sender, args) => ShowSection(true);
             LoadPreferences(); UpdateAccess(); RefreshLibrary(); RefreshQueue(); ShowSection(preferences.ActiveTab == "scenes");

@@ -1,6 +1,6 @@
 {
-  "sha256": "94bc226adf641ce7c71c178291eb233a497800dcfcdba38e10da97f8a6406e8c",
-  "size": 698607,
-  "id": "khuzoe-assets-manager",
-  "version": "0.4.3"
+  "version": "0.5.0",
+  "size": 721219,
+  "sha256": "e9fc2e3e3aa3b293787b1f2d204b5885e293c904e698af64c0d28399739a7c17",
+  "id": "khuzoe-assets-manager"
 }

@@ -43,6 +43,7 @@ namespace KhuzoeAssetsManager
         }
         public void SetScene(SceneDetail scene, SceneLevel level, SceneImageSet images, bool refit)
         {
+            if (Scene == null || scene == null || Scene.Id != scene.Id || Level == null || level == null || Level.Id != level.Id) SetAnalysisArea(null);
             FinishWheelPreview();
             if (!Object.ReferenceEquals(Images, images)) { rasterCache.Clear(); backgroundCache.Clear(); foregroundCache.Clear(); details.Clear(); }
             Scene = scene; Level = level; Images = images; layout = scene == null ? null : SceneLayout.From(scene);
@@ -148,11 +149,14 @@ namespace KhuzoeAssetsManager
             }
             if (Settings.Grid && Scene.GridType == 1) DrawGrid(g);
             if (Settings.Lights) DrawLights(g);
+            if (Settings.Walls && ReferenceWalls != null)
+                using (var referencePen = new Pen(Color.FromArgb(110, 170, 175, 185), (float)(1.5 / scale)))
+                    foreach (var wall in ReferenceWalls.Where(w => SceneDetail.Included(w.Levels, Level.Id))) if (InView(wall.X1, wall.Y1, wall.X2, wall.Y2, 8)) g.DrawLine(referencePen, (float)wall.X1, (float)wall.Y1, (float)wall.X2, (float)wall.Y2);
             if (Settings.Walls)
                 foreach (var wall in Scene.Walls.Where(value => SceneDetail.Included(value.Levels, Level.Id)))
                 {
                     if (!InView(wall.X1, wall.Y1, wall.X2, wall.Y2, 8)) continue;
-                    var color = WallColor(wall); bool dashed = wall.DoorState == 1 && wall.Door != 0;
+                    var color = UncertainWalls != null && UncertainWalls.Contains(wall.Id) ? Color.DarkOrange : WallColor(wall); bool dashed = wall.DoorState == 1 && wall.Door != 0;
                     long key = ((long)(uint)color.ToArgb() << 1) | (dashed ? 1L : 0L); Pen pen;
                     if (!wallPens.TryGetValue(key, out pen)) { pen = new Pen(color, (float)(2.1 / scale)); if (dashed) pen.DashStyle = DashStyle.Dash; wallPens[key] = pen; }
                     g.DrawLine(pen, (float)wall.X1, (float)wall.Y1, (float)wall.X2, (float)wall.Y2);

@@ -13,3 +13,5 @@
 - Le prove usano directory isolate sotto `build/` o directory temporanee. Non usare musiche o mondi veri come fixture.
 - Compilazione: `tools/build-app.ps1`; test: `tools/build-app.ps1 -Test`; pacchetto: `tools/package.ps1`.
 - Aumentare `app/version.txt` e allineare il manifest per ogni release distribuita.
+
+- Muri AI (0.5.0): API soltanto tramite backend Khuzoe, con verifica DM/admin sul server. Niente chiavi nel desktop. Selezione, zoom e modifiche manuali non chiamano AI. Persistenza della ricevuta prima del POST; recupero solo tramite GET, senza duplicare richieste incerte. Conferma in anteprima separata e inserimento additivo nella bozza con un unico annulla. Non sostituire muri esistenti. I test usano sempre un fornitore simulato; non avviare analisi a pagamento automaticamente. Il modello è configurato nel Worker. Tenere server/wall-detection.js allineato alla copia nel sito.

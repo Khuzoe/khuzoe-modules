@@ -1,4 +1,12 @@
-# Verifiche · build 0.4.3
+# Verifiche · build 0.5.0
+
+## Riconoscimento muri - 15 novembre 2026
+
+- 61 test C# superati, inclusi 11 nuovi casi su piani con contesto e coordinate esterne, limiti, ricomposizione, conservazione delle aperture, conferma additiva con annulla/ripeti, selezione senza modifiche ai documenti, cattura dagli originali, ricevute recuperabili, anteprima separata, flusso completo con servizio simulato, risposta di invio persa, interruzione e richieste scadute. Le prove precedenti di musica, scene, qualità immagini e zoom passano.
+- 11 test backend con API AI simulate: autorizzazioni DM, controllo immagini e copertura, coordinate normalizzate, idempotenza e conflitti, contatori token, input eliminati, riavvio senza nuove chiamate, interruzione fra ritagli e durante una risposta tardiva, rifiuto di risposte invalide, limiti per elemento di storage ed eliminazione dopo sette giorni.
+- Nessuna chiamata AI a pagamento o scrittura a mondi Foundry durante lo sviluppo. Le immagini di prova sono sintetiche. La precisione del modello e il costo su mappe reali non sono stati ancora misurati.
+- Il servizio sito richiede pubblicazione separata. Il comando di verifica Cloudflare rileva una sessione scaduta/non rinnovabile in questa sessione. Il bundle completo del sito ha inoltre due dipendenze preesistenti assenti dal repository: workers/main-worker/src/ability-icon-prompt.js e workers/main-worker/src/npc-visual-reference.js. La nuova funzionalità non modifica quel sottosistema.
+- Modello iniziale configurabile sul backend: gpt-5.4, dettaglio original. Nessuna scelta di modello o chiave privata è incorporata nel desktop. Il riconoscimento resta indisponibile nell'app fino all'attivazione del servizio.
 
 ## Qualità immagini e composizione — 15 novembre 2026
 

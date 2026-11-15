@@ -8,7 +8,7 @@ using System.Text;
 
 namespace KhuzoeAssetsManager
 {
-    public enum SceneEditTool { Select, Pan, Wall, Light }
+    public enum SceneEditTool { Select, Pan, Wall, Light, Area }
     public enum SceneSelectionKind { None, Wall, Light, Image, Map }
     public sealed class SceneSelection
     {

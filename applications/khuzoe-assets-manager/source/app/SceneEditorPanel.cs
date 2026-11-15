@@ -20,13 +20,15 @@ namespace KhuzoeAssetsManager
         SceneSelectionKind inspectorKind;
         string inspectorId;
         public FlowLayoutPanel Toolbar { get; private set; }
-        public event EventHandler Changed, ImportImage, ChangeMap;
+        public event EventHandler Changed, ImportImage, ChangeMap, AnalyzeWalls;
         public SceneEditorPanel(SceneCanvas canvas)
         {
             this.canvas = canvas; Dock = DockStyle.Fill; BackColor = Theme.Surface;
             Toolbar = new FlowLayoutPanel { Dock = DockStyle.Fill, WrapContents = false, AutoScroll = true, Margin = Padding.Empty, Padding = Padding.Empty };
             ToolButton("Seleziona", SceneEditTool.Select); tools[SceneEditTool.Select].Click += (s, e) => { if (draft != null && draft.Selection.Kind == SceneSelectionKind.Map) draft.Select(SceneSelectionKind.None, null); };
             ToolButton("Sposta vista", SceneEditTool.Pan); ToolButton("Muro", SceneEditTool.Wall); ToolButton("Luce", SceneEditTool.Light);
+            ToolButton("Area", SceneEditTool.Area);
+            Button("Muri AI", 83, () => { if (AnalyzeWalls != null) AnalyzeWalls(this, EventArgs.Empty); });
             Button("+ Immagine", 104, () => { if (ImportImage != null) ImportImage(this, EventArgs.Empty); });
             Button("Mappa", 72, () => { if (draft != null && canvas.Level != null) { SetTool(SceneEditTool.Select); draft.Select(SceneSelectionKind.Map, canvas.Level.Id); } });
             undo = Button("Annulla", 78, () => { if (draft != null) draft.Undo(); }); redo = Button("Ripeti", 72, () => { if (draft != null) draft.Redo(); });
@@ -53,6 +55,7 @@ namespace KhuzoeAssetsManager
         {
             canvas.CancelEditorGesture(); canvas.Tool = tool;
             foreach (var item in tools) { item.Value.Primary = item.Key == tool; item.Value.Invalidate(); }
+            if (tool == SceneEditTool.Area) { hint.Text = "Trascina un rettangolo, anche fuori dalla mappa. Muri AI analizzerà l’area scelta; Esc rimuove la selezione."; return; }
             hint.Text = tool == SceneEditTool.Wall ? "Trascina per disegnare un muro. Maiusc sospende l'aggancio." : tool == SceneEditTool.Light ? "Clicca sulla mappa per aggiungere una luce." : tool == SceneEditTool.Pan ? "Trascina per spostare la vista. Rotella per lo zoom." : "Trascina per spostare. Estremi dei muri e quadratino delle immagini sono modificabili. Spazio trascina la vista.";
         }
         public void Bind(SceneDraft value)

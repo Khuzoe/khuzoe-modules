@@ -126,7 +126,7 @@ namespace KhuzoeAssetsManager
         Task LoginAsync(Action<Uri> openBrowser, Action<string> progress, CancellationToken cancellation);
         void Logout();
     }
-    public sealed class DiscordAuth : IUserSession
+    public sealed partial class DiscordAuth : IUserSession, IWallService
     {
         public const string Backend = "https://sigillo-api.khuzoe.workers.dev";
         public const string Site = "https://khuzoe.github.io/sigillo-del-male/";

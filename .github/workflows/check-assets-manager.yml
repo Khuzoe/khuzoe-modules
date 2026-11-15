@@ -26,6 +26,8 @@ jobs:
       - name: Verifica il lettore scene
         working-directory: applications/khuzoe-assets-manager/source/engine
         run: node --test reader.test.cjs
+      - name: Verifica il servizio muri con API simulate
+        run: node --experimental-default-type=module --test server/wall-detection.test.mjs
       - name: Verifica l'app su dati di prova
         run: ./tools/build-app.ps1 -Test
       - name: Compila l'eseguibile dai sorgenti pubblici

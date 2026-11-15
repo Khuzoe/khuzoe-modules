@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace KhuzoeAssetsManager
 {
-    public sealed class ScenesPanel : UserControl
+    public sealed partial class ScenesPanel : UserControl
     {
         readonly AppStorage storage;
         readonly Preferences preferences;
@@ -17,6 +17,7 @@ namespace KhuzoeAssetsManager
         readonly SceneImages imageLoader;
         readonly Func<Task> requireLogin;
         readonly Action chooseFolder;
+        readonly IWallService wallService;
         readonly ComboBox worlds = Theme.Combo("Mondo Foundry");
         readonly ComboBox levels = Theme.Combo("Livello della scena");
         readonly ListBox scenes = new ListBox();
@@ -59,9 +60,9 @@ namespace KhuzoeAssetsManager
         public SceneEditorPanel Editor { get { return editor; } }
         public string StatusText { get { return status.Text; } }
         public event EventHandler BusyChanged;
-        public ScenesPanel(AppStorage storage, Preferences preferences, IToolProvider tools, Func<Task> requireLogin, Action chooseFolder)
+        public ScenesPanel(AppStorage storage, Preferences preferences, IToolProvider tools, Func<Task> requireLogin, Action chooseFolder, IWallService wallService = null)
         {
-            this.storage = storage; this.preferences = preferences; this.requireLogin = requireLogin; this.chooseFolder = chooseFolder;
+            this.storage = storage; this.preferences = preferences; this.requireLogin = requireLogin; this.chooseFolder = chooseFolder; this.wallService = wallService;
             repository = new SceneRepository(storage, tools, new ProcessRunner()); imageLoader = new SceneImages(storage, tools, new ProcessRunner());
             draftStore = new SceneDraftStore(storage); draftSaver = new SceneDraftSaver(draftStore); draftSaver.Completed += DraftSaved; editor = new SceneEditorPanel(canvas);
             Dock = DockStyle.Fill; BackColor = Theme.Background; Padding = new Padding(26, 15, 26, 20);
@@ -117,6 +118,7 @@ namespace KhuzoeAssetsManager
             canvas.ImageDetailChanged += (s, e) => UpdateDraftBadge();
             editor.ImportImage += async (s, e) => await ImportImageAsync(false);
             editor.ChangeMap += async (s, e) => await ImportImageAsync(true);
+            editor.AnalyzeWalls += async (s, e) => await AnalyzeWallsAsync();
             canvas.AllowDrop = true;
             canvas.DragEnter += (s, e) => { e.Effect = allowed && editMode && !IsBusy && e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None; };
             canvas.DragDrop += async (s, e) => {

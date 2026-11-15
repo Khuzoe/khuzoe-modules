@@ -73,6 +73,7 @@ namespace KhuzoeAssetsManager
     }
     public sealed class SceneWall
     {
+        [System.Web.Script.Serialization.ScriptIgnore] public bool SuggestedUncertain { get; set; }
         public string Id { get; set; }
         public double X1 { get; set; }
         public double Y1 { get; set; }

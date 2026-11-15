@@ -56,6 +56,7 @@ namespace KhuzoeAssetsManager
         bool EditorDown(MouseEventArgs e)
         {
             if (!Editing || Draft == null || Scene == null || Level == null || e.Button != MouseButtons.Left || Tool == SceneEditTool.Pan || spaceDown) return false;
+            if (Tool == SceneEditTool.Area) { areaBefore = AnalysisArea; startWorld = currentWorld = ScenePoint(e.Location, false); gesture = "area"; beforeGesture = null; gestureChanged = false; Capture = true; return true; }
             startWorld = currentWorld = ScenePoint(e.Location, true);
             gestureChanged = false;
             if (Tool == SceneEditTool.Light) { Draft.AddLight(startWorld, Level.Id); Invalidate(); return true; }
@@ -77,6 +78,7 @@ namespace KhuzoeAssetsManager
         bool EditorMove(MouseEventArgs e)
         {
             if (!Editing || gesture == null || Draft == null) return false;
+            if (gesture == "area") { currentWorld = ScenePoint(e.Location, false); SetAnalysisArea(RectangleF.FromLTRB(Math.Min(startWorld.X, currentWorld.X), Math.Min(startWorld.Y, currentWorld.Y), Math.Max(startWorld.X, currentWorld.X), Math.Max(startWorld.Y, currentWorld.Y))); return true; }
             var next = ScenePoint(e.Location, true); if (next == currentWorld) return true;
             currentWorld = next; gestureChanged = true; double x = currentWorld.X - startWorld.X, y = currentWorld.Y - startWorld.Y;
             if (gesture == "wall-a") { Draft.Wall.X1 = currentWorld.X; Draft.Wall.Y1 = currentWorld.Y; }
@@ -106,13 +108,15 @@ namespace KhuzoeAssetsManager
         {
             if (gesture == null || e.Button != MouseButtons.Left) return false;
             EditorMove(e); string action = gesture, before = beforeGesture; gesture = null; beforeGesture = null; Capture = false; Cursor = Cursors.Default;
-            if (action == "new-wall") { if (Math.Abs(startWorld.X - currentWorld.X) + Math.Abs(startWorld.Y - currentWorld.Y) >= 5) Draft.AddWall(startWorld, currentWorld, Level.Id); }
+            if (action == "area") { if (!AnalysisArea.HasValue || AnalysisArea.Value.Width < 1 || AnalysisArea.Value.Height < 1) SetAnalysisArea(areaBefore); }
+            else if (action == "new-wall") { if (Math.Abs(startWorld.X - currentWorld.X) + Math.Abs(startWorld.Y - currentWorld.Y) >= 5) Draft.AddWall(startWorld, currentWorld, Level.Id); }
             else if (before != null && gestureChanged) Draft.Commit(before, "Trascina elemento");
             Invalidate(); return true;
         }
         public void CancelEditorGesture()
         {
-            if (gesture == null) return; string before = beforeGesture; gesture = null; beforeGesture = null;
+            if (gesture == null) return; string before = beforeGesture; bool area = gesture == "area"; gesture = null; beforeGesture = null;
+            if (area) SetAnalysisArea(areaBefore);
             if (before != null && gestureChanged && Draft != null) { Draft.Cancel(before); Scene = Draft.Scene; Level = Scene.Levels.FirstOrDefault(value => value.Id == Level.Id); }
             Capture = false; Cursor = Cursors.Default; Invalidate();
         }
@@ -123,7 +127,7 @@ namespace KhuzoeAssetsManager
         {
             base.OnKeyDown(e); if (!Editing || Draft == null) return;
             if (e.KeyCode == Keys.Space) { spaceDown = true; e.Handled = true; }
-            if (e.KeyCode == Keys.Escape) { CancelEditorGesture(); Draft.Select(SceneSelectionKind.None, null); e.Handled = true; }
+            if (e.KeyCode == Keys.Escape) { bool area = gesture == "area"; CancelEditorGesture(); if (!area) SetAnalysisArea(null); Draft.Select(SceneSelectionKind.None, null); e.Handled = true; }
             if (gesture != null) return;
             if (e.Control && e.KeyCode == Keys.Z) { Draft.Undo(); e.Handled = true; }
             else if (e.Control && e.KeyCode == Keys.Y) { Draft.Redo(); e.Handled = true; }
@@ -135,6 +139,7 @@ namespace KhuzoeAssetsManager
         void DrawEditor(Graphics g)
         {
             if (!Editing || Draft == null || Scene == null || Level == null) return;
+            DrawAnalysisArea(g);
             using (var pen = new Pen(Color.FromArgb(105, 213, 235), 2)) using (var fill = new SolidBrush(Theme.Background))
             {
                 if (gesture == "new-wall") { pen.DashStyle = DashStyle.Dash; g.DrawLine(pen, Screen(startWorld.X, startWorld.Y), Screen(currentWorld.X, currentWorld.Y)); }

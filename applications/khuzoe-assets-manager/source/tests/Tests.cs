@@ -42,7 +42,8 @@ namespace KhuzoeAssetsManager
             root = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "build", "t-" + Guid.NewGuid().ToString("N").Substring(0, 8)));
             Directory.CreateDirectory(root);
             if (args.Length == 1 && args[0] == "--test-image-quality") { RunImageQuality().GetAwaiter().GetResult(); Console.WriteLine("RESULT: " + passed + " passed, " + failed + " failed"); return failed == 0 ? 0 : 1; }
-            try { Run().GetAwaiter().GetResult(); RunScenes().GetAwaiter().GetResult(); RunEditor().GetAwaiter().GetResult(); RunWheel().GetAwaiter().GetResult(); RunImageQuality().GetAwaiter().GetResult(); }
+            if (args.Length == 1 && args[0] == "--test-walls") { RunWalls().GetAwaiter().GetResult(); Console.WriteLine("RESULT: " + passed + " passed, " + failed + " failed"); return failed == 0 ? 0 : 1; }
+            try { Run().GetAwaiter().GetResult(); RunScenes().GetAwaiter().GetResult(); RunEditor().GetAwaiter().GetResult(); RunWheel().GetAwaiter().GetResult(); RunImageQuality().GetAwaiter().GetResult(); RunWalls().GetAwaiter().GetResult(); }
             catch (Exception error) { Console.WriteLine("FAIL suite: " + error); failed++; }
             Console.WriteLine("RESULT: " + passed + " passed, " + failed + " failed");
             // Keep fixtures available for diagnosis; every run has an isolated directory.
