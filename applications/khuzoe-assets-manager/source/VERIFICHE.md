@@ -1,5 +1,13 @@
 # Verifiche · build 0.5.0
 
+## Correzione coordinate AI - 15 novembre 2026
+
+- 19 test del servizio sito e 18 della copia standalone superati. Riprodotto il caso di una mappa con 24 porzioni, con coordinate non valide nella nona: vengono elaborate tutte le 24 porzioni senza ripetere le chiamate precedenti; i muri iniziali rimangono disponibili e i token della risposta inutilizzabile vengono registrati.
+- Coordinate vincolate a 0–1000 nello schema e nel prompt. Piccoli sconfinamenti vengono ritagliati geometricamente e marcati incerti; dati non numerici, non finiti o molto esterni invalidano soltanto i segmenti incidenti. Nessuna connessione attraverso un vertice scartato e nessuna reinterpretazione delle coordinate come pixel.
+- Le porzioni con geometria inutilizzabile vengono saltate. Il risultato finale partial segnala scarti e correzioni e rimane revisionabile con il client 0.5.0. Timeout, errori di rete e rifiuti mantengono lo stop senza ripetizione automatica delle richieste.
+- 62 test C# superati, incluso un nuovo caso di compatibilità JSON/UI con partial e i campi opzionali aggiuntivi del sito. Il bundle completo del Worker è verificato con Wrangler. Nessuna chiamata AI a pagamento durante le prove.
+- Correzione del backend e dei soli sorgenti/test/documenti dell'app: versione Windows e ZIP 0.5.0 già distribuito conservati. Le analisi già interrotte mantengono i propri risultati parziali e non ripartono automaticamente.
+
 ## Riconoscimento muri - 15 novembre 2026
 
 - 61 test C# superati, inclusi 11 nuovi casi su piani con contesto e coordinate esterne, limiti, ricomposizione, conservazione delle aperture, conferma additiva con annulla/ripeti, selezione senza modifiche ai documenti, cattura dagli originali, ricevute recuperabili, anteprima separata, flusso completo con servizio simulato, risposta di invio persa, interruzione e richieste scadute. Le prove precedenti di musica, scene, qualità immagini e zoom passano.

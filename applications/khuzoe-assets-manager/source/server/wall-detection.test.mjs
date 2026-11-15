@@ -48,7 +48,7 @@ test('normalized paths map to negative scene coordinates and clip only to their 
   assert.deepEqual(mapWallOutput(paths,r.tiles[0]),[{x1:-50,y1:30,x2:50,y2:30,uncertain:true}]);
   assert.deepEqual(mapWallOutput(paths,r.tiles[1]),[{x1:50,y1:30,x2:150,y2:30,uncertain:true}]);
   assert.equal(clipSegment([-20,-20,-10,-10],frame()),null);
-  assert.throws(()=>mapWallOutput({paths:[{points:[{x:0,y:0},{x:1001,y:2}],uncertain:false}]},r.tiles[0]));
+  const clipped=mapWallOutput({paths:[{points:[{x:0,y:0},{x:1001,y:2}],uncertain:false}]},r.tiles[0]);assert.equal(clipped.length,1);assert.equal(clipped[0].uncertain,true);
 });
 test('DM authentication and capabilities do not call the provider',async()=>{
   const services={requireUser:async()=>({id:'dm'}),isEditor:async()=>false,accountId:()=> 'dm'};
@@ -86,9 +86,9 @@ test('stop while provider runs wins over a late response',async()=>{
   const started=new Promise(resolve=>entered=resolve);f.env.wallFetch=()=>{entered();return new Promise(resolve=>release=resolve);};
   const run=f.store.alarm();await started;await f.send('stop',{id:r.id});release(ai());await run;const job=(await f.send('get',{id:r.id})).data.job;assert.equal(job.status,'stopped');assert.equal(job.completed,0);
 });
-test('model refusal and invalid coordinates cannot turn into ready walls',async()=>{
-  for(const response of [Response.json({status:'completed',output:[{content:[{type:'refusal'}]}]}),ai([{points:[{x:0,y:0},{x:5000,y:2}],uncertain:false}])]){
-    const f=fixture(),r=request();await f.send('create',r);f.env.wallFetch=async()=>response;await f.store.alarm();assert.equal((await f.send('get',{id:r.id})).data.job.status,'uncertain');
+test('model refusal stops processing and invalid coordinates produce a partial result',async()=>{
+  for(const [response,status] of [[Response.json({status:'completed',output:[{content:[{type:'refusal'}]}]}),'uncertain'],[ai([{points:[{x:0,y:0},{x:5000,y:2}],uncertain:false}]),'partial']]){
+    const f=fixture(),r=request();await f.send('create',r);f.env.wallFetch=async()=>response;await f.store.alarm();const job=(await f.send('get',{id:r.id})).data.job;assert.equal(job.status,status);assert.equal(job.walls.length,0);
   }
 });
 test('large geometric results are split below individual storage limits',async()=>{
@@ -97,4 +97,59 @@ test('large geometric results are split below individual storage limits',async()
 });
 test('expiry removes input and result data without a new model call',async()=>{
   const f=fixture(),r=request();await f.send('create',r);await f.store.alarm();const job=await f.state.storage.get('job:'+r.id);job.createdAt=Date.now()-8*86400000;await f.state.storage.put('job:'+r.id,job);await f.store.alarm();assert.equal((await f.send('get',{id:r.id})).status,404);assert.equal(f.state.storage.values.size,0);assert.equal(f.calls.length,1);
+});
+
+test('small edge overshoots are clipped as segments, never clamped into invented boundary walls',()=>{
+  const tile=request().tiles[0], diagnostics={};
+  const walls=mapWallOutput({paths:[{points:[{x:-1,y:100},{x:1001,y:900}],uncertain:false}]},tile,diagnostics);
+  assert.equal(walls.length,1);assert.equal(walls[0].x1,-50);assert.equal(walls[0].x2,150);assert.equal(walls[0].uncertain,true);
+  assert.ok(walls[0].y1>-10 && walls[0].y2<70);assert.equal(diagnostics.clippedSegments,1);assert.equal(diagnostics.discardedSegments,0);
+  const outside=mapWallOutput({paths:[{points:[{x:-2,y:0},{x:-1,y:1000}],uncertain:false}]},tile);
+  assert.equal(outside.length,0);
+});
+test('invalid vertices break only incident segments without bridging the gap or guessing coordinate scale',()=>{
+  for(const bad of [{x:5000,y:500},{x:'200',y:500},{x:200,y:null},{x:Infinity,y:500},null]){
+    const d={},walls=mapWallOutput({paths:[{points:[{x:0,y:500},{x:100,y:500},bad,{x:300,y:500},{x:400,y:500}],uncertain:false}]},request().tiles[0],d);
+    assert.equal(walls.length,2);assert.equal(d.discardedSegments,2);assert.equal(walls[0].x2,-30);assert.equal(walls[1].x1,10);
+    assert.ok(walls.every(wall=>wall.uncertain),'fragments of an invalid path must remain visibly uncertain');
+    assert.ok(!walls.some(w=>w.x1===-30&&w.x2===10),'invalid point bridged a doorway');
+  }
+});
+test('one malformed path does not discard valid sibling paths',()=>{
+  const d={},walls=mapWallOutput({paths:[null,{points:'wrong',uncertain:false},{points:[{x:0,y:0},{x:100,y:0}],uncertain:false}]},request().tiles[0],d);
+  assert.equal(walls.length,1);assert.equal(d.discardedPaths,2);
+});
+test('the ninth malformed tile does not stop a 24 tile map, repeat paid work or lose the first eight results',async()=>{
+  const f=fixture(),r=request();r.tiles=[];
+  for(let row=0;row<4;row++)for(let col=0;col<6;col++)r.tiles.push({frame:r.frame,core:frame(-50+col*200/6,-20+row*25,200/6,25),width:200,height:100,image:jpeg(200,100)});
+  let calls=0;f.env.wallFetch=async()=>{calls++;return calls===9?ai([{points:[{x:0,y:0},{x:5000,y:2}],uncertain:false}]):ai();};
+  await f.send('create',r);
+  for(let i=0;i<8;i++)await f.store.alarm();
+  assert.equal((await f.send('get',{id:r.id})).data.job.completed,8);
+  await f.store.alarm();assert.equal((await f.send('get',{id:r.id})).data.job.status,'pending');
+  for(let i=9;i<24;i++)await f.store.alarm();
+  const job=(await f.send('get',{id:r.id})).data.job;
+  assert.equal(job.completed,24);assert.equal(job.status,'partial');assert.equal(job.skippedTiles,1);assert.equal(job.discardedSegments,1);assert.equal(job.walls.length,6);
+  assert.equal(job.inputTokens,24*500);assert.equal(job.outputTokens,24*100);assert.equal(calls,24);assert.match(job.error,/24\/24/);assert.equal(f.bucket.values.size,0);
+  await f.send('get',{id:r.id});await f.send('create',r);await f.store.alarm();assert.equal(calls,24);
+});
+test('completed but unparseable geometry counts tokens and allows the next tile to run once',async()=>{
+  for(const text of ['{',JSON.stringify({paths:'wrong'})]){
+    const f=fixture(),r=request(true);let calls=0;
+    f.env.wallFetch=async()=>{calls++;return calls===1?Response.json({status:'completed',output:[{content:[{type:'output_text',text}]}],usage:{input_tokens:411,output_tokens:99}}):ai();};
+    await f.send('create',r);await f.store.alarm();await f.store.alarm();const job=(await f.send('get',{id:r.id})).data.job;
+    assert.equal(job.status,'partial');assert.equal(job.completed,2);assert.equal(job.skippedTiles,1);assert.equal(job.inputTokens,911);assert.equal(job.outputTokens,199);assert.equal(job.walls.length,1);assert.equal(calls,2);
+  }
+});
+test('the provider schema explicitly bounds normalized coordinates and polyline sizes',async()=>{
+  const f=fixture(),r=request();await f.send('create',r);await f.store.alarm();const body=JSON.parse(f.calls[0].init.body),paths=body.text.format.schema.properties.paths,points=paths.items.properties.points;
+  assert.equal(paths.maxItems,500);assert.equal(points.minItems,2);assert.equal(points.maxItems,256);
+  for(const axis of ['x','y'])assert.deepEqual(points.items.properties[axis],{type:'number',minimum:0,maximum:1000});
+  assert.match(body.input[0].content,/Never return source pixels/);
+});
+test('a partial result still stops on an ambiguous subsequent provider failure without retrying',async()=>{
+  const f=fixture(),r=request(true);let calls=0;
+  f.env.wallFetch=async()=>{calls++;return calls===1?ai([{points:[{x:0,y:0},{x:5000,y:2}],uncertain:false}]):new Response('',{status:503});};
+  await f.send('create',r);await f.store.alarm();await f.store.alarm();await f.store.alarm();
+  const job=(await f.send('get',{id:r.id})).data.job;assert.equal(job.status,'uncertain');assert.equal(job.completed,1);assert.equal(job.skippedTiles,1);assert.equal(calls,2);assert.equal(job.inputTokens,500);
 });

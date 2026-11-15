@@ -105,6 +105,12 @@ namespace KhuzoeAssetsManager
             await Test("Muri AI: richiesta mancante recuperabile senza bloccare nuove analisi", () => WallDialogTest(new FakeWallService { LoseResponse=true, Missing=true }, (form,service,draft) => {
                 Button(form,"Avvia analisi AI").PerformClick();Pump(()=>service.Starts==1 && Button(form,"Recupera risultato").Enabled);Button(form,"Recupera risultato").PerformClick();Pump(()=>Button(form,"Scarta risultato").Enabled);Button(form,"Scarta risultato").PerformClick();Check(Button(form,"Avvia analisi AI").Enabled && service.Starts==1,"missing receipt trapped UI or restarted AI");
             }));
+            await Test("Muri AI: risultato parziale del sito compatibile con il client 0.5.0", () => WallDialogTest(new FakeWallService { Partial=true }, (form,service,draft) => {
+                string json = Json.Write(new { ok=true, job=new { id="compat",status="partial",model="mock-vision",total=24,completed=24,frame=new WallFrame(0,0,200,100),walls=WallResult("compat").walls,inputTokens=12000,outputTokens=2400,error="Analisi parziale: segmenti non validi scartati.",skippedTiles=1,discardedSegments=2,discardedPaths=0,clippedSegments=1 } });
+                var response=Json.Read<WallJobResponse>(json);Check(response.ok && !response.job.IsRunning && response.job.walls.Count==1 && response.job.completed==24,"client rejected additive server fields or partial status");
+                Button(form,"Avvia analisi AI").PerformClick();Pump(()=>Button(form,"Controlla muri").Enabled);
+                Check(WallControls(form).OfType<Label>().Any(l=>l.Text.Contains("Analisi parziale")) && service.Starts==1 && !draft.IsDirty,"partial results were hidden, resubmitted or auto-applied");
+            }));
         }
         static Task WallDialogTest(FakeWallService service,Action<WallAnalysisForm,FakeWallService,SceneDraft> action)
         {
@@ -125,9 +131,9 @@ namespace KhuzoeAssetsManager
         static Button Button(Control parent,string text) { return WallControls(parent).OfType<Button>().First(b=>b.Text==text); }
         sealed class FakeWallService:IWallService
         {
-            public int Starts,Gets,Stops; public bool LoseResponse,Waiting,Missing; public WallRequest Request;
+            public int Starts,Gets,Stops; public bool LoseResponse,Waiting,Missing,Partial; public WallRequest Request;
             public Task<WallCapabilities> CapabilitiesAsync(CancellationToken token){return Task.FromResult(new WallCapabilities{ok=true,version=1,enabled=true,model="mock-vision",maxTiles=64,maxBytes=15*1024*1024});}
-            WallJob Result(string id){var job=WallResult(id);if(Request!=null)job.frame=Request.frame;if(Waiting){job.status="running";job.completed=0;job.walls.Clear();}return job;}
+            WallJob Result(string id){var job=WallResult(id);if(Request!=null)job.frame=Request.frame;if(Waiting){job.status="running";job.completed=0;job.walls.Clear();}else if(Partial){job.status="partial";job.error="Analisi parziale: segmenti non validi scartati.";}return job;}
             public Task<WallJob> StartWallsAsync(WallRequest request,CancellationToken token){Starts++;Request=request;if(LoseResponse)return Task.FromException<WallJob>(new IOException("Simulated lost response"));return Task.FromResult(Result(request.id));}
             public Task<WallJob> GetWallsAsync(string id,CancellationToken token){Gets++;if(Missing)return Task.FromException<WallJob>(new WallMissingException());return Task.FromResult(Result(id));}
             public Task<WallJob> StopWallsAsync(string id,CancellationToken token){Stops++;var job=Result(id);job.status="stopped";return Task.FromResult(job);}

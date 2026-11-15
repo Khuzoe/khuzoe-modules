@@ -22,8 +22,20 @@ Le mappe vengono composte dagli originali, escludendo griglia, muri, luci ed ele
 
 Ogni porzione avvia una sola richiesta al modello. Le coordinate normalizzate sono verificate e ritagliate al core; l'app ricongiunge estremi distanti al massimo 1,5 unità scena e scarta segmenti duplicati. Nessuna chiusura automatica di aperture più grandi e nessuna classificazione automatica di porte/finestre in questa versione. Le segnalazioni di incertezza sono suggerimenti del modello, non probabilità calibrate.
 
-Il server registra il tentativo prima della chiamata esterna. In caso di riavvio, timeout, errore o risposta incompleta non ripete automaticamente la chiamata. Interrompere evita le chiamate ai ritagli successivi; la richiesta già inviata può avere un costo. I risultati parziali restano revisionabili. I contatori token includono le risposte valide registrate; chiamate interrotte o non registrate possono essere fatturate comunque dal fornitore.
+Il server registra il tentativo prima della chiamata esterna. In caso di riavvio, timeout, errore o risposta incompleta non ripete automaticamente la chiamata. Interrompere evita le chiamate ai ritagli successivi; la richiesta già inviata può avere un costo. I risultati parziali restano revisionabili. I contatori token includono le risposte registrate, incluse quelle con geometria inutilizzabile; chiamate interrotte o non registrate possono essere fatturate comunque dal fornitore.
 
 Le immagini in ingresso sono private in R2 e vengono cancellate a termine/interruzione. Ricevute e segmenti restano recuperabili per sette giorni, poi sono rimossi. La richiesta OpenAI usa `store:false`; questo parametro non sostituisce le regole di conservazione del fornitore. Nessun input o segreto è scritto nei log applicativi.
 
 I test simulano il fornitore AI: verificano autorizzazioni, geometria, idempotenza, annullamento, consumo registrato e gestione dei guasti. Non misurano la precisione del modello su mappe reali. Non sono state eseguite chiamate AI a pagamento durante lo sviluppo.
+
+## Coordinate AI non valide
+
+Lo schema impone esplicitamente coordinate normalizzate da 0 a 1000 per entrambi gli assi, insieme ai limiti di punti e tracciati. Il prompt definisce angoli e centro dell'immagine e chiede di terminare le pareti sul bordo, senza estenderle fuori dal ritaglio.
+
+La validazione resta attiva anche con lo schema. Un piccolo sconfinamento, entro il 2% del ritaglio, viene tagliato geometricamente al core e segnalato come incerto. Coordinate non numeriche, non finite o molto esterne invalidano soltanto i segmenti incidenti. I vertici sui lati opposti di un punto scartato non vengono ricongiunti; i frammenti conservati sono incerti. Non si tenta di indovinare un diverso sistema di coordinate.
+
+Se una risposta AI completata contiene geometria illeggibile, la porzione viene registrata come scartata e l'analisi continua sulle successive. La chiamata già eseguita non viene ripetuta; i token comunicati dal fornitore vengono conteggiati anche per la porzione inutilizzabile. Rifiuti del modello, timeout ed errori di rete conservano la gestione precedente, senza tentativi automatici.
+
+Il risultato usa lo stato compatibile `partial` e il campo `error` per spiegare cosa controllare. I campi opzionali `skippedTiles`, `discardedSegments`, `discardedPaths` e `clippedSegments` espongono i contatori. Il client 0.5.0 può già mostrare l'avviso e aprire Controlla muri per revisionare i segmenti conservati. Nessuna modifica al modello o all'eseguibile è necessaria per questa correzione.
+
+La modifica riguarda le nuove analisi. Un'analisi già terminata con errore mantiene i propri risultati parziali; non riparte automaticamente e non si possono recuperare le porzioni non elaborate senza una nuova richiesta esplicita. Non vengono ricostruiti o stimati retroattivamente i token di risposte precedentemente scartate.
