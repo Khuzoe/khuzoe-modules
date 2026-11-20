@@ -1,0 +1,18 @@
+{
+  "id": "khuzoe-hud",
+  "title": "Khuzoe HUD",
+  "description": "Card di combattimento per la chat D&D 5e, con riepilogo dei danni per tipo e per bersaglio.",
+  "version": "0.2.1",
+  "authors": [{ "name": "Khuzoe" }],
+  "compatibility": { "minimum": "14", "verified": "14.367", "maximum": "14" },
+  "relationships": {
+    "systems": [{ "id": "dnd5e", "type": "system", "compatibility": { "minimum": "5.3.3", "verified": "5.3.3" } }],
+    "recommends": [{ "id": "midi-qol", "type": "module", "compatibility": { "verified": "14.0.11" } }]
+  },
+  "esmodules": ["scripts/chat-cards.mjs"],
+  "styles": ["styles/chat-cards.css"],
+  "languages": [
+    { "lang": "it", "name": "Italiano", "path": "lang/it.json" },
+    { "lang": "en", "name": "English", "path": "lang/en.json" }
+  ]
+}

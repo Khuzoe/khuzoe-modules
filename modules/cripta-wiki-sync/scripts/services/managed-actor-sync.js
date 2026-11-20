@@ -1,3 +1,4 @@
+import { hasNpcAnimation, exportNpcAnimations, installNpcAnimations } from "./activity-animation-sync.mjs";
 import { applyNpcNativeSheet } from "./npc-native-sheet.mjs";
 import { applyNpcNativeEditor } from "./npc-native-editor.mjs";
 import { validateNativeAbilityItem } from "./npc-native-ability.mjs";
@@ -3309,6 +3310,12 @@ async function rollbackManagedActorLinkConversion(actor) {
         return { status: "failed", error: `Ripristino non completato: ${String(error?.message || error)}` };
     }
 }
+function npcAnimationContext(actor) {
+    const campaign = getCampaignId(), world = sanitizeId(game.world.id), id = sanitizeId(actor.id);
+    return {campaign, world, actor:id, origin:DISCORD_WORKER_URL, request:policyFetch, headers:buildWorkerAuthHeaders,
+        allowUpload:canPushToWorker(), endpoint:DISCORD_WORKER_URL + "/api/managed-actors/" + world + "/" + id + "/activity-animations?campaign=" + encodeURIComponent(campaign)};
+}
+
 async function applyManagedActorCommand(command) {
     const kind = String(command?.kind || "");
     const allowed = new Set(["relationship.update", "actor.update", "item.update", "item.create", "item.delete", "effect.update", "effect.create", "effect.delete", "actor-link.inspect", "actor-link.apply", "actor-link.rollback"]);
@@ -3339,6 +3346,10 @@ async function applyManagedActorCommand(command) {
     if (kind === "item.update") {
         const item = findManagedCommandItem(actor, command.target || {});
         if (!item) return { status: "conflict", error: "Elemento non trovato nell'Actor" };
+        const activitiesPatch = command.patches?.find(patch => patch.path === "system.activities");
+        if (actor.type === "npc" && activitiesPatch) {
+            await installNpcAnimations(activitiesPatch.baseValue, activitiesPatch.value, npcAnimationContext(actor));
+        }
         return applyManagedDocumentPatches(item, command.patches, async (update) => {
             let requestedActivities = foundry.utils.getProperty(update, "system.activities");
             let requestedEffects = update.effects;
@@ -3905,6 +3916,7 @@ export async function syncManagedActorNow(actor, event = {}) {
     const stateRoot = getWorldObjectSetting(STATE_SETTING);
     const mediaOnlyWrite = !normalizedEvent.forceCreate
         && !normalizedEvent.forceContentSync
+        && !normalizedEvent.checkAnimations
         && (normalizedEvent.changedTargets.length > 0 || normalizedEvent.variantsChanged || normalizedEvent.removedVariantIds.length > 0);
 
     if (!mediaOnlyWrite) {
@@ -3923,6 +3935,9 @@ export async function syncManagedActorNow(actor, event = {}) {
     const mediaResult = await syncManagedActorMedia(actor, normalizedEvent, previousState, worldId, actorId);
     const link = await callbacks.getActorLink?.(actor) || {};
     const document = buildManagedActorDocument(actor, mediaResult.media, link, mediaResult.state.icons);
+    if (actor.type === "npc" && !mediaOnlyWrite) {
+        await exportNpcAnimations(document.definition.items, npcAnimationContext(actor));
+    }
     document.mediaWriteTargets = normalizedEvent.changedTargets;
     document.writeScopes = mediaOnlyWrite ? ["media"] : ["content", "media"];
     document.expectedRevision = Math.max(0, Number(previousState.revision || 0));
@@ -4053,7 +4068,10 @@ async function flushManagedNpcNativeBackfill() {
     try {
         const run = async () => {
             const actor = game.actors.get(id);
-            if (actor && actor === job.actor && job.identity === currentIdentity()) await syncManagedNpcNativeSnapshotNow(actor);
+            if (actor && actor === job.actor && job.identity === currentIdentity()) {
+                await syncManagedNpcNativeSnapshotNow(actor);
+                if (hasNpcAnimation(actor)) await queueManagedActorSync(actor, {reason:"activity-animation-backfill", checkAnimations:true});
+            }
         };
         const task = managedActorFlushChain.then(run, run);
         managedActorFlushChain = task.catch(() => {});
@@ -4084,6 +4102,7 @@ async function syncManagedNpcNativeSnapshotNow(actor) {
             foundry: contract.foundry, system: contract.system,
             wikiSync: contract.module?.version,
             nativeEditor: 1,
+            activityAnimations: 1,
             nativeSheetEditor: 1,
             nativeAbilityCreate: 1,
             nativeAbilityEdit: 1,
@@ -4719,6 +4738,7 @@ function normalizeTokenizerEvent(event = {}) {
         forceCreate: Boolean(event.forceCreate),
         forceContentSync: Boolean(event.forceContentSync),
         nativeSnapshotOnly: event.nativeSnapshotOnly === true,
+        checkAnimations: event.checkAnimations === true,
         variantsChanged: Boolean(event.variantsChanged) || String(event.reason || "").startsWith("variant-"),
         allowMissingBaseMedia: Boolean(event.allowMissingBaseMedia),
         changedTargets: Array.from(new Set((Array.isArray(event.changedTargets) ? event.changedTargets : []).filter((target) => ["avatar", "token"].includes(target)))),
@@ -4735,6 +4755,7 @@ function mergeTokenizerEvents(previous, next) {
         forceCreate: Boolean(previous.forceCreate || next.forceCreate),
         forceContentSync: Boolean(previous.forceContentSync || next.forceContentSync),
         nativeSnapshotOnly: previous.nativeSnapshotOnly === true && next.nativeSnapshotOnly === true,
+        checkAnimations: previous.checkAnimations === true || next.checkAnimations === true,
         variantsChanged: Boolean(previous.variantsChanged || next.variantsChanged),
         allowMissingBaseMedia: Boolean(previous.allowMissingBaseMedia || next.allowMissingBaseMedia),
         removedVariantIds: Array.from(new Set([...previous.removedVariantIds, ...next.removedVariantIds]))

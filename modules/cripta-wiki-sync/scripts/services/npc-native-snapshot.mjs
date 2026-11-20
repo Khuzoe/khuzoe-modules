@@ -65,6 +65,10 @@ export async function npcNativeSnapshotHash(snapshot, { subtle = globalThis.cryp
     return value;
   });
   const bytes = new TextEncoder().encode(canonical);
+  return hashNpcBytes(bytes, subtle);
+}
+
+export async function hashNpcBytes(bytes, subtle = globalThis.crypto?.subtle) {
   if (!subtle) return portableSha256(bytes);
   const digest = await subtle.digest("SHA-256", bytes);
   return Array.from(new Uint8Array(digest), value => value.toString(16).padStart(2, "0")).join("");
@@ -86,6 +90,7 @@ export async function captureNpcNativeSnapshot(actor, context) {
     identity: { campaignId: context.campaignId, worldId: context.worldId, foundryActorId: String(actor.id), actorUuid: String(actor.uuid || `Actor.${actor.id}`) },
     versions: {
       ...(context.nativeEditor ? {nativeEditor: context.nativeEditor} : {}),
+      ...(context.activityAnimations ? {activityAnimations: 1} : {}),
       ...(context.nativeAbilityCreate ? {nativeAbilityCreate: context.nativeAbilityCreate} : {}),
       ...(context.nativeSheetEditor ? {nativeSheetEditor: context.nativeSheetEditor} : {}),
       ...(context.nativeAbilityEdit ? {nativeAbilityEdit: context.nativeAbilityEdit} : {}),

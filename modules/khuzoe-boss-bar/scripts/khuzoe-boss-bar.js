@@ -351,14 +351,8 @@ async function clearBars() {
 
 async function hideBars() {
   const state = getState();
-  const root = document.getElementById("khbb-root");
-  if (root && !root.classList.contains("khbb-minimized")) {
-    const rect = root.getBoundingClientRect();
-    manualPosition = captureAnchoredPosition(rect);
-    manualSize = normalizeSize({ width: rect.width, height: rect.height });
-    manualBarHeight = currentBarHeight(root);
-  }
-
+  // Hiding is not a drag/resize: preserve explicit choices without freezing
+  // an automatic placement measured while the Foundry interface is loading.
   await game.settings.set(MODULE_ID, SETTING_DISMISSED, { updatedAt: state.updatedAt });
   renderBossBars(state);
 }
@@ -621,10 +615,12 @@ function initializeLayoutTracking() {
   }
 
   observeLayoutElements();
+  // Re-measure after the ready hook has finished laying out the interface.
+  scheduleLayoutRefresh();
 }
 
 function observeLayoutElements() {
-  const selector = "#scene-controls, #sidebar, #sidebar-content, #players, #hotbar, #camera-views, #smalltime-app";
+  const selector = "#scene-controls, #scene-navigation, #navigation, #sidebar, #sidebar-content, #players, #hotbar, #camera-views, #smalltime-app";
   const elements = document.querySelectorAll(selector);
   elements.forEach(element => layoutObserver?.observe(element));
 
@@ -1271,11 +1267,10 @@ async function onDragEnd(event) {
 
   root.classList.remove("khbb-dragging");
   const rect = root.getBoundingClientRect();
-  if (didMove) suppressClickUntil = Date.now() + 250;
-  if (root.classList.contains("khbb-minimized")) {
-    minimizedPosition = captureAnchoredPosition(rect);
-  } else {
-    manualPosition = captureAnchoredPosition(rect);
+  if (didMove) {
+    suppressClickUntil = Date.now() + 250;
+    if (root.classList.contains("khbb-minimized")) minimizedPosition = captureAnchoredPosition(rect);
+    else manualPosition = captureAnchoredPosition(rect);
   }
   applyRootPosition(root);
 }
@@ -1293,9 +1288,11 @@ function onResizeEnd(event) {
 
   root.classList.remove("khbb-resizing");
   const rect = root.getBoundingClientRect();
-  if (didMove) suppressClickUntil = Date.now() + 250;
-  manualSize = normalizeSize({ width: rect.width, height: rect.height });
-  manualBarHeight = currentBarHeight(root);
+  if (didMove) {
+    suppressClickUntil = Date.now() + 250;
+    manualSize = normalizeSize({ width: rect.width, height: rect.height });
+    manualBarHeight = currentBarHeight(root);
+  }
   applyRootPosition(root);
 }
 
@@ -1387,6 +1384,10 @@ function horizontalBoundsAvoidingFoundryUi() {
   let right = window.innerWidth - padding;
   const selectors = [
     "#scene-controls",
+    // V14 navigation is a vertical left dock. Reserve its visible controls
+    // horizontally, never the full-height flex menus as a top obstruction.
+    "#scene-navigation .scene",
+    "#scene-navigation-expand",
     "#sidebar",
     "#sidebar-content.expanded",
     "#players",
@@ -1399,8 +1400,10 @@ function horizontalBoundsAvoidingFoundryUi() {
     if (!isVisibleElement(element)) continue;
 
     const rect = element.getBoundingClientRect();
-    const isLeftDock = rect.right <= window.innerWidth * 0.5 && rect.height > 40;
-    const isRightDock = rect.left >= window.innerWidth * 0.5 && rect.height > 40;
+    const isNavigation = Boolean(element.closest?.("#scene-navigation"));
+    const isDockControl = rect.height > 40 || isNavigation;
+    const isLeftDock = rect.right <= window.innerWidth * 0.5 && isDockControl;
+    const isRightDock = rect.left >= window.innerWidth * 0.5 && isDockControl;
 
     if (isLeftDock) left = Math.max(left, rect.right + padding);
     if (isRightDock) right = Math.min(right, rect.left - padding);
@@ -1419,11 +1422,9 @@ function horizontalBoundsAvoidingFoundryUi() {
 function topOffsetAvoidingFoundryUi(rootLeft, rootRight) {
   const topPadding = 10;
   const gap = 10;
-  const selectors = [
-    "#navigation",
-    "#scene-navigation > *",
-    "#notifications > *"
-  ];
+  // Transient notifications are overlays at 10vh, not top-edge docks.
+  // Stacking below them would move a persistent HUD toward screen center.
+  const selectors = ["#navigation"];
 
   let top = topPadding;
   const elements = document.querySelectorAll(selectors.join(","));
@@ -1431,7 +1432,9 @@ function topOffsetAvoidingFoundryUi(rootLeft, rootRight) {
     if (element.id === "khbb-root" || !isVisibleElement(element)) continue;
 
     const rect = element.getBoundingClientRect();
-    const isTopInterface = rect.top < window.innerHeight * 0.35;
+    const maxHeaderBottom = Math.min(120, window.innerHeight * 0.2);
+    const isTopInterface = rect.top >= 0 && rect.top < window.innerHeight * 0.15
+      && rect.bottom <= maxHeaderBottom;
     const overlapsHorizontally = rect.right > rootLeft && rect.left < rootRight;
     if (isTopInterface && overlapsHorizontally) top = Math.max(top, rect.bottom + gap);
   }
@@ -1444,8 +1447,7 @@ function bottomOffsetAvoidingFoundryUi(rootLeft, rootRight) {
   const gap = 10;
   const selectors = [
     "#hotbar",
-    "#camera-views.horizontal",
-    "#notifications > *"
+    "#camera-views.horizontal"
   ];
 
   let bottom = bottomPadding;

@@ -1,0 +1,25 @@
+{
+  "KHUZOE_HUD": {
+    "Roll": "Damage rolled",
+    "HealingRoll": "Healing roll",
+    "MixedRoll": "Roll total",
+    "Initial": "Initial calculation",
+    "Applied": "Applied at creation",
+    "Pending": "Initial preview",
+    "Target": "Target",
+    "HP": "HP",
+    "TempHP": "Temporary HP",
+    "NoChange": "HP unchanged",
+    "Rolled": "Rolled",
+    "Ward": "Arcane Ward · {amount} absorbed",
+    "Resistance": "Resistance",
+    "Immunity": "Immunity",
+    "Vulnerability": "Vulnerability",
+    "Absorption": "Absorption",
+    "Save": "Saving throw",
+    "Reduction": "Reduction",
+    "Dodge": "Uncanny Dodge",
+    "Threshold": "Damage threshold",
+    "Untyped": "Untyped"
+  }
+}

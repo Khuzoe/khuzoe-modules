@@ -67,3 +67,18 @@ Non sono nuove fasi di gioco: la reazione è solo visiva, basata sulla percentua
 vita già condivisa. Gli effetti dei minion e dei boss multipli sono più contenuti.
 Movimento ridotto e modalità fotosensibile lasciano il bordo statico, mentre
 Disattivati nasconde la decorazione esterna. Nessun nuovo intervallo o ciclo JS.
+
+## Posizionamento all'avvio (0.4.2)
+
+Corretto lo spostamento imprevisto delle barre verso il centro durante l'avvio:
+le notifiche temporanee non cambiano più l'ancoraggio. La navigazione scene di
+Foundry V14 è verticale e viene ora evitata lateralmente, senza posizionare la
+barra sotto le sue liste o contenitori alti quanto lo schermo. La navigazione è
+osservata anche quando viene espansa o ricreata durante il caricamento.
+
+Nascondere/ripristinare la barra o cliccare un comando di trascinamento o
+ridimensionamento senza muoverlo non fissa più la posizione automatica come
+manuale. Trascinamenti e ridimensionamenti intenzionali restano conservati
+nella sessione. L'ancoraggio inferiore continua a evitare hotbar e video.
+Ricaricare i client per applicare la correzione e azzerare le vecchie posizioni
+errate conservate nella memoria della sessione.

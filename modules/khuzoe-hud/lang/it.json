@@ -1,0 +1,25 @@
+{
+  "KHUZOE_HUD": {
+    "Roll": "Danni tirati",
+    "HealingRoll": "Tiro di cura",
+    "MixedRoll": "Totale del tiro",
+    "Initial": "Calcolo iniziale",
+    "Applied": "Applicato alla creazione",
+    "Pending": "Anteprima iniziale",
+    "Target": "Bersaglio",
+    "HP": "PF",
+    "TempHP": "PF temporanei",
+    "NoChange": "PF invariati",
+    "Rolled": "Tirato",
+    "Ward": "Arcane Ward · {amount} assorbiti",
+    "Resistance": "Resistenza",
+    "Immunity": "Immunità",
+    "Vulnerability": "Vulnerabilità",
+    "Absorption": "Assorbimento",
+    "Save": "Tiro salvezza",
+    "Reduction": "Riduzione",
+    "Dodge": "Schivata prodigiosa",
+    "Threshold": "Soglia di danno",
+    "Untyped": "Senza tipo"
+  }
+}
