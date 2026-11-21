@@ -23,3 +23,11 @@ export function managedAnimationDigest(source, campaign, world, actor) {
   const digest = source.split('/').at(-1).replace(/\.webm$/, '');
   return animationDigestPattern.test(digest) && animationPaths(campaign, world, actor, digest).localPath === source ? digest : '';
 }
+
+export function hostedAnimationPath(source, campaign, world, actor, origin) {
+  if (!source.startsWith(origin + '/media/campaigns/')) return '';
+  const digest = source.match(/\/([a-f0-9]{64})\.webm$/)?.[1];
+  if (!digest) return '';
+  const {path} = animationPaths(campaign, world, actor, digest);
+  return source === origin + '/' + path ? path : '';
+}

@@ -1,4 +1,4 @@
-import { hasNpcAnimation, exportNpcAnimations, installNpcAnimations } from "./activity-animation-sync.mjs";
+import { applyLegacySiteAudio, hasNpcAnimation, exportNpcAnimations, installNpcAnimations } from "./activity-animation-sync.mjs";
 import { applyNpcNativeSheet } from "./npc-native-sheet.mjs";
 import { applyNpcNativeEditor } from "./npc-native-editor.mjs";
 import { validateNativeAbilityItem } from "./npc-native-ability.mjs";
@@ -509,6 +509,7 @@ export async function pullManagedActorVariants({ forceIndex = false, actorIds = 
     const canReplaceVariants = typeof tokenizerApi?.replaceVariants === "function";
     const indexPayload = await loadManagedActorRelationshipIndex({ force: forceIndex });
     const stateRoot = getWorldObjectSetting(STATE_SETTING);
+    const audioCandidates = [];
     let nextState = stateRoot;
     let changed = false;
     for (const summary of Array.isArray(indexPayload?.data) ? indexPayload.data : []) {
@@ -521,6 +522,7 @@ export async function pullManagedActorVariants({ forceIndex = false, actorIds = 
         }
         const actor = game.actors.get(summary.foundryActorId) || game.actors.get(summary.actorId);
         if (!actor || isTemporaryWikiActor(actor)) continue;
+        if (actor.type === "npc") audioCandidates.push(actor);
         let previous = nextState[actor.id] || {};
         await npcDossierVisibilitySync?.pull(actor, summary.profile);
         const categoryChanged = await applyManagedActorNpcCategory(actor, summary.profile || {});
@@ -591,6 +593,14 @@ export async function pullManagedActorVariants({ forceIndex = false, actorIds = 
             return false;
         })
         : false;
+    // Apply pending edits first so an explicitly chosen soundtrack wins.
+    for (const actor of audioCandidates) {
+        const canApply = () => canRunManagedActorPull(actor) && game.actors.get(actor.id) === actor
+            && getCampaignId() === campaignId && sanitizeId(game.world.id) === worldId;
+        if (!canApply() || !await applyLegacySiteAudio(actor, npcAnimationContext(actor), canApply)) continue;
+        changed = true;
+        if (canRunManagedActorSync(actor)) await queueManagedActorSync(actor, {reason:"activity-audio-default", forceContentSync:true});
+    }
     return changed || commandChanges;
 }
 

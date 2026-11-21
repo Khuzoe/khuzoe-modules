@@ -1,4 +1,5 @@
-import { animationPaths, managedAnimationDigest, primaryAnimationSource, MAX_ANIMATION_BYTES } from './npc-activity-animation.mjs';
+import { animationPaths, hostedAnimationPath, managedAnimationDigest, primaryAnimationSource, MAX_ANIMATION_BYTES } from './npc-activity-animation.mjs';
+import { webmAudioTrack } from './webm-audio-track.mjs';
 import { hashNpcBytes } from './npc-native-snapshot.mjs';
 
 function localAsset(source) {
@@ -15,16 +16,19 @@ function localUrl(source) {
   return foundry.utils.getRoute(path);
 }
 
+async function clipBytes(response) {
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error(`Lettura WebM: HTTP ${response.status}`);
+  if (Number(response.headers.get('Content-Length')) > MAX_ANIMATION_BYTES) return null;
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  return bytes.length <= MAX_ANIMATION_BYTES && bytes[0] === 0x1a && bytes[1] === 0x45 ? bytes : null;
+}
+
 // A missing local asset must not block the Actor and its other activities.
 async function readLocalClip(source) {
   const url = localUrl(source);
   if (!url) return null;
-  const response = await fetch(url, {cache:'no-store', redirect:'error'});
-  if (response.status === 404) return null;
-  if (!response.ok) throw new Error(`Lettura WebM Foundry: HTTP ${response.status}`);
-  if (Number(response.headers.get('Content-Length')) > MAX_ANIMATION_BYTES) return null;
-  const bytes = new Uint8Array(await response.arrayBuffer());
-  return bytes.length <= MAX_ANIMATION_BYTES && bytes[0] === 0x1a && bytes[1] === 0x45 ? bytes : null;
+  return clipBytes(await fetch(url, {cache:'no-store', redirect:'error', signal:AbortSignal.timeout(20000)}));
 }
 
 export function hasNpcAnimation(actor) {
@@ -33,6 +37,59 @@ export function hasNpcAnimation(actor) {
     if (activities?.values && Array.from(activities.values()).some(primaryAnimationSource)) return true;
     return Object.values(item._source?.system?.activities || item.toObject?.(true)?.system?.activities || {}).some(primaryAnimationSource);
   });
+}
+
+const scanningAudio = new WeakSet();
+
+// A preview exported from Foundry has an R2 object too. Only the activity's
+// actual video path identifies a clip assigned by the website.
+function legacySiteClip(activity, {campaign, world, actor, origin}) {
+  const source = primaryAnimationSource(activity);
+  if (!source || activity.flags.autoanimations.primary.video.wikiSyncAudio != null) return '';
+  return managedAnimationDigest(source, campaign, world, actor) || hostedAnimationPath(source, campaign, world, actor, origin)
+    ? source : '';
+}
+
+async function inspectSiteClip(source, context) {
+  const bytes = source.startsWith('worlds/') ? await readLocalClip(source)
+    : await clipBytes(await context.request(source, {redirect:'error', signal:AbortSignal.timeout(20000)}));
+  return bytes && webmAudioTrack(bytes);
+}
+
+export async function applyLegacySiteAudio(actor, context, canApply) {
+  if (actor.type !== 'npc' || actor.isToken || scanningAudio.has(actor)) return false;
+  scanningAudio.add(actor);
+  const inspected = new Map();
+  let changed = false;
+  try {
+    for (const item of actor.items.values()) {
+      for (const activity of item.system?.activities?.values() || []) {
+        if (!canApply()) return changed;
+        const source = legacySiteClip(activity, context);
+        if (!source) continue;
+        try {
+          if (!inspected.has(source)) inspected.set(source, await inspectSiteClip(source, context));
+          const hasTrack = inspected.get(source);
+          if (hasTrack == null) continue;
+          const current = actor.items.get(item.id)?.system.activities?.get(activity.id);
+          if (!canApply() || legacySiteClip(current, context) !== source) continue;
+          const config = current.flags.autoanimations;
+          const changes = {'flags.autoanimations.primary.video.wikiSyncAudio':{hasTrack}};
+          if (hasTrack && !config.primary.sound?.file && !config.soundOnly?.sound?.enable) {
+            changes['flags.autoanimations.primary.sound.file'] = source;
+            changes['flags.autoanimations.primary.sound.enable'] = true;
+          }
+          await current.update(changes);
+          changed = true;
+        } catch (error) {
+          console.warn('Wiki Sync | Audio WebM in attesa della prossima sincronizzazione.', item.name, activity.id, error);
+        }
+      }
+    }
+    return changed;
+  } finally {
+    scanningAudio.delete(actor);
+  }
 }
 
 // Store a preview alongside the public Item projection. Raw activity flags keep
