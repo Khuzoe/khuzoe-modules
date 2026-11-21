@@ -2,10 +2,11 @@ name: Pubblica moduli Khuzoe
 on:
   push:
     branches: [main]
-    paths: ['modules/**', 'applications/*/application.json', 'applications/*/release.json', 'applications/*/application.zip', 'publisher.config.json', 'tools/publisher.mjs', '.github/workflows/publish-modules.yml']
+    paths: ['modules/**', 'applications/*/application.json', 'applications/*/release.json', 'applications/*/application.zip', 'publisher.config.json', 'tools/publisher.mjs', 'tools/wait-pages-artifact.ps1', 'tests/WaitPagesArtifactTests.ps1', '.github/workflows/publish-modules.yml']
   workflow_dispatch:
 permissions:
   contents: write
+  actions: read
   pages: write
   id-token: write
 concurrency:
@@ -15,6 +16,8 @@ jobs:
   publish:
     if: github.ref == 'refs/heads/main'
     runs-on: windows-latest
+    env:
+      KHUZOE_PAGES_ARTIFACT: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
     defaults:
       run:
         shell: pwsh
@@ -28,6 +31,8 @@ jobs:
           node-version: '22'
       - name: Verifica preparazione pacchetti
         run: node --test tests/publisher.test.mjs
+      - name: Verifica recupero del catalogo tra tentativi diversi
+        run: ./tests/WaitPagesArtifactTests.ps1
       - name: Installa lo strumento ufficiale per leggere i compendi
         working-directory: modules/khuzoe-automations
         run: npm ci
@@ -50,9 +55,16 @@ jobs:
       - uses: actions/upload-pages-artifact@v4
         with:
           path: build/publication/site
+          name: ${{ env.KHUZOE_PAGES_ARTIFACT }}
+      - name: Attendi che GitHub renda disponibile il file del catalogo
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./tools/wait-pages-artifact.ps1 -Repository $env:GITHUB_REPOSITORY -RunId $env:GITHUB_RUN_ID -ArtifactName $env:KHUZOE_PAGES_ARTIFACT
       - name: Aggiorna il catalogo solo dopo i pacchetti
         id: pages
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: ${{ env.KHUZOE_PAGES_ARTIFACT }}
       - name: Verifica installazione dal catalogo pubblico su cartella isolata
         run: |
           for ($attempt = 1; $attempt -le 6; $attempt++) {
