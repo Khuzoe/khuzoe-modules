@@ -29,6 +29,19 @@ function strictDocument(document,data){
 }
 const creationFields=['_id','name','type','img','system','effects','flags','statuses','duration','disabled','transfer'];
 const creationMissingPaths=(saved,data)=>creationFields.filter(key=>Object.hasOwn(data,key)).flatMap(path=>nativePatchMissingPaths(saved,{path,op:'set',value:data[path]}));
+const npcGearTypes=new Set(['weapon','equipment','tool','consumable','loot','container']);
+function persistedCreationMissingPaths(saved,data,targetType){
+ const wanted=data.system?.properties,actual=saved.system?.properties;
+ // D&D5e preCreateGear adds "gear" to physical NPC items after preflight.
+ // Compare this SetField by membership and still verify every other field.
+ if(targetType==='Item'&&npcGearTypes.has(data.type)&&data.system?.type?.value!=='natural'&&Array.isArray(wanted)&&Array.isArray(actual)){
+  const expected=new Set(wanted),stored=new Set(actual);
+  if(wanted.every(property=>stored.has(property))&&actual.every(property=>property==='gear'||expected.has(property))){
+   saved={...saved,system:{...saved.system,properties:wanted}};
+  }
+ }
+ return creationMissingPaths(saved,data);
+}
 function strictNew(actor,type,data){
  const Class=globalThis.CONFIG?.[type]?.documentClass;
  if(!Class)throw new Error(`Modello ${type} non disponibile.`);
@@ -126,7 +139,7 @@ async function applySheet(actor,command,services){
    if(operation.operation==='create'){
     await actor.createEmbeddedDocuments(operation.target.type,[clone(entry.document)],{keepId:true,keepEmbeddedIds:true,criptaWikiSyncCommand:true});
     const saved=resolve(actor,operation.target);if(!saved)throw new Error('Il nuovo elemento non è stato restituito da Foundry.');entry.after=sourceOf(saved);
-    const missing=creationMissingPaths(entry.after,entry.document);if(missing.length)throw new Error(entry.document.name+': Foundry non ha conservato '+missing.slice(0,24).join(', ')+'.');
+    const missing=persistedCreationMissingPaths(entry.after,entry.document,operation.target.type);if(missing.length)throw new Error(entry.document.name+': Foundry non ha conservato '+missing.slice(0,24).join(', ')+'.');
    }else if(operation.operation==='update'){
     const result=await applyNpcNativeEditor(actor,{...command,kind:operation.target.type==='Actor'?'actor.update':operation.target.type==='Item'?'item.update':'effect.update',nativeSheetVersion:undefined,nativeEditorVersion:1,target:operation.target,patches:operation.patches,nativePermissions:permissions},services);
     entry.after=sourceOf(resolve(actor,operation.target));if(result.status!=='applied')throw new Error(result.error||'Elemento non aggiornato.');
