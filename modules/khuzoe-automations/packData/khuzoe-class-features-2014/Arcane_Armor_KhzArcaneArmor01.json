@@ -11,7 +11,7 @@
       "custom": "Khuzoe Automations — regole 2014"
     },
     "description": {
-      "value": "<p>Associa un'armatura indossata; i benefici del modello richiedono quell'armatura. La rimozione fa perdere i PF temporanei del Defensive Field.</p>",
+      "value": "<p>Configura Guardian/Infiltrator e la caratteristica delle armi. L'associazione a un'armatura è facoltativa e non richiede che sia indossata; togliere o cambiare armatura non disattiva i benefici né rimuove i PF temporanei.</p>",
       "chat": ""
     },
     "type": {

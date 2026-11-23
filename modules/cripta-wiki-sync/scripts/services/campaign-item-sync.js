@@ -196,6 +196,17 @@ export async function reconcileCampaignItemsNow({ notify = false } = {}) {
                 await propagateWorldItemToLinkedInstances(item);
             }
 
+            if (!projectSiteContent) {
+                const live = item.system?.description?.value;
+                if (live && live === record.foundry?.document?.system?.description?.value) {
+                    const fixed = repairLegacyCatalogPropertyTones(live, record.properties, escapeFoundryHtml);
+                    if (fixed !== live) {
+                        await item.update({ "system.description.value": fixed }, { criptaCampaignItemSync: true });
+                        localChanges += 1;
+                        await propagateWorldItemToLinkedInstances(item);
+                    }
+                }
+            }
             const snapshot = await buildWorldItemSnapshot(item, record);
             const previousHash = String(nextItemsState[id]?.foundryHash || "");
             const mustConfirmSite = Boolean(record?.sync?.pendingFoundry);
@@ -522,6 +533,9 @@ function buildWorldItemData(record, folder) {
     if (pendingSiteWrite || repairMissingPresentation) {
         projectSitePresentationOntoFoundryDocument(record, base, { missingOnly: !pendingSiteWrite });
     }
+    if (!pendingSiteWrite && base.system?.description?.value) {
+        base.system.description.value = repairLegacyCatalogPropertyTones(base.system.description.value, record.properties, escapeFoundryHtml);
+    }
     base.folder = folder?.id || base.folder || null;
     base.flags = mergeObject(base.flags || {}, { [MODULE_ID]: { campaignItemId: id, wikiItemId: id, managedCampaignItem: true, categoryId: category.id, categoryName: category.name, archived: isArchivedRecord(record), archiveIdentityVersion: 1 } });
     return base;
@@ -561,7 +575,7 @@ function fallbackWorldItemData(record, folder) {
         img: resolveItemImage(record?.image) || "icons/svg/item-bag.svg",
         folder: folder?.id || null,
         system: {
-            description: { value: renderLegacyDescription(record), unidentified: String(record?.unidentifiedDescription || ""), chat: "" },
+            description: { value: renderLegacyDescription(record), unidentified: renderCatalogItemText(record?.unidentifiedDescription, {inlineWhenSimple: true}), chat: "" },
             quantity: 1,
             rarity: mapRarity(record?.rarity),
             identified: record?.unidentified !== true,
@@ -617,10 +631,10 @@ function projectSitePresentationOntoFoundryDocument(record, documentValue, { mis
     if (!missingOnly || !currentUnidentified) {
         system.unidentified = {
             ...unidentified,
-            description: String(record?.unidentifiedDescription || "")
+            description: renderCatalogItemText(record?.unidentifiedDescription, {inlineWhenSimple: true})
         };
         if (Object.prototype.hasOwnProperty.call(description, "unidentified")) {
-            system.description.unidentified = String(record?.unidentifiedDescription || "");
+            system.description.unidentified = system.unidentified.description;
         }
     }
 
@@ -1238,21 +1252,23 @@ function renderLegacyDescription(record) {
 }
 
 function buildSiteDescriptionHtml(record) {
-    const summary = renderFoundryParagraphs(record?.summary);
-    const properties = (Array.isArray(record?.properties) ? record.properties : []).filter((property) => property?.hidden !== true);
-    const propertyCards = properties.map((property) => {
-        const toneClass = property?.negative === true
-            ? "cripta-catalog-property--negative"
-            : property?.genial === true ? "cripta-catalog-property--genial" : "cripta-catalog-property--normal";
-        const heading = property?.name
-            ? "<h3><span>" + escapeFoundryHtml(property.name) + "</span>"
-                + (property.charges ? '<small class="cripta-catalog-property-charges">' + escapeFoundryHtml(property.charges) + "</small>" : "")
-                + "</h3>"
-            : "";
-        const description = renderFoundryParagraphs(property?.description);
-        return '<section class="cripta-catalog-property ' + toneClass + '">' + heading + description + "</section>";
-    }).filter(Boolean).join("");
-    const notes = renderFoundryParagraphs(record?.notes);
+    const summary = renderCatalogItemText(record?.summary);
+    const properties = Array.isArray(record?.properties) ? record.properties : [];
+    const propertyCards = properties.filter(property => property && property.hidden !== true).map(entry => {
+        const property = typeof entry === "string" ? { description: entry } : entry;
+        const name = String(property.name || "");
+        const negative = property.negative === true;
+        const tone = negative ? "negative" : property.genial === true ? "genial" : "normal";
+        const label = negative ? "Negativa" : tone === "genial" ? "Geniale" : "";
+        const charges = String(property.charges ?? "").trim();
+        const unit = charges && Number.isFinite(Number(charges)) ? (Number(charges) === 1 ? "carica" : "cariche") : "";
+        const badge = charges ? '<small class="cripta-catalog-property-charges"' + (unit ? ' data-unit="' + unit + '"' : '')
+            + '>' + escapeFoundryHtml(charges) + '</small>' : '';
+        const heading = name || badge ? '<h3><span>' + escapeFoundryHtml(name) + '</span>' + badge + '</h3>' : '';
+        return '<section class="cripta-catalog-property cripta-catalog-property--' + tone + '"'
+            + (label ? ' aria-label="' + label + '"' : '') + '>' + heading + renderCatalogItemText(property.description) + '</section>';
+    }).join("");
+    const notes = renderCatalogItemText(record?.notes);
     const parts = [
         summary ? '<section class="cripta-catalog-summary">' + summary + "</section>" : "",
         propertyCards ? '<div class="cripta-catalog-properties">' + propertyCards + "</div>" : "",
@@ -1261,13 +1277,110 @@ function buildSiteDescriptionHtml(record) {
     return parts.length ? '<div class="cripta-catalog-description">' + parts.join("") + "</div>" : "";
 }
 
-function renderFoundryParagraphs(value, { emphasis = false } = {}) {
-    const text = String(value || "").replace(/\r\n?/g, "\n").trim();
-    if (!text) return "";
-    return text.split(/\n{2,}/).map((block) => {
-        const content = escapeFoundryHtml(block).replace(/\n/g, "<br />");
-        return "<p>" + (emphasis ? "<em>" + content + "</em>" : content) + "</p>";
-    }).join("");
+// Shared with the Foundry item description renderer. Only catalog formatting is expanded.
+// Repair the opening tag written by the old name-based renderer. Keep the
+// document's prose, rolls, and all unrelated markup byte-for-byte.
+function repairLegacyCatalogPropertyTones(html, properties, escapeName) {
+    if (typeof html !== "string" || !html.includes('cripta-catalog-property--negative" aria-label="Negativa"') || !Array.isArray(properties)) return html;
+    const expected = new Map();
+    for (const p of properties) {
+        if (!p?.name || p.hidden === true) continue;
+        const name = String(p.name).trim();
+        if (!/maledizion|effetto negativo|malus|penalita|svantaggio/.test(name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase())) continue;
+        const title = escapeName(name);
+        if (!expected.has(title)) expected.set(title, []);
+        expected.get(title).push(p.negative === true ? "negative" : p.genial === true ? "genial" : "normal");
+    }
+    if (!expected.size) return html;
+    const tag = /<section class="cripta-catalog-property cripta-catalog-property--(normal|genial|negative)"(?: aria-label="(?:Negativa|Geniale)")?>(?=<h3><span>([^<]*)<\/span>)/g;
+    const counts = new Map();
+    for (const [, , name] of html.matchAll(tag)) counts.set(name, (counts.get(name) || 0) + 1);
+    for (const [name, tones] of expected) if (tones.length !== counts.get(name)) expected.delete(name);
+    return html.replace(tag, (opening, oldTone, name) => {
+        const tones = expected.get(name);
+        if (!tones) return opening;
+        const tone = tones.shift();
+        if (oldTone !== "negative" || tone === "negative") return opening;
+        return '<section class="cripta-catalog-property cripta-catalog-property--' + tone + '"'
+            + (tone === "genial" ? ' aria-label="Geniale"' : '') + '>';
+    });
+}
+
+function renderCatalogItemText(source, { plain = false, inlineWhenSimple = false } = {}) {
+    const text = String(source ?? "").replace(/\r\n?/g, "\n").trimEnd();
+    if (!text.trim()) return "";
+    const escape = value => plain ? value : value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+    function inline(line) {
+        const parts = [];
+        const open = [];
+        let cursor = 0;
+        // Foundry rolls, document references and their labels are opaque to emphasis.
+        for (const token of line.matchAll(/\[\[[^\n]*?\]\](?:\{[^}\n]*\})?|@[\w.]+\[[^\]\n]*\](?:\{[^}\n]*\})?|\\[\\*]|\*+/g)) {
+            const run = token[0];
+            parts.push(escape(line.slice(cursor, token.index)));
+            cursor = token.index + run.length;
+            if (!run.startsWith("*") || run.length > 3) {
+                parts.push(escape(run.startsWith("\\") ? run.slice(1) : run));
+                continue;
+            }
+            let left = run.length;
+            const canClose = /\S/.test(line[token.index - 1] || "");
+            const canOpen = /\S/.test(line[cursor] || "");
+            while (canClose && open.length && open.at(-1).size <= left) {
+                const {index, size, tag} = open.pop();
+                parts[index] = plain ? "" : "<" + tag + ">";
+                parts.push(plain ? "" : "</" + tag + ">");
+                left -= size;
+            }
+            while (left > 0) {
+                const size = Math.min(2, left);
+                if (canOpen) open.push({index: parts.length, size, tag: size === 2 ? "strong" : "em"});
+                parts.push("*".repeat(size));
+                left -= size;
+            }
+        }
+        return parts.join("") + escape(line.slice(cursor));
+    }
+
+    const out = [], paragraph = [], lists = [];
+    function finishParagraph() {
+        if (paragraph.length) out.push("<p>" + paragraph.splice(0).join("<br />") + "</p>");
+    }
+    function closeList() {
+        out.push("</li></" + lists.pop().tag + ">");
+    }
+    for (const line of text.split("\n")) {
+        const item = /^([ \t]*)(?:[-+*]|(\d{1,9})[.)])[ \t]+(.*)$/.exec(line);
+        if (plain) {
+            out.push(item ? item[1] + (item[2] ? item[2] + ". " : "• ") + inline(item[3]) : inline(line));
+            continue;
+        }
+        if (!item) {
+            while (lists.length) closeList();
+            if (line.trim()) paragraph.push(inline(line));
+            else finishParagraph();
+            continue;
+        }
+        finishParagraph();
+        const indent = item[1].replace(/\t/g, "    ").length;
+        const tag = item[2] ? "ol" : "ul";
+        while (lists.length && lists.at(-1).indent > indent) closeList();
+        if (lists.at(-1)?.indent === indent && lists.at(-1).tag !== tag) closeList();
+        if (lists.at(-1)?.indent === indent) {
+            out.push("</li><li>");
+        } else {
+            const start = tag === "ol" && Number(item[2]) !== 1 ? ' start="' + Number(item[2]) + '"' : "";
+            out.push("<" + tag + start + "><li>");
+            lists.push({indent, tag});
+        }
+        out.push(inline(item[3]));
+    }
+    if (plain) return out.join("\n");
+    while (lists.length) closeList();
+    if (inlineWhenSimple && !out.length && paragraph.length === 1) return paragraph[0];
+    finishParagraph();
+    return out.join("");
 }
 
 function escapeFoundryHtml(value) {

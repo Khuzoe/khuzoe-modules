@@ -1,8 +1,16 @@
 # Khuzoe Automations
 
-Versione **0.28.9** — ambiente di riferimento **Foundry VTT 14.367 / D&D5e 5.3.3**. Arcane Ward e le capacità Armorer di Valdor sono descritte in [WARD-ARMORER-0.26.0.md](WARD-ARMORER-0.26.0.md). Le capacità introdotte nella 0.25.0 sono descritte nello storico [CAMPAIGN-FEATURES-0.25.0.md](CAMPAIGN-FEATURES-0.25.0.md); Difesa Impenetrabile usa ora la formulazione riportata qui sotto. Le copie già presenti sugli attori si aggiornano dall'icona Khuzoe nella barra della scheda oppure dal Medkit CAT. Nessun aggiornamento del mondo viene eseguito dagli strumenti di compilazione.
+Versione **0.28.15** - ambiente di riferimento **Foundry VTT 14.367 / D&D5e 5.3.3**. Arcane Ward e le capacità Armorer di Valdor sono descritte in [WARD-ARMORER-0.26.0.md](WARD-ARMORER-0.26.0.md). Le capacità introdotte nella 0.25.0 sono descritte nello storico [CAMPAIGN-FEATURES-0.25.0.md](CAMPAIGN-FEATURES-0.25.0.md); Difesa Impenetrabile usa ora la formulazione riportata qui sotto. Le copie già presenti sugli attori si aggiornano dall'icona Khuzoe nella barra della scheda oppure dal Medkit CAT. Nessun aggiornamento del mondo viene eseguito dagli strumenti di compilazione.
 
 Automazioni D&D 5e per Foundry VTT v14 basate su Coven's Automation Toolkit, Midi-QOL e DAE.
+
+## Armorer: uso senza vincoli di armatura
+
+Da 0.28.15, Thunder Gauntlets, Defensive Field e Lightning Launcher possono essere usati anche senza armatura indossata o associata, senza configurare un modello e senza possedere entrambe le capacità Arcane Armor e Armor Model. Restano il consumo degli usi, i limiti per turno e la scelta della caratteristica d'attacco.
+
+Arcane Armor permette un'associazione facoltativa a un'armatura dell'inventario, anche non indossata, oppure di continuare senza armatura. Armor Model può essere configurato autonomamente; dopo la prima scelta il cambio resta disponibile dopo un riposo. Il modello Infiltrator selezionato gestisce i benefici passivi di movimento e Furtività senza verificare l'equipaggiamento. Togliere, eliminare o cambiare l'armatura non disattiva il modello né elimina i PF temporanei del Defensive Field.
+
+Ricaricare completamente Foundry e i client GM/giocatori. Le automazioni già applicate beneficiano della modifica senza riapplicazione; nessuna scheda viene modificata dagli strumenti di generazione e compilazione.
 
 ## Abbraccio di Ginevra
 

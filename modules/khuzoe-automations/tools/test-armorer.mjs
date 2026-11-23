@@ -54,8 +54,8 @@ function workflow(actor, item, extra = {}) {
   assert.equal(await bind("infiltrator"), false, "Rebinding armor cannot bypass the rest requirement");
   armor.system.equipped = false;
   await armorer.reconcileArmorer(actor);
-  assert.equal(armorer.activeArmorModel(actor), null);
-  assert.equal(actor.effects.length, 0);
+  assert.equal(armorer.activeArmorModel(actor), "guardian", "The selected model does not require equipped armor");
+  assert.equal(actor.effects.length, 1);
   armor.system.equipped = true;
   await armorer.reconcileArmorer(actor);
   assert.equal(armorer.activeArmorModel(actor), "guardian");
@@ -90,12 +90,19 @@ function workflow(actor, item, extra = {}) {
   assert.equal(duplicate.system.uses.spent, 3);
   armor.system.equipped = false;
   await armorer.reconcileArmorer(actor);
-  assert.equal(actor.system.attributes.hp.temp, 0, "Doffing removes only the HP granted by this field");
+  assert.equal(actor.system.attributes.hp.temp, 4, "Doffing no longer removes Defensive Field temporary HP");
+  const otherArmor = {...armor, uuid: `${actor.uuid}.Item.otherSuit`, system: {...armor.system, equipped: false}};
+  actor.items.push(otherArmor); registerDocuments(otherArmor);
+  assert.equal(await cmd({action: "bind", armorUuid: otherArmor.uuid, model: "guardian", ability: "int"}), true);
+  assert.equal(actor.system.attributes.hp.temp, 4, "Changing the optional armor association preserves temporary HP");
+  actor.items.splice(actor.items.indexOf(otherArmor), 1);
+  await armorer.reconcileArmorer(actor);
+  assert.equal(armorer.activeArmorModel(actor), "guardian", "Deleting the associated armor does not disable the selected model");
   actor.system.attributes.hp.temp = 20;
   actor.flags[MODULE].temporaryHPSource = "Item.agathys";
   await armorer.reconcileArmorer(actor);
   assert.equal(actor.system.attributes.hp.temp, 20, "Other sources of temporary HP are preserved");
-  cases += 6;
+  cases += 8;
 }
 {
   const {actor, items, bind} = actorFixture();
@@ -135,7 +142,8 @@ function workflow(actor, item, extra = {}) {
   actor.flags[MODULE].armorer.ability = "ordinary";
   await armorer.prepareArmorerUse({workflow: attack});
   assert.equal(attack.activity.attack.ability, "str");
-  assert.equal(await armorer.prepareArmorerUse({workflow: workflow(actor, items.launcher)}), true);
+  assert.equal(await armorer.prepareArmorerUse({workflow: workflow(actor, items.launcher)}), undefined,
+    "An explicit Launcher attack is allowed even with Guardian selected");
   const target = {uuid: "Actor.marked", documentName: "Actor", items: [], effects: []};
   registerDocuments(target); combat(actor);
   attack.hitTargets = new Set([{actor: target}, {actor: target}]);
@@ -183,6 +191,101 @@ function workflow(actor, item, extra = {}) {
   await armorer.reconcileArmorer(actor);
   assert.equal(actor.effects[0].system.changes[0].value, "5");
   cases++;
+}
+// Explicit abilities work without armor, Arcane Armor, Armor Model or a selected model.
+{
+  const {actor, items} = actorFixture();
+  actor.items = [items.field, items.gauntlets, items.launcher];
+  assert.equal(armorer.activeArmorModel(actor), null);
+  const field = workflow(actor, items.field, {activity: {type: "utility"}});
+  assert.equal(await armorer.prepareArmorerUse({workflow: field}), undefined);
+  await armorer.finishArmorerUse({workflow: field});
+  assert.equal(actor.system.attributes.hp.temp, 4);
+  assert.equal(items.field.system.uses.spent, 1, "The GM path allows standalone Field and still spends a use");
+  const target = {uuid: `${actor.uuid}.Target`, name: "Target", documentName: "Actor", items: [], effects: []};
+  registerDocuments(target); combat(actor);
+  const gauntlets = workflow(actor, items.gauntlets, {hitTargets: new Set([{actor: target}])});
+  assert.equal(await armorer.prepareArmorerUse({workflow: gauntlets}), undefined);
+  await armorer.gauntletsHit({workflow: gauntlets});
+  assert.equal(target.effects.length, 1, "Standalone Gauntlets apply their mark");
+  const launcher = workflow(actor, items.launcher);
+  assert.equal(await armorer.prepareArmorerUse({workflow: launcher}), undefined);
+  decisions = [true];
+  await armorer.launcherBonus({workflow: launcher});
+  assert.equal(launcher.bonus, "1d6", "Standalone Launcher includes its bonus damage on the GM path");
+  const second = workflow(actor, items.launcher);
+  await armorer.launcherBonus({workflow: second});
+  assert.equal(second.bonus, undefined, "The once-per-own-turn limit remains enforced");
+  cases += 4;
+}
+// Model setup is available by itself, and its passive benefits survive equipment changes.
+{
+  const {actor, armor, items} = actorFixture();
+  actor.items = [items.model, items.steps, items.dampening];
+  const use = workflow(actor, items.model, {activity: {type: "utility"}});
+  decisions = ["infiltrator", "int"];
+  assert.equal(await armorer.prepareArmorerUse({workflow: use}), undefined);
+  await armorer.finishArmorerUse({workflow: use});
+  assert.equal(actor.flags[MODULE].armorer.armorUuid, null);
+  assert.equal(armorer.activeArmorModel(actor), "infiltrator");
+  assert.equal(actor.effects[0].system.changes[0].value, "5");
+  const options = {};
+  armorer.dampeningStealth({document: items.model, options, skillId: "ste"});
+  assert.equal(options.advantage, true, "Infiltrator's passive stealth works without armor");
+  actor.items.push(armor); armor.system.equipped = false;
+  await armorer.reconcileArmorer(actor);
+  assert.equal(actor.effects.length, 1);
+  assert.equal(actor.effects[0].system.changes[0].value, "5");
+  cases += 3;
+}
+// Arcane Armor's association is optional, including when there is no armor in the inventory.
+{
+  const {actor, items, cmd} = actorFixture();
+  actor.items = [items.armor];
+  const use = workflow(actor, items.armor, {activity: {type: "utility"}});
+  decisions = ["guardian", "int"];
+  assert.equal(await armorer.prepareArmorerUse({workflow: use}), undefined);
+  await armorer.finishArmorerUse({workflow: use});
+  assert.equal(armorer.activeArmorModel(actor), "guardian");
+  assert.equal(actor.effects[0].origin, items.armor.uuid, "Arcane Armor setup does not require a second feature");
+  assert.equal(await cmd({action: "bind", armorUuid: "Item.missing", model: "guardian", ability: "int"}), false,
+    "An optional association must still reference a real armor item");
+  cases += 2;
+}
+{
+  const {actor, armor, items} = actorFixture();
+  armor.system.equipped = false;
+  decisions = ["none", "infiltrator", "int"];
+  const use = workflow(actor, items.armor, {activity: {type: "utility"}});
+  assert.equal(await armorer.prepareArmorerUse({workflow: use}), undefined);
+  await armorer.finishArmorerUse({workflow: use});
+  assert.equal(actor.flags[MODULE].armorer.armorUuid, null, "Existing inventory armor can be left unassociated");
+  assert.equal(armorer.activeArmorModel(actor), "infiltrator");
+  cases++;
+}
+{
+  const {actor, armor, items} = actorFixture();
+  armor.system.equipped = false;
+  decisions = [armor.uuid, "infiltrator", "ordinary"];
+  const use = workflow(actor, items.armor, {activity: {type: "utility"}});
+  assert.equal(await armorer.prepareArmorerUse({workflow: use}), undefined);
+  await armorer.finishArmorerUse({workflow: use});
+  assert.equal(actor.flags[MODULE].armorer.armorUuid, armor.uuid, "Unequipped inventory armor can be associated");
+  assert.equal(armorer.activeArmorModel(actor), "infiltrator");
+  const launcher = workflow(actor, items.launcher);
+  await armorer.prepareArmorerUse({workflow: launcher});
+  assert.equal(launcher.activity.attack.ability, "dex", "The configured ordinary attack ability is retained");
+  cases++;
+}
+{
+  const {actor, items} = actorFixture();
+  decisions = [false];
+  assert.equal(await armorer.prepareArmorerUse({workflow: workflow(actor, items.armor)}), true);
+  assert.equal(actor.flags[MODULE], undefined, "Cancelling optional armor selection changes no state");
+  decisions = ["none", false];
+  assert.equal(await armorer.prepareArmorerUse({workflow: workflow(actor, items.armor)}), true);
+  assert.equal(actor.flags[MODULE], undefined, "Cancelling model selection changes no state");
+  cases += 2;
 }
 // The native v14 expiry uses the source combatant, even when the marked enemy owns the effect.
 {

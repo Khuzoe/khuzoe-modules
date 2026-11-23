@@ -17,13 +17,13 @@ const randomId = () => globalThis.crypto.randomUUID();
 export const ARMORER_IDS = Object.freeze({armor: "arcane-armor", model: "armor-model", gauntlets: "thunder-gauntlets",
   field: "defensive-field", launcher: "lightning-launcher", steps: "powered-steps", dampening: "dampening-field"});
 const definitions = [
-  ["armor", "KhzArcaneArmor01", "Arcane Armor", "Associa un'armatura indossata; i benefici del modello richiedono quell'armatura. La rimozione fa perdere i PF temporanei del Defensive Field."],
-  ["model", "KhzArmorModel001", "Armor Model", "Scelta Guardian/Infiltrator dopo un riposo, con strumenti da fabbro; selezione Intelligenza o caratteristica ordinaria per le armi dell'armatura."],
-  ["gauntlets", "KhzThunderGaunt1", "Thunder Gauntlets", "1d8 tuono. Chi viene colpito ha svantaggio contro altre creature fino all'inizio del prossimo turno dell'Armorer."],
-  ["field", "KhzDefensField01", "Defensive Field", "Azione bonus: sostituisce i PF temporanei con il livello da artefice. Usi pari alla competenza, recuperati al riposo lungo."],
-  ["launcher", "KhzLightLaunch01", "Lightning Launcher", "1d6 fulmine, gittata 90/300 piedi; propone 1d6 extra dopo un colpo a segno una volta in ciascun proprio turno."],
-  ["steps", "KhzPoweredSteps1", "Powered Steps", "+5 piedi alla velocità sul terreno soltanto con Infiltrator indossato."],
-  ["dampening", "KhzDampenField01", "Dampening Field", "Vantaggio a Furtività soltanto con Infiltrator indossato; cancella normalmente lo svantaggio dell'armatura."]
+  ["armor", "KhzArcaneArmor01", "Arcane Armor", "Configura Guardian/Infiltrator e la caratteristica delle armi. L'associazione a un'armatura è facoltativa e non richiede che sia indossata; togliere o cambiare armatura non disattiva i benefici né rimuove i PF temporanei."],
+  ["model", "KhzArmorModel001", "Armor Model", "Scelta Guardian/Infiltrator dopo un riposo, con strumenti da fabbro; selezione Intelligenza o caratteristica ordinaria per le armi. Configurabile anche senza Arcane Armor o armatura associata."],
+  ["gauntlets", "KhzThunderGaunt1", "Thunder Gauntlets", "1d8 tuono. Chi viene colpito ha svantaggio contro altre creature fino all'inizio del prossimo turno dell'Armorer. Utilizzabile anche senza armatura o modello configurato."],
+  ["field", "KhzDefensField01", "Defensive Field", "Azione bonus: sostituisce i PF temporanei con il livello da artefice. Usi pari alla competenza, recuperati al riposo lungo. Utilizzabile anche senza armatura o modello configurato."],
+  ["launcher", "KhzLightLaunch01", "Lightning Launcher", "1d6 fulmine, gittata 90/300 piedi; propone 1d6 extra dopo un colpo a segno una volta in ciascun proprio turno. Utilizzabile anche senza armatura o modello configurato."],
+  ["steps", "KhzPoweredSteps1", "Powered Steps", "+5 piedi alla velocità sul terreno con il modello Infiltrator selezionato, anche senza armatura."],
+  ["dampening", "KhzDampenField01", "Dampening Field", "Vantaggio a Furtività con il modello Infiltrator selezionato, anche senza armatura; si compensa normalmente con lo svantaggio."]
 ];
 export const ARMORER_AUTOMATIONS = definitions.map(([key, id, name, notes]) => ({source: MODULE, type: "feat", key, identifier: ARMORER_IDS[key], name, notes,
   rules: "2014", version: RELEASE_VERSION, uuid: `Compendium.khuzoe-automations.KhuzoeClassFeatures2014.Item.${id}`}));
@@ -85,8 +85,8 @@ export function boundArmor(actor) {
   return values(actor?.items).find(item => item.uuid === data.armorUuid && item.type === "equipment");
 }
 export function activeArmorModel(actor) {
-  const data = state(actor), armor = boundArmor(actor);
-  if (!feature(actor, ARMORER_IDS.armor) || !feature(actor, ARMORER_IDS.model) || !armor?.system?.equipped
+  const data = state(actor);
+  if (!(feature(actor, ARMORER_IDS.armor) || feature(actor, ARMORER_IDS.model))
     || values(actor?.statuses).includes("dead")) return null;
   return ["guardian", "infiltrator"].includes(data.model) ? data.model : null;
 }
@@ -110,7 +110,7 @@ export function prepareArmorerActivity(activity) {
   activity.range.long = 300;
 }
 function armorChoices(actor) {
-  return values(actor?.items).filter(item => item.type === "equipment" && item.system?.equipped
+  return values(actor?.items).filter(item => item.type === "equipment"
     && ["light", "medium", "heavy"].includes(item.system?.type?.value ?? item.system?.armor?.type));
 }
 async function chooseModel(actor) {
@@ -127,16 +127,15 @@ export async function prepareArmorerUse({workflow, document} = {}) {
   const id = item.system?.identifier;
   if (id === ARMORER_IDS.armor) {
     const choices = armorChoices(actor);
-    if (!choices.length) { inform("Arcane Armor: indossa prima un'armatura."); return true; }
-    const armorUuid = await cat.utils.dialogUtils.buttonDialog("Arcane Armor", "<p>Scegli l'armatura indossata da trasformare usando gli strumenti da fabbro.</p>",
-      [...choices.map(armor => [armor.name, armor.uuid]), ["Annulla", false]], {userId: userId(actor)});
-    if (!armorUuid) return true;
+    const selected = choices.length ? await cat.utils.dialogUtils.buttonDialog("Arcane Armor", "<p>Puoi associare un'armatura dell'inventario oppure continuare senza. Non è necessario indossarla.</p>",
+      [["Continua senza armatura", "none"], ...choices.map(armor => [armor.name, armor.uuid]), ["Annulla", false]], {userId: userId(actor)}) : "none";
+    if (!selected) return true;
+    const armorUuid = selected === "none" ? null : selected;
     const model = state(actor).model ?? await chooseModel(actor);
     const ability = state(actor).ability ?? await chooseAbility(actor);
     if (!model || !ability) return true;
     workflow.khuzoeArmorerChoice = {action: "bind", armorUuid, model, ability};
   } else if (id === ARMORER_IDS.model) {
-    if (!boundArmor(actor)?.system?.equipped) { inform("Armor Model: usa prima Arcane Armor sull'armatura indossata."); return true; }
     if (state(actor).model && !state(actor).restAvailable) { inform("Armor Model: puoi cambiare modello dopo un riposo breve o lungo."); return true; }
     const model = await chooseModel(actor);
     if (!model) return true;
@@ -144,8 +143,7 @@ export async function prepareArmorerUse({workflow, document} = {}) {
     if (!ability) return true;
     workflow.khuzoeArmorerChoice = {action: "model", model, ability};
   } else if ([ARMORER_IDS.field, ARMORER_IDS.gauntlets, ARMORER_IDS.launcher].includes(id)) {
-    const required = id === ARMORER_IDS.launcher ? "infiltrator" : "guardian";
-    if (activeArmorModel(actor) !== required) { inform(`${item.name}: richiede il modello ${required === "guardian" ? "Guardian" : "Infiltrator"} indossato.`); return true; }
+    // Explicit uses are allowed independently of equipment and model setup.
     if (id === ARMORER_IDS.field && fieldSpent(actor) >= Number(actor.system?.attributes?.prof ?? 0)) {
       inform("Defensive Field: non rimangono usi prima del prossimo riposo lungo."); return true;
     }
@@ -185,14 +183,14 @@ export async function executeArmorerCommand({actorUuid, action, ...data}) {
   return withDocumentLock(actor, "armorer", async () => {
     const previous = state(actor);
     if (action === "bind" || action === "model") {
-      if (!feature(actor, ARMORER_IDS.armor) || !feature(actor, ARMORER_IDS.model)) return false;
+      if (!feature(actor, action === "bind" ? ARMORER_IDS.armor : ARMORER_IDS.model)) return false;
       if (!["guardian", "infiltrator"].includes(data.model) || !["int", "ordinary"].includes(data.ability)) return false;
       const armor = action === "bind" ? armorChoices(actor).find(item => item.uuid === data.armorUuid) : boundArmor(actor);
-      if (!armor?.system?.equipped) return false;
+      if (action === "bind" && data.armorUuid && !armor) return false;
       if (action === "model" && previous.model && !previous.restAvailable) return false;
       if (action === "bind" && previous.model && (data.model !== previous.model || data.ability !== previous.ability)) return false;
-      if (previous.armorUuid && previous.armorUuid !== armor.uuid) await clearDefensiveHP(actor);
-      await actor.update({[`flags.${MODULE}.armorer`]: {...previous, armorUuid: armor.uuid, model: data.model, ability: data.ability, restAvailable: false}});
+      await actor.update({[`flags.${MODULE}.armorer`]: {...previous, armorUuid: action === "bind" ? armor?.uuid ?? null : previous.armorUuid ?? null,
+        model: data.model, ability: data.ability, restAvailable: false}});
       await reconcileArmorer(actor);
       return true;
     }
@@ -205,7 +203,7 @@ export async function executeArmorerCommand({actorUuid, action, ...data}) {
       return true;
     }
     if (action === "field") {
-      if (activeArmorModel(actor) !== "guardian" || !(artificerLevel(actor) > 0)) return false;
+      if (!(artificerLevel(actor) > 0)) return false;
       const items = canonicalField(actor), spent = fieldSpent(actor);
       if (!items.length || spent >= Number(actor.system.attributes.prof) || (previous.fieldUses ?? []).includes(data.id)) return false;
       const uses = items.map(item => Number(item.system.uses.spent ?? 0));
@@ -223,7 +221,7 @@ export async function executeArmorerCommand({actorUuid, action, ...data}) {
     }
     if (action === "launcherReserve") {
       const turn = launcherTurn(actor);
-      if (activeArmorModel(actor) !== "infiltrator" || !turn || previous.launcher?.turn === turn || data.turn !== turn) return false;
+      if (!turn || previous.launcher?.turn === turn || data.turn !== turn) return false;
       await actor.update({[`flags.${MODULE}.armorer.launcher`]: {turn, id: data.id}});
       return true;
     }
@@ -246,7 +244,7 @@ export async function finishArmorerUse({workflow} = {}) {
 export async function launcherBonus({workflow} = {}) {
   const actor = workflow?.actor;
   if (!actor || workflow.aborted || workflow.khuzoeLauncherAsked || !workflow.attackRoll || !values(workflow.hitTargets).length
-    || activeArmorModel(actor) !== "infiltrator" || !launcherTurn(actor) || state(actor).launcher?.turn === launcherTurn(actor)) return;
+    || !launcherTurn(actor) || state(actor).launcher?.turn === launcherTurn(actor)) return;
   workflow.khuzoeLauncherAsked = true;
   const accepted = await cat.utils.dialogUtils.buttonDialog("Lightning Launcher", "<p>Aggiungere 1d6 da fulmine a questo colpo? Una volta in ciascun tuo turno.</p>",
     [["Aggiungi 1d6", true], ["Non ora", false]], {userId: userId(actor)});
@@ -263,7 +261,7 @@ export function gauntletExpiry(actor) {
 }
 export async function gauntletsHit({workflow} = {}) {
   const actor = workflow?.actor;
-  if (!actor || workflow.aborted || workflow.khuzoeGauntletsMarked || !workflow.attackRoll || activeArmorModel(actor) !== "guardian") return;
+  if (!actor || workflow.aborted || workflow.khuzoeGauntletsMarked || !workflow.attackRoll) return;
   workflow.khuzoeGauntletsMarked = true;
   const seen = new Set();
   for (const token of values(workflow.hitTargets)) {
@@ -304,21 +302,23 @@ async function clearDefensiveHP(actor) {
   if (item) await removeOwnedTemporaryHP(actor, item);
 }
 export async function reconcileArmorer(actor) {
-  if (!actor?.uuid || !state(actor).armorUuid) return;
+  if (!actor?.uuid || !(state(actor).model || state(actor).armorUuid)) return;
   return withDocumentLock(actor, "armorer-effects", async () => {
     const model = activeArmorModel(actor);
     const effects = values(actor.effects).filter(effect => effect.flags?.cat?.identifier === MODEL_EFFECT);
     if (!model) {
       for (const effect of effects) await cat.utils.documentUtils.deleteDocument(effect);
-      await clearDefensiveHP(actor);
-      if (values(actor.statuses).includes("dead")) await actor.update({[`flags.${MODULE}.armorer.armorUuid`]: null});
+      if (values(actor.statuses).includes("dead")) {
+        await clearDefensiveHP(actor);
+        await actor.update({[`flags.${MODULE}.armorer.armorUuid`]: null, [`flags.${MODULE}.armorer.model`]: null});
+      }
       return;
     }
     const otherSteps = values(actor.items).some(item => item.system?.identifier === ARMORER_IDS.steps && !automated(item)
       && values(item.effects).some(effect => !effect.disabled && !effect.isSuppressed && effect.transfer
         && (effect.system?.changes ?? []).some(change => change.key === "system.attributes.movement.walk" && Number(change.value) === 5)));
     const changes = model === "infiltrator" && !otherSteps ? [{key: "system.attributes.movement.walk", type: "add", value: "5", priority: 20}] : [];
-    const origin = feature(actor, ARMORER_IDS.model);
+    const origin = feature(actor, ARMORER_IDS.model) ?? feature(actor, ARMORER_IDS.armor);
     const name = `Arcane Armor — ${model === "guardian" ? "Guardian" : "Infiltrator"}`;
     if (effects[0]) {
       if (effects[0].name !== name || JSON.stringify(effects[0].system?.changes) !== JSON.stringify(changes)) {
@@ -358,7 +358,7 @@ export function registerArmorerHooks() {
   for (const hook of ["createActiveEffect", "updateActiveEffect", "deleteActiveEffect"]) Hooks.on(hook, effect => {
     if (authority() && effect.parent?.documentName === "Actor" && values(effect.statuses).includes("dead")) void reconcileArmorer(effect.parent);
   });
-  if (authority()) for (const actor of values(game.actors)) if (state(actor).armorUuid) void reconcileArmorer(actor);
+  if (authority()) for (const actor of values(game.actors)) if (state(actor).model || state(actor).armorUuid) void reconcileArmorer(actor);
 }
 export function registerArmorer(api) {
   const macros = [];
