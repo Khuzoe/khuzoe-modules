@@ -22,6 +22,27 @@ function invalid(path, reason) {
   throw new NpcItemMechanicsError(`${path} — ${reason}`);
 }
 
+// Spell and activity ranges share D&D5e's RangeField. A weapon's system.range
+// has its own numeric schema and must never pass through this conversion.
+const rangeModes = new Set(['self', 'touch', 'spec', 'any']);
+function normalizeRange(range, previous, path) {
+  if (nativeEqual(range, previous)) return;
+  if (!record(range)) invalid(path, 'indica la gittata con valore e unità.');
+  if (!changed(previous, range, 'value') && !changed(previous, range, 'units')) return;
+  if (typeof range.value === 'number' && Number.isFinite(range.value)) {
+    range.value = String(range.value);
+    return;
+  }
+  if (typeof range.value !== 'string') return;
+  const mode = range.value.trim().toLowerCase();
+  if (!rangeModes.has(mode)) return;
+  if (range.units && range.units !== mode) {
+    invalid(path, `il valore «${mode}» e l’unità «${range.units}» indicano gittate diverse. Per «${mode}» scegli questa unità e lascia vuoto il valore. Per una distanza inserisci la misura.`);
+  }
+  range.units = mode;
+  range.value = '';
+}
+
 function checkKeys(data, before, keys, path) {
   if (!record(data)) invalid(path, 'è richiesto un oggetto.');
   for (const key of Object.keys(data)) {
@@ -110,6 +131,7 @@ export function normalizeNpcItemMechanics(item, baseline = {}) {
   if (!knownItems.has(item.type) || !record(item.system)) return;
   const {system} = item, before = baseline.system || {};
   try {
+    if (item.type === 'spell' && Object.hasOwn(system, 'range')) normalizeRange(system.range, before.range, 'system.range');
     for (const [key, types] of Object.entries(itemFields)) {
       if (Object.hasOwn(system, key) && !Object.hasOwn(before, key) && !types.includes(item.type)) {
         invalid('system.' + key, `campo non disponibile su un Item ${item.type}. Controlla il tipo di oggetto o configura l’attività.`);
@@ -119,6 +141,7 @@ export function normalizeNpcItemMechanics(item, baseline = {}) {
       const original = before.activities?.[id];
       if (nativeEqual(original, activity) || !['attack', 'save', 'damage', 'heal', 'utility'].includes(activity?.type)) continue;
       const path = 'system.activities.' + id;
+      if (Object.hasOwn(activity, 'range')) normalizeRange(activity.range, original?.range, `${activity.name || id} · ${path}.range`);
       for (const [key, types] of Object.entries(activityFields)) {
         if (Object.hasOwn(activity, key) && !Object.hasOwn(original || {}, key) && !types.includes(activity.type)) {
           invalid(path + '.' + key, `campo non disponibile su un’attività ${activity.type}.`);
