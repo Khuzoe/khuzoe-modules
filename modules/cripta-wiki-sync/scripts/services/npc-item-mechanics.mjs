@@ -25,6 +25,72 @@ function invalid(path, reason) {
 // Spell and activity ranges share D&D5e's RangeField. A weapon's system.range
 // has its own numeric schema and must never pass through this conversion.
 const rangeModes = new Set(['self', 'touch', 'spec', 'any']);
+const decimal = /^-?(?:\d+(?:\.\d+)?|\.\d+)$/;
+function normalizeWeaponRange(range, before) {
+  if (nativeEqual(range, before)) return;
+  checkKeys(range, before, ['value','long','reach','units'], 'system.range');
+  for (const key of ['value','long','reach']) {
+    if (!changed(before, range, key) || range[key] === null) continue;
+    const raw = range[key];
+    const value = typeof raw === 'string' ? raw.trim() : raw;
+    if (value === '') { range[key] = null; continue; }
+    const n = typeof value === 'string' && decimal.test(value) ? Number(value) : value;
+    if (!Number.isFinite(n) || n < 0 || n > Number.MAX_SAFE_INTEGER) {
+      invalid('system.range.' + key, 'indica una distanza numerica non negativa, oppure lascia vuoto il campo.');
+    }
+    range[key] = n;
+  }
+  if (changed(before, range, 'units') && (typeof range.units !== 'string' || !range.units.trim())) {
+    invalid('system.range.units', 'indica l’unità di misura dell’arma.');
+  }
+}
+
+function normalizeSpellPreparation(system, before, proposalPaths) {
+  if (!changed(before, system, 'preparation')) return;
+  const legacy = system.preparation;
+  checkKeys(legacy, {}, ['mode','prepared'], 'system.preparation');
+  const {mode, prepared} = legacy;
+  if (mode !== undefined && typeof mode !== 'string') invalid('system.preparation.mode', 'indica il metodo di lancio.');
+  if (prepared !== undefined && typeof prepared !== 'boolean') invalid('system.preparation.prepared', 'indica se l’incantesimo è preparato.');
+  const method = mode === 'prepared' || mode === 'always' ? 'spell' : mode;
+  const state = mode === 'always' ? 2 : prepared === undefined ? undefined : Number(prepared);
+  for (const [key, value] of [['method',method],['prepared',state]]) {
+    if (value === undefined || value === '') continue;
+    // Only the original field-level proposal distinguishes inherited defaults
+    // from an explicit choice. A flattened command must resolve any conflict.
+    const inherited = proposalPaths && !proposalPaths.includes('system.' + key)
+      && !Object.hasOwn(before, 'preparation') && nativeEqual(system[key], before[key]);
+    if (!inherited && Object.hasOwn(system, key) && system[key] !== value) {
+      invalid('system.' + key, `la preparazione precedente indica «${value}» e il campo attuale «${system[key]}». Indica la stessa scelta in entrambi.`);
+    }
+    system[key] = value;
+  }
+  delete system.preparation;
+}
+
+function normalizeEffectLinks(activity, original, path) {
+  if (activity.type === 'save' || !Array.isArray(activity.effects)) return;
+  for (const [index, link] of activity.effects.entries()) {
+    const before = original?.effects?.find(previous => previous?._id === link?._id);
+    if (!record(link) || !changed(before, link, 'onSave')) continue;
+    if (link.onSave !== false) invalid(`${path}.effects.${index}.onSave`, 'questa opzione richiede un’attività con tiro salvezza.');
+    delete link.onSave;
+  }
+}
+
+// Foundry v14 accepts typed effect values. Keep formulas and existing values
+// intact when an unrelated field or the order of changes is edited.
+export function normalizeNpcEffectChanges(effect, previous) {
+  const changes = effect.system?.changes;
+  if (!Array.isArray(changes) || nativeEqual(changes, previous?.system?.changes)) return;
+  for (const change of changes) {
+    if (change?.type !== 'add' || change.key !== 'system.attributes.ac.bonus' || typeof change.value !== 'string') continue;
+    if (previous?.system?.changes?.some(old => old.key === change.key && old.type === change.type && old.value === change.value)) continue;
+    const n = Number(change.value);
+    if (decimal.test(change.value) && Number.isFinite(n) && Math.abs(n) <= Number.MAX_SAFE_INTEGER) change.value = n;
+  }
+}
+
 function normalizeRange(range, previous, path) {
   if (nativeEqual(range, previous)) return;
   if (!record(range)) invalid(path, 'indica la gittata con valore e unità.');
@@ -127,10 +193,12 @@ function itemDamage(item, previous) {
 
 // Work on the caller's detached draft. Untouched archived fields, including
 // module extensions and older imports, must survive unrelated edits.
-export function normalizeNpcItemMechanics(item, baseline = {}) {
+export function normalizeNpcItemMechanics(item, baseline = {}, proposalPaths) {
   if (!knownItems.has(item.type) || !record(item.system)) return;
   const {system} = item, before = baseline.system || {};
   try {
+    if (item.type === 'weapon' && Object.hasOwn(system, 'range')) normalizeWeaponRange(system.range, before.range);
+    if (item.type === 'spell') normalizeSpellPreparation(system, before, proposalPaths);
     if (item.type === 'spell' && Object.hasOwn(system, 'range')) normalizeRange(system.range, before.range, 'system.range');
     for (const [key, types] of Object.entries(itemFields)) {
       if (Object.hasOwn(system, key) && !Object.hasOwn(before, key) && !types.includes(item.type)) {
@@ -141,6 +209,7 @@ export function normalizeNpcItemMechanics(item, baseline = {}) {
       const original = before.activities?.[id];
       if (nativeEqual(original, activity) || !['attack', 'save', 'damage', 'heal', 'utility'].includes(activity?.type)) continue;
       const path = 'system.activities.' + id;
+      normalizeEffectLinks(activity, original, path);
       if (Object.hasOwn(activity, 'range')) normalizeRange(activity.range, original?.range, `${activity.name || id} · ${path}.range`);
       for (const [key, types] of Object.entries(activityFields)) {
         if (Object.hasOwn(activity, key) && !Object.hasOwn(original || {}, key) && !types.includes(activity.type)) {
@@ -157,6 +226,7 @@ export function normalizeNpcItemMechanics(item, baseline = {}) {
       damage.parts = damage.parts.map((part, i) => nativeEqual(part, old?.parts?.[i]) ? part : damagePart(part, old?.parts?.[i], path + '.damage.parts.' + i));
     }
     if (changed(before, system, 'damage')) itemDamage(item, before.damage);
+    for (const effect of item.effects || []) normalizeNpcEffectChanges(effect, baseline.effects?.find(old => old._id === effect._id));
   } catch (error) {
     if (!(error instanceof NpcItemMechanicsError)) throw error;
     throw new NpcItemMechanicsError(`${item.name} (${item.type}): ${error.message}`);

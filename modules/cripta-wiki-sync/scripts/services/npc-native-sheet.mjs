@@ -3,7 +3,7 @@ import {applyNpcNativeEditor} from './npc-native-editor.mjs';
 import {nativeUndoPatches} from './npc-native-undo.mjs';
 import {npcNativeSnapshotEnabled} from './npc-native-snapshot.mjs';
 import {nativePreserveActivityReferencePatches} from './npc-native-automation.mjs';
-import {normalizeNpcItemMechanics} from './npc-item-mechanics.mjs';
+import {normalizeNpcItemMechanics,normalizeNpcEffectChanges} from './npc-item-mechanics.mjs';
 
 const clone=structuredClone,journalPath='flags.cripta-wiki-sync.nativeSheetJournal';
 const sourceOf=document=>{const source=JSON.parse(JSON.stringify(document.toJSON?.()??document.toObject(true)));if(source.flags?.['cripta-wiki-sync'])delete source.flags['cripta-wiki-sync'].nativeSheetJournal;return source;};
@@ -114,7 +114,9 @@ async function applySheet(actor,command,services){
     else {const list=target.type==='Item'?'items':'effects',index=final[list].findIndex(value=>value._id===target.id);final[list][index]=next;}
    }else if(operation.operation==='create'){
     if(target.type==='Actor'||document||operation.document?._id!==target.id||Object.hasOwn(operation.document,'ownership')||Object.hasOwn(operation.document,'_stats'))throw new Error('Identità del nuovo elemento non valida.');
-    const data=target.type==='Item'?prepareItem(operation.document,true):clone(operation.document);strictNew(actor,target.type,data);planned.push({...operation,document:data});final[target.type==='Item'?'items':'effects'].push(data);
+    const data=target.type==='Item'?prepareItem(operation.document,true):clone(operation.document);
+    if(target.type==='ActiveEffect')normalizeNpcEffectChanges(data);
+    strictNew(actor,target.type,data);planned.push({...operation,document:data});final[target.type==='Item'?'items':'effects'].push(data);
    }else if(operation.operation==='delete'){
     if(target.type==='Actor'||!document||!nativeEqual(comparable(nativeEditorSource(sourceOf(document),target.type)),comparable(operation.baseValue)))return{status:'conflict',error:'L’elemento da rimuovere è cambiato. Nessuna modifica applicata.'};
     planned.push({...operation,before:sourceOf(document)});final[target.type==='Item'?'items':'effects']=final[target.type==='Item'?'items':'effects'].filter(value=>value._id!==target.id);
