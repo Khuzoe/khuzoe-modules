@@ -7,6 +7,7 @@ const onceHooks = new Map();
 const onHooks = new Map();
 const automations = [];
 const macros = [];
+const settings = new Map();
 const runtimeSource = await readFile(new URL("../scripts/rune-knight.mjs", import.meta.url), "utf8");
 const mainSource = await readFile(new URL("../scripts/main.mjs", import.meta.url), "utf8");
 
@@ -32,6 +33,10 @@ globalThis.Hooks = {
 };
 
 globalThis.game = {
+  settings: {
+    register(module, key, config) { settings.set(`${module}.${key}`, config.default); },
+    get(module, key) { return settings.get(`${module}.${key}`); }
+  },
   modules: new Map([["khuzoe-automations", {active: true}]]),
   user: {id: "gm", isGM: true},
   users: [],
@@ -79,6 +84,10 @@ globalThis.cat = {
 };
 
 await import("../scripts/main.mjs");
+onceHooks.get("init")();
+const promptSetting = "khuzoe-automations.runeKnightTurnAndAttackPrompts";
+assert.equal(settings.get(promptSetting), false);
+settings.set(promptSetting, true);
 onceHooks.get("catReady")();
 const {isFriendlyToken, reconcileAllRuneUses, resolveGiantsMightConfig} = await import("../scripts/rune-knight.mjs");
 
@@ -717,6 +726,43 @@ assert.equal(reactionUsed.has(shieldActor), true);
 assert.equal(technicalRolls.at(-1).data._id, "KhzRKShldRt00001");
 assert.equal(shieldSetRoll, 1);
 assert.equal(shieldHitChecks, 1);
+
+settings.set(promptSetting, false);
+reactionUsed.clear();
+for (const item of [cloudItem, stoneItem, shieldItem]) item.system.uses.spent = 0;
+globalThis.cat.utils.dialogUtils = {
+  confirm: () => assert.fail("Conferma di reazione inattesa"),
+  selectTargetDialog: () => assert.fail("Selezione bersaglio inattesa"),
+  buttonDialog: () => assert.fail("Scelta di vantaggio/svantaggio inattesa")
+};
+const quietAttack = {...shieldWorkflow, activity: {attack: {}}, targets: new Set([cloudTarget])};
+const rollsBeforeQuietEvents = technicalRolls.length;
+await stoneMacro({...stoneEvent, turn: 5});
+await cloudMacro({workflow: quietAttack, document: cloudItem});
+await shieldMacro({workflow: quietAttack, document: shieldItem});
+const stormAttackMacro = byIdentifier("storm-rune-active").roll.find(entry => entry.pass === "sceneAttackRollConfig").macro;
+await stormAttackMacro({workflow: quietAttack, document: stormEffect});
+assert.equal(reactionUsed.size, 0);
+assert.equal(technicalRolls.length, rollsBeforeQuietEvents);
+assert.deepEqual([cloudItem, stoneItem, shieldItem].map(item => item.system.uses.spent), [0, 0, 0]);
+assert.deepEqual([...quietAttack.targets], [cloudTarget]);
+assert.equal(quietAttack.advantage, undefined);
+assert.equal(shieldSetRoll, 1);
+
+const midiFilter = onHooks.get("midi-qol.ReactionFilter");
+const riders = ["cloud-rune", "stone-rune", "runic-shield"].map(identifier => {
+  const item = runeDocument(identifier);
+  const [id] = item.flags.dnd5e.riders.activity;
+  return {item, id, uuid: `Item.${item._id}.Activity.${id}`};
+});
+const otherReaction = {id: "shield", uuid: "Item.spell.Activity.shield"};
+for (const other of [[], [otherReaction]]) {
+  const candidates = [...riders, ...other];
+  const references = candidates.map(activity => activity.uuid);
+  midiFilter(candidates, {}, "reactionhit", references);
+  assert.deepEqual(candidates, other);
+  assert.deepEqual(references, other.map(activity => activity.uuid));
+}
 
 const preUpdate = onHooks.get("preUpdateItem");
 const runeUpdate = {

@@ -26,6 +26,7 @@ import {
   prepareRuneKnightItemUpdate,
   reconcileAllRuneUses,
   registerRuneKnight,
+  registerRuneKnightSettings,
   restoreGiantsMightTokenSize,
   scheduleRuneUseReconciliation
 } from "./rune-knight.mjs";
@@ -241,6 +242,7 @@ Hooks.once("init", () => {
   registerGinevraChargesApi();
   registerSpellTerrainType();
   registerSpells2014Settings();
+  registerRuneKnightSettings();
 });
 Hooks.once("setup", registerSpellTerrainType);
 Hooks.once("socketlib.ready", registerGinevraChargesSocket);

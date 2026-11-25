@@ -1,6 +1,6 @@
 # Khuzoe Automations
 
-Versione **0.28.15** - ambiente di riferimento **Foundry VTT 14.367 / D&D5e 5.3.3**. Arcane Ward e le capacità Armorer di Valdor sono descritte in [WARD-ARMORER-0.26.0.md](WARD-ARMORER-0.26.0.md). Le capacità introdotte nella 0.25.0 sono descritte nello storico [CAMPAIGN-FEATURES-0.25.0.md](CAMPAIGN-FEATURES-0.25.0.md); Difesa Impenetrabile usa ora la formulazione riportata qui sotto. Le copie già presenti sugli attori si aggiornano dall'icona Khuzoe nella barra della scheda oppure dal Medkit CAT. Nessun aggiornamento del mondo viene eseguito dagli strumenti di compilazione.
+Versione **0.28.16** - ambiente di riferimento **Foundry VTT 14.367 / D&D5e 5.3.3**. Arcane Ward e le capacità Armorer di Valdor sono descritte in [WARD-ARMORER-0.26.0.md](WARD-ARMORER-0.26.0.md). Le capacità introdotte nella 0.25.0 sono descritte nello storico [CAMPAIGN-FEATURES-0.25.0.md](CAMPAIGN-FEATURES-0.25.0.md); Difesa Impenetrabile usa ora la formulazione riportata qui sotto. Le copie già presenti sugli attori si aggiornano dall'icona Khuzoe nella barra della scheda oppure dal Medkit CAT. Nessun aggiornamento del mondo viene eseguito dagli strumenti di compilazione.
 
 Automazioni D&D 5e per Foundry VTT v14 basate su Coven's Automation Toolkit, Midi-QOL e DAE.
 
@@ -84,10 +84,10 @@ Le attività tecniche di Blade Flourish restano nascoste durante l'uso ordinario
 
 ## Rune Knight 2014
 
-Il pacchetto include l'intero insieme di capacità operative del Rune Knight:
+Le richieste di reazione a fine turno e durante gli attacchi sono disattivate per impostazione predefinita. Il GM può riattivarle nelle impostazioni di Khuzoe Automations con **Rune Knight — proponi reazioni a fine turno e durante gli attacchi**. L'opzione riguarda Stone Rune a fine turno, Cloud Rune e Runic Shield su un colpo, e Storm Rune sul tiro per colpire.
 
 - **Giant's Might**, inclusi taglia del token, vantaggio alle prove e ai TS di Forza, danno extra una volta per turno e usi pari al bonus di competenza. Il danno extra viene confermato dal proprietario attivo dell'attore, non dal GM; il GM è usato soltanto se nessun owner è connesso. Le taglie normale e di Runic Juggernaut sono configurabili sulla singola capacità dalla sua intestazione o dal Medkit dell'attore; i valori ufficiali restano Large e Huge. Il rinnovo dell'effetto conserva senza scatti la dimensione originale del token.
-- **Cloud, Fire, Frost, Hill, Stone e Storm Rune**, con vantaggi passivi, reazioni, tiri salvezza, condizioni, danni ricorrenti e durate gestiti in modo nativo per v14. Le attività attivabili dal giocatore restano visibili, mentre quelle tecniche usano copie runtime non-rider e non compaiono sulla scheda. Cloud Rune viene proposta soltanto quando il bersaglio originale ha disposizione `Friendly`; la creatura a cui deviare l'attacco resta liberamente selezionabile. Storm Rune applica direttamente la scelta dell'owner senza chiedere una seconda conferma a chi effettua il tiro.
+- **Cloud, Fire, Frost, Hill, Stone e Storm Rune**, con vantaggi passivi, reazioni, tiri salvezza, condizioni, danni ricorrenti e durate gestiti in modo nativo per v14. Le attività attivabili dal giocatore restano visibili, mentre quelle tecniche usano copie runtime non-rider e non compaiono sulla scheda. Con le richieste attive, Cloud Rune permette di deviare un colpo diretto a un bersaglio `Friendly` verso un'altra creatura a scelta. Storm Rune applica direttamente la scelta dell'owner senza chiedere una seconda conferma a chi effettua il tiro.
 - **Runic Shield**, con ripetizione del solo d20 del tiro per colpire, conservazione degli altri dadi e ricalcolo dell’esito contro la CA.
 - **Great Stature, Master of Runes e Runic Juggernaut**, rilevati automaticamente per aumentare il dado, portare ogni runa a due invocazioni, consentire la taglia Huge e aumentare la portata in mischia.
 

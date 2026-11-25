@@ -10,6 +10,7 @@ const RULES = "2014";
 const VERSION = RELEASE_VERSION;
 const PACK = "Compendium.khuzoe-automations.KhuzoeClassFeatures2014.Item";
 const GIANTS_MIGHT_CONFIG_FLAG = "giantsMightConfig";
+const REACTION_PROMPTS_SETTING = "runeKnightTurnAndAttackPrompts";
 
 const GIANTS_MIGHT_DEFAULTS = Object.freeze({
   baseSize: "lg",
@@ -71,6 +72,36 @@ const RUNTIME_ACTIVITY = Object.freeze({
   stone: "KhzRKStoneRt0001",
   shield: "KhzRKShldRt00001"
 });
+
+const TECHNICAL_REACTIONS = new Set([ACTIVITY.cloud, ACTIVITY.stone, ACTIVITY.shield]);
+
+export function registerRuneKnightSettings() {
+  game.settings.register(MODULE_ID, REACTION_PROMPTS_SETTING, {
+    name: "Rune Knight — proponi reazioni a fine turno e durante gli attacchi",
+    hint: "Chiede se usare Stone Rune a fine turno, Cloud Rune o Runic Shield su un colpo e Storm Rune sul tiro per colpire.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false
+  });
+}
+
+function reactionPromptsEnabled() {
+  return game.settings?.get?.(MODULE_ID, REACTION_PROMPTS_SETTING) === true;
+}
+
+// Midi-QOL consulta anche le attività rider. Queste tre servono solo alle macro CAT.
+function filterTechnicalReactions(activities, _options, _trigger, activityList) {
+  const excluded = new Set(activities.filter(activity =>
+    TECHNICAL_REACTIONS.has(activity?.id) && activity.item?.flags?.cat?.automation?.source === MODULE_ID
+  ).map(activity => activity.uuid));
+  if (!excluded.size) return;
+  for (const list of [activities, activityList]) {
+    for (let index = list.length - 1; index >= 0; index--) {
+      if (excluded.has(list[index]?.uuid ?? list[index])) list.splice(index, 1);
+    }
+  }
+}
 
 const itemUseQueues = new Map();
 const reactionQueues = new Map();
@@ -641,6 +672,7 @@ async function applyStoneRuneEffect(item, workflow) {
 }
 
 async function triggerStoneRune({token, document, combat, round, turn}) {
+  if (!reactionPromptsEnabled()) return;
   const target = tokenDocument(token);
   if (!target?.actor || !document?.actor) return;
   if (!["character", "npc"].includes(target.actor.type ?? "npc")) return;
@@ -928,6 +960,7 @@ export function prepareRuneKnightItemUpdate(item, changes) {
 }
 
 async function redirectCloudRune({workflow, document}) {
+  if (!reactionPromptsEnabled()) return;
   if (!workflow?.attackRoll || targetDocuments(workflow, "hitTargets").length !== 1) return;
   const ownerActor = document.actor;
   const original = targetDocuments(workflow, "hitTargets")[0];
@@ -1014,6 +1047,7 @@ async function rerollAttack(workflow) {
 }
 
 async function useRunicShield({workflow, document}) {
+  if (!reactionPromptsEnabled()) return;
   if (!workflow?.attackRoll || targetDocuments(workflow, "hitTargets").length !== 1) return;
   const ownerActor = document.actor;
   const protectedTarget = targetDocuments(workflow, "hitTargets")[0];
@@ -1078,7 +1112,7 @@ async function chooseStormInfluence(document, rollingToken, label, eventObject) 
 }
 
 async function stormAttack({workflow, document, token}) {
-  if (!workflow?.activity?.attack) return;
+  if (!workflow?.activity?.attack || !reactionPromptsEnabled()) return;
   const choice = await chooseStormInfluence(document, token ?? workflow.token, "il tiro per colpire", workflow);
   if (choice === "advantage") workflow.advantage = true;
   if (choice === "disadvantage") workflow.disadvantage = true;
@@ -1201,3 +1235,4 @@ export function registerRuneKnight(api) {
 }
 
 Hooks.on("getHeaderControlsApplicationV2", addGiantsMightHeaderControl);
+Hooks.on("midi-qol.ReactionFilter", filterTechnicalReactions);

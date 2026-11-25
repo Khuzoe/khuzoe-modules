@@ -1,67 +1,479 @@
-.khhud-results,
-.dice-roll.khhud-roll,
-.khhud-source {
+.khhud-message {
   --khhud-ink: #f6efdf;
   --khhud-muted: #cec5b5;
   --khhud-gold: #e6c88b;
   --khhud-border: #65553f;
-  --khhud-panel: #191d24;
-  --khhud-surface: #252a32;
+  --khhud-panel: #151c24;
+  --khhud-surface: #252e38;
+  --khhud-line: #c4aa7b40;
+  --khhud-edge: var(--khhud-border);
+  --khhud-wash: #282c32;
+  --khhud-gap: 8px;
+  --khhud-paper: #f3dfb5;
+  --khhud-shine: #fff1d3;
+  --khhud-neutral: #9c8b80;
+  --khhud-tone: var(--khhud-element, var(--khhud-sender-color, var(--khhud-neutral)));
+  --khhud-metal: color-mix(in srgb, var(--khhud-tone) 46%, var(--khhud-shine));
+  --khhud-metal-end: color-mix(in srgb, var(--khhud-element-end, var(--khhud-tone)) 56%, var(--khhud-shine));
+  --khhud-foil: color-mix(in srgb, var(--khhud-tone) 26%, var(--khhud-paper));
+  --khhud-dye: hsl(from var(--khhud-tone) h min(94, calc(s * 1.12)) 48%);
+  --khhud-dye-end: hsl(from var(--khhud-element-end, var(--khhud-tone)) h min(94, calc(s * 1.12)) 48%);
+  --khhud-bloom: color-mix(in srgb, var(--khhud-dye) 38%, #fff2e2);
+  --khhud-leaf: color-mix(in srgb, var(--khhud-dye-end) 13%, #fcf7ef);
+  --khhud-field: linear-gradient(155deg, var(--khhud-bloom) 8%, var(--khhud-leaf) 68%);
+  --khhud-display: var(--dnd5e-font-roboto-condensed, "Roboto Condensed", var(--font-sans, sans-serif));
+  --khhud-print: #302921;
+  --khhud-print-soft: #594b40;
+  --khhud-binding: color-mix(in srgb, var(--khhud-dye) 27%, #191a24);
+  --khhud-print-accent: color-mix(in srgb, var(--khhud-dye) 30%, #30232a);
+  --khhud-print-rule: color-mix(in srgb, var(--khhud-print-accent) 37%, transparent);
+  --khhud-title-font: "Palatino Linotype", "Book Antiqua", Georgia, serif;
 }
 
-.khhud-results,
-.dice-roll.khhud-roll {
+/* D&D5e styles the chat log by ID and draws parchment on the outer message. */
+:is(#chat-log, .chat-log) > .chat-message.khhud-message { margin-inline: 0; }
+
+:is(#chat-log, .chat-log, .chat-popout, #chat-notifications, body) .chat-message.khhud-message {
+  --color-text-primary: var(--khhud-ink);
+  --color-text-secondary: var(--khhud-muted);
+  --color-text-tertiary: #bcb4a6;
+  --color-text-emphatic: #fff6e6;
+  --dnd5e-color-card: var(--khhud-surface);
+  --dnd5e-background-5: #ffffff0b;
+  position: relative;
+  isolation: isolate;
   box-sizing: border-box;
-  color: var(--khhud-ink);
-  background: linear-gradient(145deg, #292a2d, var(--khhud-panel) 72%);
-  border: 1px solid var(--khhud-border);
-  border-radius: 9px;
-  font-family: var(--font-body, sans-serif);
-  font-variant-numeric: tabular-nums;
-  text-shadow: none;
-}
-
-.khhud-results {
-  padding: 4px;
-}
-
-.khhud-results > .khhud-source,
-.chat-card > .card-header > .khhud-source {
-  display: flex;
-  align-items: center;
-  gap: 10px;
   min-width: 0;
-  padding: 7px 9px;
+  padding: 10px 12px;
   color: var(--khhud-ink);
-  background: linear-gradient(100deg, #3d352c, #28292c 65%, #22262d);
-  border: 1px solid var(--khhud-border);
-  border-radius: 6px;
-  text-align: start;
-  text-shadow: none;
+  background-color: var(--khhud-panel);
+  background-image: radial-gradient(ellipse 85% 145px at 98% 0%, color-mix(in srgb, var(--khhud-metal) 23%, transparent), transparent),
+    linear-gradient(155deg, color-mix(in srgb, var(--khhud-wash) 91%, transparent), #141b24d6 45%, #121923f5),
+    var(--khhud-family-art, none);
+  background-position: center, center, center 32%;
+  background-size: cover;
+  border: 0 solid var(--khhud-edge);
+  border-inline-start-width: 3px;
+  border-inline-start-style: var(--khhud-edge-style, solid);
+  border-radius: 3px 6px 6px 3px;
+  box-shadow: inset 0 0 0 1px #bba58341, inset 0 1px 0 #f1daaa24, 0 2px 6px #080c1138;
+  font-variant-numeric: tabular-nums;
 }
 
-.khhud-results > .khhud-source { margin-bottom: 3px; }
-.chat-card .card-header > .summary.khhud-source > :is(.gold-icon, .khhud-token-icon),
-.khhud-source > .khhud-source-icon,
-.khhud-target-art > .khhud-source-icon,
+.khhud-token-layer {
+  --khhud-rim-mask: radial-gradient(ellipse closest-side, black 83%, #000e 90%, transparent 99%);
+  --khhud-subject-feather: transparent, black 6%, black 94%, transparent;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.khhud-token-layer > img {
+  content: var(--khhud-speaker-art, none);
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  object-fit: contain;
+  /* Fade inside the circumference of a flattened token, including the four corners. */
+  object-view-box: inset(8%);
+  mask-image: var(--khhud-rim-mask);
+  mask-composite: intersect;
+}
+.khhud-token-subject .khhud-token-layer > img {
+  object-view-box: none;
+  mask-image: linear-gradient(to right, var(--khhud-subject-feather)),
+    linear-gradient(to bottom, var(--khhud-subject-feather));
+}
+:is(#chat-log, .chat-log, .chat-popout, #chat-notifications, body) .chat-message.khhud-has-portrait:not(:has(.khhud-banner)) > .khhud-token-backdrop {
+  display: flex;
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  inset: 0 0 auto auto;
+  width: min(69%, 225px);
+  height: min(100%, 185px);
+  border-radius: inherit;
+  opacity: .52;
+  mask-image: linear-gradient(to right, transparent 2%, black 69%), linear-gradient(to bottom, black 25%, transparent);
+  mask-composite: intersect;
+  mix-blend-mode: normal;
+  filter: none;
+}
+
+.chat-message.khhud-message.whisper {
+  --khhud-edge: #a79abe;
+  --khhud-wash: #3a3244;
+  --khhud-edge-style: dashed;
+}
+.chat-message.khhud-message.blind {
+  --khhud-edge: #bd90b7;
+  --khhud-wash: #402f40;
+  --khhud-edge-style: double;
+}
+
+/* One continuous field under the artwork, title, rolls and target tray. */
+:is(#chat-log, .chat-log, .chat-popout, #chat-notifications, body)
+.chat-message.khhud-message:has(.chat-card > .description > .khhud-source) {
+  --khhud-gutter: 12px;
+  --khhud-overlap: 2.7rem;
+  --khhud-art-height: clamp(8rem, 46cqi, 11rem);
+  --khhud-roll-surface: transparent;
+  padding: 0;
+  background: var(--khhud-binding);
+  box-shadow: inset 0 0 0 1px #ffffff21, 0 2px 6px #080c1138;
+  > .message-header {
+    position: relative;
+    isolation: isolate;
+    z-index: 1;
+    min-height: var(--khhud-overlap);
+    margin: 0 0 calc(0px - var(--khhud-overlap));
+    padding: 7px var(--khhud-gutter) 4px;
+    border: 0;
+    border-image: none;
+    --khhud-muted: #efe7dd;
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 -.85rem;
+      z-index: -1;
+      pointer-events: none;
+      border-start-end-radius: 6px;
+      background: linear-gradient(110deg, color-mix(in srgb, var(--khhud-binding) 95%, transparent),
+        color-mix(in srgb, var(--khhud-binding) 64%, transparent) 68%, color-mix(in srgb, var(--khhud-binding) 78%, transparent));
+      mask-image: linear-gradient(black calc(100% - .85rem), transparent);
+    }
+  }
+  > .message-content {
+    padding: 0 var(--khhud-gutter) 10px;
+    border-radius: inherit;
+    color: var(--khhud-print);
+    --color-text-primary: var(--khhud-print);
+    --color-text-secondary: var(--khhud-print-soft);
+    --color-text-tertiary: var(--khhud-print-soft);
+    --color-text-emphatic: var(--khhud-print-accent);
+    --dnd5e-color-card: var(--khhud-foil);
+    --khhud-cloth: var(--khhud-binding);
+    background: var(--khhud-field) var(--khhud-leaf);
+  }
+  .chat-card > .description:has(> .khhud-source) { margin-inline: calc(0px - var(--khhud-gutter)); }
+  .chat-card > .description > .khhud-source {
+    display: grid;
+    grid-template: var(--khhud-art-height) auto / minmax(0, 1fr);
+    gap: 0;
+    align-items: end;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    &::before, > .khhud-portrait-band {
+      grid-area: 1 / 1 / 2 / 2;
+      --khhud-fade: linear-gradient(to bottom, black 61%, transparent 100%);
+    }
+    &::before {
+      inset-inline-start: 0;
+      background: var(--khhud-ability-art, none) 60% 38% / cover no-repeat;
+      mask-image: var(--khhud-fade);
+      border-start-end-radius: 6px;
+    }
+    &:has(> .gold-icon[hidden])::before { background-image: none; }
+    > .khhud-portrait-band {
+      /* Use the visible area below the byline for the crop, while painting all the way to the edge. */
+      padding-block-start: var(--khhud-overlap);
+      mask-image: var(--khhud-seam), var(--khhud-fade);
+      mask-composite: intersect;
+    }
+    &::after { content: none; }
+    > :is(.name-stacked, .khhud-source-name) {
+      grid-area: 2 / 1;
+      margin: -.3rem 0 0;
+      padding: 0 var(--khhud-gutter) 2px;
+      text-align: start;
+    }
+    :is(.title, .khhud-source-name) {
+      color: var(--khhud-binding);
+      font: 700 clamp(1.75rem, 11.8cqi, 2.85rem)/1 var(--khhud-display);
+      letter-spacing: -.035em;
+      text-shadow: none;
+    }
+  }
+  &:not(.khhud-has-portrait):not(:has(.khhud-banner > .gold-icon[src]:not([src=""], [hidden], [aria-hidden="true"], [data-concealed]))) {
+    --khhud-overlap: 0px;
+    --khhud-art-height: 0px;
+    > .message-header::before { content: none; }
+    .khhud-banner > .name-stacked { margin-block-start: .6rem; }
+  }
+  .chat-card > .description > .khhud-banner ~ .details { display: none; }
+  @media (prefers-reduced-motion: no-preference) {
+    &[data-khhud-reflect][data-khhud-element] .chat-card > .description > .khhud-source[data-khhud-ability-art]:has(> .gold-icon:not([hidden], [aria-hidden="true"], [data-concealed], .hidden))::after {
+      content: "";
+      grid-area: 1 / 1 / 2 / 2;
+      inset: 24% 5% 14% 38%;
+      height: auto;
+      background: linear-gradient(112deg, transparent 34%,
+        color-mix(in srgb, var(--khhud-tone) 57%, white) 47%,
+        color-mix(in srgb, var(--khhud-element-end, var(--khhud-tone)) 24%, white) 51%, transparent 66%);
+      mask-image: radial-gradient(ellipse closest-side, black 22%, transparent);
+      opacity: 0;
+      animation: khhud-art-glint 6.6s ease-in-out -1s infinite;
+    }
+  }
+  .chat-card .card-footer.pills { border-color: var(--khhud-print-rule); }
+  .card-footer.pills > .pill { background: var(--khhud-binding); border-color: var(--khhud-print-accent); }
+  .targets-tray > label, .targets-tray > label > i:first-of-type { color: var(--khhud-print-accent); }
+  .targets-tray > label::after { border-color: var(--khhud-print-rule); }
+  .card-buttons button {
+    --button-background-color: var(--khhud-foil);
+    --button-text-color: var(--khhud-print);
+    --button-border-color: var(--khhud-print-rule);
+  }
+}
+
+/* Draw the hairline on the actual perimeter. Foundry keeps its own sender /
+   whisper stripe on the leading edge and its ordinary keyboard focus outline. */
+.chat-message.khhud-message:where(:has(.khhud-banner, .dice-roll), .khhud-hp-message)::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  border: 1px solid color-mix(in srgb, var(--khhud-dye-end) 65%, #827b78);
+  border-block-start-color: var(--khhud-metal);
+  border-inline-start: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.chat-message.khhud-joined-next::after { border-block-end-width: 0; }
+
+/* One wash per action, from the fading illustration through the target tray. */
+.khhud-message:not(.khhud-hp-message, .blind) {
+  &.khhud-has-portrait {
+    --khhud-wash-display: block;
+    --khhud-token-display: block;
+    --khhud-art-crossfade: linear-gradient(108deg, #0003, #0007 33%, #000a 54%, #000e 79%, black);
+  }
+  .chat-card:has(
+    > .description:not([hidden], [aria-hidden="true"], [data-concealed], .hidden, .secret:not(.revealed), [style*="display: none"], [style*="display:none"])
+    > .khhud-source[data-khhud-ability-art]:not([hidden], [aria-hidden="true"], [data-concealed], .hidden, .secret:not(.revealed), [style*="display: none"], [style*="display:none"])
+    > .gold-icon[src]:not([src=""], [hidden], [aria-hidden="true"], [data-concealed], .hidden, .secret:not(.revealed), [style*="display: none"], [style*="display:none"])
+  ) > .khhud-card-wash {
+    --khhud-wash-display: block;
+    --khhud-wash-ability: "";
+  }
+
+  .chat-card:has(> .description > .khhud-source) {
+    position: relative;
+    isolation: isolate;
+    > .khhud-card-wash {
+      display: var(--khhud-wash-display, none);
+      position: absolute;
+      inset: calc(var(--khhud-art-height) * .72) calc(0px - var(--khhud-gutter, 0px)) 0;
+      z-index: -1;
+      pointer-events: none;
+      overflow: clip;
+      clip-path: inset(0);
+      mask-image: linear-gradient(to bottom, transparent, #0002 9%, #0009 24%, black 43%, #000e 61%, #0007 80%, #0002 93%, transparent);
+      background: var(--khhud-foil);
+      filter: blur(10px);
+      opacity: .38;
+      > img, &::after {
+        position: absolute;
+        inset: -18px;
+      }
+      > img {
+        display: var(--khhud-token-display, none);
+        width: calc(100% + 36px);
+        height: calc(100% + 36px);
+        max-width: none;
+        max-height: none;
+        object-fit: cover;
+        object-view-box: inset(24%);
+        mask-image: none;
+        mix-blend-mode: soft-light;
+      }
+      &::after {
+        content: var(--khhud-wash-ability, none);
+        background: var(--khhud-ability-art, none) 62% 46% / cover no-repeat;
+        mask-image: var(--khhud-art-crossfade, none);
+        mix-blend-mode: overlay;
+      }
+    }
+    &:has(.dice-roll.expanded) > .khhud-card-wash { opacity: .25; }
+  }
+
+  /* A standalone check has only its token. Keep its existing edge treatment. */
+  &.khhud-has-portrait:not(:has(.khhud-banner)) .dice-roll:not(.secret-roll, .midi-results .dice-roll) > .dice-result {
+    position: relative;
+    isolation: isolate;
+    > .khhud-token-echo {
+      display: flex;
+      position: absolute;
+      z-index: -1;
+      pointer-events: none;
+      inset: 0 auto auto calc(0px - var(--khhud-gutter, 0px));
+      width: 55%;
+      height: min(100%, 9rem);
+      mask-image: radial-gradient(ellipse 102% 70% at 0% 48%, black 10%, #0009 55%, transparent),
+        linear-gradient(to bottom, transparent, black 22%, black 64%, transparent);
+      mask-composite: intersect;
+      opacity: .29;
+    }
+    &:is(.expanded > .dice-result) > .khhud-token-echo { opacity: .145; }
+  }
+}
+/* Keep Foundry's timestamp and actor link in place for clock updates,
+   targeting, and the chat menu. Only their positions on the card change. */
+:is(#chat-log, .chat-log, .chat-popout, #chat-notifications, body)
+.chat-message.khhud-message:not(.khhud-gm-receipt)
+> .message-header:has(> .message-sender):not([hidden], [aria-hidden="true"], [data-concealed], .hidden, .secret-roll, .secret:not(.revealed)) {
+  display: grid;
+  grid-template-columns: fit-content(65%) minmax(0, 1fr);
+  grid-auto-columns: max-content;
+  grid-template-rows: auto auto;
+  align-items: baseline;
+  row-gap: 2px;
+  .chat-popout & { padding-inline-end: 18px; }
+  > .message-sender { grid-area: 1 / 1 / 2 / 3; min-width: 0; overflow-wrap: anywhere; }
+  > .message-sender:has(> .name-stacked > .title), > .message-metadata, > .message-sender > .name-stacked {
+    &:not([hidden], [aria-hidden="true"], [data-concealed], .hidden, .secret-roll, .secret:not(.revealed)) { display: contents; }
+  }
+  .name-stacked > .title {
+    grid-area: 1 / 1 / 2 / 3;
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .message-sender > .avatar {
+    grid-area: 1 / 1 / 2 / 3;
+    position: relative;
+    z-index: 1;
+    place-self: stretch;
+    height: auto;
+  }
+  .message-sender > .avatar > :is(img, video) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    border-width: 0;
+    clip-path: inset(50%);
+  }
+  .name-stacked > .subtitle {
+    grid-area: 2 / 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    color: var(--khhud-muted);
+  }
+  .message-metadata > time {
+    grid-area: 2 / 2;
+    min-width: 0;
+    justify-self: start;
+    text-align: start;
+    overflow-wrap: anywhere;
+    font-size: var(--font-size-11, .7rem);
+    color: var(--khhud-muted);
+  }
+  &:has(.name-stacked > .subtitle:not(:empty, [hidden], [aria-hidden="true"])) time {
+    margin-inline-start: .5em;
+    padding-inline-start: .55em;
+    border-inline-start: 1px solid var(--khhud-line);
+  }
+  .message-metadata > :not(time) { grid-row: 1; align-self: center; }
+  > .whisper-to { grid-area: 2 / 1; overflow-wrap: anywhere; }
+  > .flavor-text { grid-column: 1 / -1; }
+}
+
+.khhud-message > .message-header {
+  color: var(--khhud-muted);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--khhud-line);
+}
+.khhud-message > .message-header .message-sender { color: var(--khhud-ink); }
+.chat-message.khhud-message:has(.chat-card .khhud-source) > .message-header {
+  align-items: center;
+  min-height: 39px;
+  border-image: linear-gradient(90deg, var(--khhud-metal), #ddc39630 65%, transparent) 1;
+}
+.khhud-message > .message-content { min-width: 0; container: khhud-content / inline-size; }
+.khhud-message .whisper-to { color: #e2c8ef; }
+.khhud-message .table-draw .table-description { color: var(--khhud-muted); }
+.khhud-message :is(.content-link, .inline-roll) {
+  background-color: var(--khhud-surface);
+  border-color: var(--khhud-border);
+  color: var(--khhud-ink);
+}
+.khhud-message .card-buttons button {
+  --button-background-color: var(--khhud-surface);
+  --button-text-color: var(--khhud-ink);
+  --button-border-color: var(--khhud-border);
+}
+.khhud-message .dice-result > .dice-total:not(.critical, .fumble, .success, .failure) { color: var(--khhud-ink); }
+.khhud-message .chat-card > .card-header.description {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+}
+.khhud-message .chat-card .description .details p {
+  font-size: .875rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.khhud-message .chat-card .description .details p:first-child {
+  padding-top: var(--khhud-gap);
+  font-weight: 400;
+}
+.khhud-message .chat-card .card-footer.pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  margin: var(--khhud-gap) 0 0;
+  padding: 8px 0 0;
+  border-top: 1px solid var(--khhud-line);
+}
+.khhud-message .chat-card .card-footer.pills > .pill {
+  box-sizing: border-box;
+  max-width: 100%;
+  align-items: center;
+  min-height: 22px;
+  padding: 3px 8px;
+  border: 1px solid color-mix(in srgb, var(--khhud-metal) 45%, #475260);
+  border-radius: 2px;
+  background: #263039;
+  color: #edf4f6;
+  font: 600 .75rem/1.2 var(--font-body, var(--font-sans, sans-serif));
+  letter-spacing: .015em;
+  text-transform: none;
+}
+.khhud-message .card-footer.pills .pill > .label {
+  color: inherit;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.khhud-message .chat-card > .description.critical .summary {
+  border-inline-start: 2px solid var(--dnd5e-color-success);
+  padding-inline-start: 7px;
+}
+
 .khhud-results .khhud-target-art img.midi-qol-target-name {
   box-sizing: border-box;
-  flex: 0 0 auto;
   width: 48px;
   height: 48px;
-  max-width: none;
-  margin: 0;
   padding: 1px;
-  object-fit: var(--khhud-art-fit, cover);
+  margin: 0;
+  object-fit: contain;
+  border-radius: 50%;
+  border: 1px solid #a49a87;
   background: var(--khhud-panel);
-  border: 1px solid var(--khhud-art-border, #b49764);
-  border-radius: var(--khhud-art-radius, 6px);
-}
-.khhud-source > .khhud-token-icon,
-.khhud-results .khhud-target-art img.midi-qol-target-name {
-  --khhud-art-fit: contain;
-  --khhud-art-radius: 50%;
-  --khhud-art-border: #a49a87;
 }
 .khhud-target-art {
   display: inline-flex;
@@ -72,14 +484,95 @@
 .khhud-target-art > .midi-qol-tooltip { line-height: 0; }
 .khhud-target-art .midi-qol-tooltiptext { line-height: 1.25; }
 
-.khhud-source > :is(.name-stacked, .khhud-source-name) { flex: 1; min-width: 0; }
-.khhud-source .name-stacked .title, .khhud-source-name {
-  color: var(--khhud-ink);
-  font: 650 1.08rem/1.15 var(--font-heading, Georgia, serif);
-  overflow-wrap: anywhere;
+/* The actor portrait and the published ability art share a single banner. */
+.khhud-message .khhud-banner {
+  --khhud-band-width: 40%;
+  --khhud-blend: clamp(24px, 12cqi, 52px);
+  --khhud-seam: linear-gradient(to right, black calc(100% - var(--khhud-blend)), transparent);
+  display: flex;
+  position: relative;
+  isolation: isolate;
+  align-items: flex-end;
+  min-width: 0;
+  min-height: 108px;
+  padding: 12px;
+  border-block-end: 1px solid var(--khhud-metal);
+  background-color: var(--khhud-binding);
+  text-align: start;
+  cursor: default;
 }
-.khhud-source .subtitle, .khhud-source > i { color: var(--khhud-muted); }
-
+.khhud-message .khhud-banner::before,
+.khhud-message .khhud-banner::after,
+.khhud-portrait-band {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+}
+.khhud-message .khhud-banner::before {
+  inset: 0;
+  background: linear-gradient(0deg, #160f18cc, transparent 62%),
+    var(--khhud-ability-art, none) 60% 42% / cover no-repeat;
+}
+.khhud-message .khhud-banner:has(> .gold-icon[hidden])::before { background-image: none; }
+.khhud-message .khhud-banner::after {
+  inset: auto 0 0;
+  height: 2px;
+  z-index: 0;
+  background: linear-gradient(90deg, var(--khhud-metal), var(--khhud-metal-end));
+}
+.khhud-portrait-band { display: none; }
+.khhud-has-portrait .khhud-banner:not([data-khhud-ability-art])::before { inset-inline-start: calc(var(--khhud-band-width) - var(--khhud-blend)); }
+.khhud-has-portrait .khhud-banner > .khhud-portrait-band {
+  display: flex;
+  inset: 0 auto 0 0;
+  width: var(--khhud-band-width);
+  box-sizing: border-box;
+  mask-image: var(--khhud-seam);
+}
+/* Let the ability show through the token's perimeter, keeping the upper centre opaque. */
+.khhud-banner[data-khhud-ability-art]:not(:has(> .gold-icon[hidden])) > .khhud-portrait-band {
+  --khhud-seam: linear-gradient(102deg, black 32%, #000f 41%, #000d 56%, #0009 70%, #0004 83%, #0001 93%, transparent);
+  --khhud-rim-mask: radial-gradient(ellipse closest-side, black 69%, #000e 81%, #0009 90%, #0002 97%, transparent 99%),
+    radial-gradient(ellipse 82% 84% at 45% 32%, black 27%, #000f 39%, #000c 57%, #0006 77%, #0001 94%, transparent);
+  --khhud-subject-feather: transparent, #0003 4%, #000b 10%, black 18%, black 82%, #000b 90%, #0003 96%, transparent;
+}
+.khhud-message .khhud-banner > :is(.name-stacked, .khhud-source-name) {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.khhud-has-portrait .khhud-banner > :is(.name-stacked, .khhud-source-name) {
+  margin-inline-start: var(--khhud-band-width);
+}
+.khhud-message .khhud-banner :is(.title, .khhud-source-name) {
+  color: #fff3d8;
+  font: 700 clamp(1.5rem, 9cqi, 2.35rem)/1 var(--khhud-title-font);
+  letter-spacing: -.04em;
+  overflow-wrap: anywhere;
+  text-shadow: 0 2px 3px #090a0d, 0 0 10px #080a0e;
+}
+.khhud-message .khhud-banner > .gold-icon,
+.khhud-message .khhud-banner > .fa-chevron-down,
+.khhud-message .khhud-banner .name-stacked > .subtitle { display: none; }
+.khhud-message :is(.midi-attribution, .midi-attribution-info, .midi-save-attribution-info),
+.midi-attribution-tooltip {
+  display: none;
+}
+.khhud-message:is([data-khhud-element="cold"], [data-khhud-element="lightning"], [data-khhud-element="temphp"]) {
+  --khhud-paper: #c8dde5;
+  --khhud-shine: #effaff;
+}
+.khhud-message:is([data-khhud-element="force"], [data-khhud-element="psychic"], [data-khhud-element="poison"]) {
+  --khhud-paper: #decee6;
+  --khhud-shine: #fcf0fb;
+}
+.khhud-message:is([data-khhud-element="healing"], [data-khhud-element="acid"], [data-khhud-element="necrotic"]) {
+  --khhud-paper: #cfdcc5;
+  --khhud-shine: #f5f7dc;
+}
 .khhud-results .midi-qol-dmg-header {
   padding: 4px 6px;
   color: var(--khhud-gold);
@@ -87,7 +580,7 @@
 }
 
 .khhud-results .midi-qol-dmg-row {
-  padding: 6px;
+  padding: 6px 0;
   column-gap: 6px;
   border-top: 1px solid #ffffff16;
 }
@@ -186,34 +679,81 @@
 .khhud-ward { padding-inline-start: 6px; border-inline-start: 2px solid #a997e2; color: #d9cef9; font-size: .92em; }
 
 .khhud-badge {
-  --khhud-accent: color-mix(in srgb, var(--khhud-type-color, #948878) 65%, #fff1d9);
+  --khhud-pigment: var(--khhud-type-color, #96816b);
+  --khhud-stamp: color-mix(in srgb, var(--khhud-pigment) 44%, #2c252b);
+  --khhud-wash-end: color-mix(in srgb, var(--khhud-pigment) 23%, #fff4e6);
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 7px;
+  column-gap: 5px;
   min-width: 0;
-  padding: 4px 8px 4px 5px;
-  border: 1px solid color-mix(in srgb, var(--khhud-accent) 30%, var(--khhud-panel));
-  border-inline-start: 2px solid var(--khhud-accent);
-  border-radius: 5px;
-  background: linear-gradient(100deg, color-mix(in srgb, var(--khhud-accent) 15%, var(--khhud-panel)), var(--khhud-surface));
-  color: var(--khhud-ink);
+  padding: 2px 5px 2px 3px;
+  border: 0;
+  border-inline-start: 2px solid var(--khhud-stamp);
+  border-radius: 0 4px 4px 0;
+  background: var(--khhud-wash-end);
+  color: #30251e;
   text-align: start;
   line-height: 1.2;
 }
-.khhud-badge:has(.khhud-emblem) { grid-template-columns: 24px minmax(0, 1fr) auto; }
+.khhud-badge:has(.khhud-emblem) { grid-template-columns: 21px minmax(0, 1fr) auto; }
+
+/* Slow, repeating reflections on visible cards only. */
+@media (prefers-reduced-motion: no-preference) {
+  .khhud-message[data-khhud-reflect] .khhud-badge[data-khhud-kind] {
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+    &::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      background: linear-gradient(var(--khhud-reflect-angle, 108deg),
+        transparent var(--khhud-reflect-start, 36%), color-mix(in srgb, var(--khhud-pigment) 55%, white) 47%,
+        var(--khhud-reflect-core, #fffaf1) 50%, transparent var(--khhud-reflect-end, 64%));
+      animation: khhud-damage-sheen var(--khhud-reflect-time, 5.8s) ease-in-out -.45s infinite;
+    }
+  }
+  .khhud-badge:is([data-khhud-kind="fire"], [data-khhud-kind="radiant"]) {
+    --khhud-reflect-core: #fff0b7;
+    --khhud-reflect-start: 24%;
+    --khhud-reflect-end: 72%;
+    --khhud-reflect-time: 6.4s;
+  }
+  .khhud-badge:is([data-khhud-kind="cold"], [data-khhud-kind="lightning"], [data-khhud-kind="thunder"]) {
+    --khhud-reflect-angle: 119deg;
+    --khhud-reflect-core: #edfbff;
+    --khhud-reflect-start: 43%;
+    --khhud-reflect-end: 55%;
+  }
+  .khhud-badge[data-khhud-kind="lightning"] { --khhud-reflect-time: 4.8s; }
+}
+@keyframes khhud-damage-sheen {
+  from { transform: translateX(-65%); opacity: 0; }
+  18%, 37% { opacity: .4; }
+  59%, to { transform: translateX(65%); opacity: 0; }
+}
+@keyframes khhud-art-glint {
+  from { transform: translateX(-14%); opacity: 0; }
+  29% { opacity: .28; }
+  63%, to { transform: translateX(7%); opacity: 0; }
+}
+
 .khhud-emblem {
   display: grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--khhud-accent) 22%, #15191f);
+  width: 21px;
+  height: 23px;
+  background: var(--khhud-stamp);
+  clip-path: polygon(0 0, 100% 0, 100% 75%, 50% 100%, 0 75%);
 }
 .khhud-badge img.khhud-type-icon {
-  width: 17px;
-  height: 17px;
-  margin: 0;
+  width: 15px;
+  height: 15px;
+  margin: 0 0 2px;
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -222,12 +762,19 @@
 }
 
 .khhud-type { display: grid; min-width: 0; gap: 1px; overflow-wrap: anywhere; }
-.khhud-type-name { font-size: .95em; font-weight: 600; }
-.khhud-value { text-align: end; font-variant-numeric: tabular-nums; }
-.khhud-amount { color: var(--khhud-ink); font-size: 1.08em; }
-.khhud-before, .khhud-reasons { color: var(--khhud-muted); font-size: .85em; }
+.khhud-type-name { font-size: .95em; font-weight: 650; }
+.khhud-value {
+  box-sizing: content-box;
+  min-inline-size: 2.25ch;
+  padding-inline-start: 5px;
+  border-inline-start: 1px solid color-mix(in srgb, var(--khhud-stamp) 35%, transparent);
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+.khhud-amount { color: #30251e; font-size: 1.08em; white-space: nowrap; }
+.khhud-before, .khhud-reasons { color: #514538; font-size: .85em; }
 
-.dice-roll.khhud-roll { margin-block: 4px; padding: 7px 8px; }
+.dice-roll.khhud-roll { margin-block: 4px; padding: 3px 0; }
 .dice-roll.khhud-roll .dice-result > .dice-total {
   display: flex;
   align-items: baseline;
@@ -268,3 +815,657 @@
 }
 
 .dice-roll.khhud-roll .khhud-types { margin-block-start: 5px; }
+.khhud-message .message-content > .khhud-roll .dice-result > .dice-total {
+  border-block-end: 1px solid var(--khhud-metal);
+  color: var(--khhud-foil);
+  font: 700 2rem/1.1 var(--khhud-title-font);
+}
+.khhud-message .message-content > .khhud-roll .dice-total[data-khhud-label]::before {
+  font: 650 .75rem/1.25 var(--font-body, sans-serif);
+}
+
+/* Midi's condensed activity card puts attack and damage in a single flex row.
+   Keep both dice on the same baseline when only the damage has a breakdown. */
+.khhud-message .midi-results > .flexrow:has(> .midi-qol-attack-roll .dice-roll):has(> .midi-qol-damage-roll .dice-roll) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: var(--khhud-gap);
+}
+.khhud-message .midi-results :is(.midi-qol-attack-roll, .midi-qol-damage-roll) {
+  min-width: 0;
+  white-space: normal;
+}
+.khhud-message .midi-results .midi-roll-label {
+  margin: 0;
+  padding: 6px 0 4px;
+  color: #e9cf9c;
+  font: 650 .6875rem/1.25 var(--font-body, var(--font-sans, sans-serif));
+  letter-spacing: .075em;
+  text-align: start;
+}
+.khhud-message .midi-results .dice-roll { margin: 0; padding: 0; }
+.khhud-message .midi-results .dice-roll:not(.expanded) .dice-tooltip-collapser { margin-block: 0; }
+.khhud-message .midi-results .dice-result > :is(.dice-formula, .dice-total) {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  border: 1px solid #515963;
+  background: #232c36;
+  box-shadow: none;
+  text-shadow: none;
+}
+.khhud-message .midi-results .dice-result > .dice-formula {
+  display: grid;
+  place-items: center;
+  min-height: 26px;
+  padding: 3px 7px;
+  border-radius: 6px;
+  font-size: .8125rem;
+  line-height: 1.25;
+  color: #dae2e8;
+  overflow-wrap: anywhere;
+}
+.khhud-message .midi-results .dice-result > .dice-total {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 35px;
+  margin-top: 4px;
+  padding: 3px 24px;
+  border-radius: 6px;
+  color: var(--khhud-ink);
+  font-size: 1.25rem;
+  line-height: 1.1;
+}
+.khhud-message .midi-results .dice-total:is(.success, .critical) {
+  color: #c7f7d9;
+  background: #243c33;
+  border-color: #56896d;
+}
+.khhud-message .midi-results .dice-total:is(.failure, .fumble) {
+  color: #ffd2ce;
+  background: #452b32;
+  border-color: #aa6976;
+}
+.khhud-message .midi-results .dice-total:is(.critical, .fumble) { border-style: double; border-width: 3px; }
+.khhud-message .midi-results .dice-roll .dice-total::after {
+  position: absolute;
+  inset: 0 5px 0 auto;
+  align-self: auto;
+  align-content: center;
+  padding: 0;
+  color: var(--khhud-muted);
+}
+.khhud-message .midi-results .midi-attack-roll .dice-total::before { border: 0; }
+.khhud-message .midi-results .dice-roll .dice-total:is(.success, .critical, .failure, .fumble)::after { color: inherit; }
+/* D&D5e positions these marks over the total and gives them its font size.
+   Keep the original symbols in normal flow, separate from the disclosure arrow. */
+.khhud-message .dice-result > .dice-total:has(> .icons) {
+  display: flex;
+  align-items: center;
+  column-gap: 7px;
+}
+.khhud-message .dice-result > .dice-total > .icons {
+  position: static;
+  inset: auto;
+  order: 1;
+  flex: 0 0 auto;
+  align-self: center;
+  gap: 1px;
+  opacity: .85;
+  font-size: .85rem;
+  line-height: 1;
+  letter-spacing: normal;
+}
+.khhud-message .midi-results .midi-roll-label ~ .khhud-roll .dice-total::before { content: none; }
+.khhud-message .khhud-roll .dice-total > .khhud-repeated-type { display: none; }
+
+/* Keep both totals on one reading line with a single rule between columns. */
+.khhud-message .midi-results > :is(
+  .flexrow:has(> :is(.midi-qol-attack-roll, .midi-qol-damage-roll) .dice-roll),
+  :is(.midi-qol-attack-roll, .midi-qol-damage-roll, .midi-qol-other-damage-roll, .midi-qol-bonus-damage-roll):has(.dice-roll)
+) {
+  margin-block: 6px 2px;
+  padding: 8px 0 5px;
+  column-gap: 0;
+  color: #251b17;
+  background: var(--khhud-roll-surface, var(--khhud-leaf));
+  > :is(.midi-qol-attack-roll, .midi-qol-damage-roll) { padding-inline: 2px; }
+  &:has(> .midi-qol-attack-roll .dice-roll) > .midi-qol-damage-roll:has(.dice-roll) {
+    border-inline-start: 1px solid var(--khhud-print-rule);
+    padding-inline-start: 12px;
+  }
+  .midi-roll-label {
+    color: #4c3929;
+    padding: 0;
+    font: 700 .65rem/1.3 var(--font-body, sans-serif);
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+  .dice-roll { position: relative; isolation: isolate; }
+  .dice-result > .dice-formula {
+    order: 0;
+    justify-items: start;
+    min-height: 18px;
+    padding: 1px 0 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #574434;
+    font: 600 .74rem/1.25 var(--font-body, sans-serif);
+  }
+  .dice-result > .dice-total {
+    order: -1;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 2px 4px;
+    min-height: 41px;
+    margin: 0;
+    padding: 0 17px 0 0;
+    border: 0;
+    background: transparent;
+    color: #302016;
+    font: 700 clamp(1.85rem, 13cqi, 2.8rem)/1 var(--khhud-display);
+    letter-spacing: -.045em;
+    &:is(.success, .critical) { color: #214e3a; }
+    &:is(.failure, .fumble) { color: #8a302e; }
+    &:is(.critical, .fumble) { text-decoration: underline double; text-decoration-thickness: 1px; }
+    &::after { color: #624831; font-size: .78rem; }
+  }
+  .dice-result :is(.dice-tooltip, .midi-dice-tooltip) {
+    --color-text-primary: var(--khhud-print);
+    --color-text-secondary: var(--khhud-print-soft);
+    --color-text-tertiary: var(--khhud-print-soft);
+    color: var(--khhud-print);
+    background: transparent;
+    box-shadow: none;
+    text-shadow: none;
+    .tooltip-part { border-color: var(--khhud-print-rule); }
+    .tooltip-part.constant { min-height: 0; padding-block: 3px; }
+    .dice { min-width: 0; }
+    .dice-rolls { margin-inline-start: 0; }
+    .total { min-width: 0; }
+    .total .label, .sign { color: var(--khhud-print-soft); overflow-wrap: anywhere; }
+    .total .value { color: var(--khhud-print); font-variant-numeric: tabular-nums; }
+    .dice-formula { color: var(--khhud-print-soft); background: transparent; box-shadow: none; }
+    .midi-attribution {
+      color: var(--khhud-print-accent);
+      font-size: .72rem;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+  }
+  .khhud-types { order: 1; margin-top: 3px; }
+  &:not(.flexrow) {
+    padding-inline: 2px;
+    .dice-total[data-khhud-label]::before { color: #4c3929; font: 700 .75rem/1.2 var(--font-body, sans-serif); letter-spacing: normal; }
+  }
+  /* Midi keeps the other roll's insertion point even on an attack-only card. */
+  &.flexrow:has(> :is(.midi-qol-attack-roll, .midi-qol-damage-roll):empty,
+      > :is(.midi-qol-attack-roll, .midi-qol-damage-roll) > :is(.end-midi-qol-attack-roll, .end-midi-qol-damage-roll):only-child:empty) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 0;
+  }
+}
+@container khhud-content (max-width: 15.5rem) {
+  .khhud-message .midi-results > .flexrow:has(> .midi-qol-attack-roll .dice-roll):has(> .midi-qol-damage-roll .dice-roll) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 7px;
+    > .midi-qol-damage-roll:has(.dice-roll) { padding: 7px 2px 0; border-inline-start: 0; border-top: 1px solid var(--khhud-print-rule); }
+  }
+}
+
+/* Place only standard, single attack and damage actions side by side. The
+   multi-button advantage/critical groups keep their full native row. */
+.khhud-message .chat-card .card-buttons:has(> .midi-qol-attack-buttons > button[data-action="rollAttack"]:only-child):has(> .midi-qol-damage-buttons > button[data-action="rollDamage"]:only-child),
+.khhud-message .chat-card .card-buttons:has(> button[data-action="rollAttack"]):has(> button[data-action="rollDamage"]) {
+  flex-flow: row wrap;
+  column-gap: 6px;
+  > *, > .midi-results > * { flex: 0 0 100%; min-width: 0; box-sizing: border-box; }
+  > :is(.midi-qol-attack-buttons, .midi-qol-damage-buttons, button[data-action="rollAttack"], button[data-action="rollDamage"]) {
+    flex: 1 1 0;
+    order: -1;
+  }
+  > :is(.midi-qol-attack-buttons, .midi-qol-damage-buttons) > button:only-child { width: 100%; }
+}
+.khhud-message .chat-card .card-buttons button:is([data-action="rollAttack"], [data-action="rollDamage"], [data-action="rollSave"]) {
+  min-width: 0;
+  height: auto;
+  min-height: 26px;
+  line-height: 1.15;
+  padding: 3px 6px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.khhud-message .chat-card:has(.khhud-banner) .card-buttons button:is([data-action="rollAttack"], [data-action="rollDamage"]):not(:disabled) {
+  background: color-mix(in srgb, var(--khhud-leaf) 72%, var(--khhud-metal));
+  color: var(--khhud-print);
+  border: 1px solid var(--khhud-print-rule);
+  border-radius: 3px;
+  box-shadow: none;
+  text-transform: none;
+  &:is(:hover, :focus-visible) { background: var(--khhud-foil); border-color: var(--khhud-print-accent); }
+}
+.khhud-message .midi-buttons > .midi-dnd5e-buttons:has(button[data-action="rollSave"]) { margin-block-start: 3px; }
+.khhud-message .chat-card:has(.khhud-banner) .card-buttons button[data-action="rollSave"] {
+  box-shadow: none;
+  background: transparent;
+  color: var(--khhud-print-accent);
+  border-color: var(--khhud-print-rule);
+  text-transform: none;
+}
+.khhud-message .chat-card:has(.khhud-banner) .card-buttons button[data-action="rollSave"]:not(:disabled):is(:hover, :focus-visible) {
+  background: var(--khhud-foil);
+}
+
+/* Keep Midi's click handlers, collapsible trays and per-viewer visibility on
+   the original elements. Only their visual order changes in a merged card. */
+.khhud-message :is(.midi-chat-card, .midi-buttons):has(> .midi-results .midi-qol-target-select) {
+  row-gap: 0;
+}
+.khhud-message .midi-results:has(.midi-qol-target-select):not([hidden], [aria-hidden="true"]) {
+  display: contents;
+}
+.khhud-message .midi-results > :is(.midi-qol-hits-display, .midi-qol-saves-display):has(.midi-qol-target-select) {
+  order: 1;
+  margin-block-start: 7px;
+}
+.khhud-message .targets-tray:has(ul.evaluation > .target) > label {
+  justify-content: flex-start;
+  gap: 6px;
+  padding-block: 4px;
+  color: var(--khhud-gold);
+  font-size: .69rem;
+  letter-spacing: .075em;
+}
+.khhud-message .targets-tray:has(ul.evaluation > .target) > label::before { content: none; }
+.khhud-message .targets-tray:has(ul.evaluation > .target) > label::after {
+  flex: 1;
+  border-top: 1px solid var(--khhud-line);
+}
+
+:is(#chat-log, .chat-log, .chat-popout, #chat-notifications, body) .khhud-message
+ul.evaluation.wrapper:has(> .midi-qol-target-select, > .target[data-miss]):not([hidden], [aria-hidden="true"]) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 5.4rem), 1fr));
+  gap: 6px;
+  align-items: stretch;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  &:has(> .target:only-child) {
+    grid-template-columns: minmax(0, min(100%, 6.25rem));
+    justify-content: center;
+    background: linear-gradient(90deg, transparent, var(--khhud-metal) 30%, var(--khhud-metal-end) 70%, transparent) center / 100% 1px no-repeat;
+  }
+  &:has(> .target:nth-child(2):last-child) {
+    grid-template-columns: repeat(2, minmax(0, min(46%, 7rem)));
+    justify-content: center;
+  }
+  > .target:not([hidden], [aria-hidden="true"]) {
+    --khhud-result-color: #c2ab83;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: minmax(24px, auto) 50px 1fr auto;
+    position: relative;
+    isolation: isolate;
+    align-content: stretch;
+    align-items: start;
+    gap: 0;
+    min-width: 0;
+    padding: 4px 2px 12px;
+    border: 0 solid color-mix(in srgb, var(--khhud-result-color) 68%, #19232d);
+    border-radius: 0;
+    background: transparent;
+    color: var(--khhud-ink);
+  }
+  > .target:is(.hit, .success) { --khhud-result-color: #97d9bb; }
+  > .target:is(.miss, .failure) { --khhud-result-color: #efaaa1; }
+  > .target:is(:hover, :focus-within) { border-color: var(--khhud-result-color); }
+
+  > .target::before,
+  > .target::after,
+  > .target > img {
+    grid-area: 1 / 1 / 3 / -1;
+    align-self: stretch;
+    border-radius: 0;
+  }
+  > .target::before {
+    content: "";
+    position: absolute;
+    grid-area: auto;
+    inset: 0;
+    border-top: 3px solid var(--khhud-result-color);
+    background:
+      linear-gradient(90deg, #05060855, transparent 11% 88%, #05060860),
+      linear-gradient(168deg, color-mix(in srgb, var(--khhud-result-color) 35%, var(--khhud-cloth, #1d2732)), var(--khhud-cloth, #171f29) 74%);
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), 50% 100%, 0 calc(100% - 10px));
+    z-index: -2;
+  }
+  > .target:is(:hover, :focus-within)::before { border-top-color: #fff0c8; }
+  > .target > img {
+    z-index: -1;
+    object-fit: cover;
+    object-position: center 30%;
+    background: radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--khhud-result-color) 31%, var(--khhud-cloth, #19232c)), var(--khhud-cloth, #1b2530) 85%);
+  }
+  > .target::after {
+    content: "";
+    pointer-events: none;
+    background: linear-gradient(to bottom, #07101960, transparent 24%, transparent 60%, color-mix(in srgb, var(--khhud-cloth, #1a232d) 91%, transparent));
+  }
+  > .target > i {
+    grid-area: 4 / 1 / 5 / -1;
+    z-index: 1;
+    justify-self: start;
+    margin: 0 6px 3px;
+    color: var(--khhud-result-color);
+    font-size: .72rem;
+    line-height: 1.15;
+    height: auto;
+  }
+  > .target > i:not(:is(.fa-check, .fa-tick, .fa-check-double, .fa-xmark, .fa-times, .fa-xmarks-lines)) {
+    margin-block: 0;
+  }
+  > .target > i::after {
+    content: var(--khhud-outcome, none);
+    margin-inline-start: 3px;
+    font: 600 .69rem/1.2 var(--font-body, var(--font-sans, sans-serif));
+    letter-spacing: .015em;
+  }
+  > .target > i:is(.fa-check, .fa-check-double, .fa-tick) {
+    --khhud-outcome: var(--khhud-label-Hit);
+  }
+  > .target > i:is(.fa-times, .fa-xmark, .fa-xmarks-lines) {
+    --khhud-outcome: var(--khhud-label-Miss);
+  }
+  > .midi-qol-save-class > i.fa-check {
+    --khhud-outcome: var(--khhud-label-SavePassed);
+  }
+  > .midi-qol-save-class > i.fa-xmark {
+    --khhud-outcome: var(--khhud-label-SaveFailed);
+  }
+  > .target > :is(.ac, .midi-qol-ac, .midi-qol-save-indicators) {
+    grid-area: 1 / 2 / 2 / 4;
+    z-index: 1;
+    justify-self: end;
+    max-width: 100%;
+    margin: 2px 3px;
+    padding: 1px 4px;
+    border-radius: 4px;
+    background: #111b24e8;
+    color: #f0f4f5;
+    font-size: .72rem;
+    line-height: 1.3;
+    opacity: 1;
+  }
+  > .target .midi-qol-save-indicators:not(:has(> *)) { padding: 0; }
+  > .target > .midi-qol-ac-icons {
+    grid-area: 2 / 1 / 3 / -1;
+    z-index: 1;
+    align-self: end;
+    justify-self: end;
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 100%;
+    padding: 1px 3px;
+    background: #151f29e8;
+    border-radius: 4px;
+  }
+  > .target > :is(.name, .name-stacked, .midi-qol-save-name) {
+    grid-area: 3 / 1 / 4 / -1;
+    min-width: 0;
+    min-height: 0;
+    padding: 3px 6px 5px;
+    text-align: start;
+  }
+  > .target :is(.name, .name-stacked .title) {
+    margin: 0;
+    color: #f3f3ee;
+    font: 650 .8rem/1.2 var(--font-body, var(--font-sans, sans-serif));
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-shadow: none;
+  }
+  > .target .name-stacked { min-height: 0; }
+}
+
+/* Checks, saves and /roll use Foundry's dice template, even with no item or actor.
+   Keep its disclosure, dice faces, outcomes and concealment under system control. */
+:is(#chat-log, .chat-log, .chat-popout, #chat-notifications, body) .chat-message.khhud-message:not(.khhud-hp-message) {
+  &:has(> .message-content .dice-roll):not(:has(.khhud-banner)) {
+    --khhud-roll-surface: transparent;
+    --khhud-ink: var(--khhud-print);
+    --khhud-muted: var(--khhud-print-soft);
+    --khhud-gold: #684922;
+    --khhud-line: var(--khhud-print-rule);
+    --khhud-panel: var(--khhud-paper);
+    --khhud-surface: var(--khhud-foil);
+    --color-text-tertiary: var(--khhud-muted);
+    --color-text-emphatic: var(--khhud-print-accent);
+    --dnd5e-background-5: var(--khhud-foil);
+    background: var(--khhud-field) var(--khhud-leaf);
+    box-shadow: none;
+    &.khhud-has-portrait > .khhud-token-backdrop {
+      width: 55%;
+      height: min(85px, 58%);
+      opacity: .24;
+      mix-blend-mode: multiply;
+    }
+    .whisper-to { color: #614462; }
+    > .message-header .flavor-text {
+      margin-block: 5px 0;
+      color: var(--khhud-print-accent);
+      font: 600 .95rem/1.2 var(--khhud-title-font);
+      overflow-wrap: anywhere;
+    }
+  }
+
+  > .message-content .dice-roll:not(.midi-results .dice-roll) > .dice-result {
+    color: var(--khhud-print);
+    --color-text-primary: var(--khhud-print);
+    --color-text-secondary: var(--khhud-print-soft);
+    --color-text-tertiary: var(--khhud-print-soft);
+    padding: 6px 10px;
+    border-block: 1px solid var(--khhud-print-rule);
+    background: var(--khhud-roll-surface, var(--khhud-leaf));
+    > :is(.dice-formula, .dice-total) {
+      margin: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      text-align: start;
+      text-shadow: none;
+      overflow-wrap: normal;
+      word-break: normal;
+    }
+    > .dice-formula {
+      order: 0;
+      padding: 0;
+      overflow-wrap: anywhere;
+      color: var(--khhud-print-soft);
+      font: 650 .8rem/1.35 var(--font-body, var(--font-sans, sans-serif));
+    }
+    > .dice-total {
+      order: -1;
+      justify-content: flex-start;
+      padding: 1px 24px 2px 0;
+      color: var(--khhud-print);
+      font: 700 2.15rem/1.05 var(--khhud-display);
+      &:is(.success, .critical) { color: #215139; }
+      &:is(.failure, .fumble) { color: #852e2a; }
+      &:is(.critical, .fumble) { text-decoration: underline double; text-decoration-thickness: 1px; }
+      &:not([data-khhud-label])::before { border: 0; }
+      &[data-khhud-label]::before { color: var(--khhud-print-soft); }
+      &::after {
+        position: absolute;
+        inset: 0 0 0 auto;
+        align-content: center;
+        padding-inline: 3px;
+        color: var(--khhud-print-soft);
+        font-size: .8rem;
+      }
+    }
+    .dice-tooltip { color: var(--khhud-print); text-shadow: none; }
+    .tooltip-part, .part-header { border-color: var(--khhud-print-rule); }
+    .total .label, .part-flavor { color: var(--khhud-print-soft); }
+    .total .value, .part-total { color: var(--khhud-print); }
+  }
+}
+
+:is(#chat-log, .chat-log, .chat-popout, #chat-notifications, body) .chat-message.khhud-hp-message {
+  --khhud-ink: var(--khhud-print);
+  --khhud-muted: var(--khhud-print-soft);
+  --khhud-gold: #654822;
+  --khhud-border: #977a4c;
+  --khhud-panel: var(--khhud-paper);
+  --khhud-surface: var(--khhud-leaf);
+  --khhud-line: var(--khhud-print-rule);
+  --color-text-tertiary: var(--khhud-muted);
+  --color-text-emphatic: var(--khhud-ink);
+  background: color-mix(in srgb, var(--khhud-leaf) 84%, #ab9572);
+  box-shadow: inset 0 1px var(--khhud-print-rule);
+  .whisper-to { color: var(--khhud-muted); }
+  :is(.khhud-loss, .midi-qol-disable-damage-button, .midi-qol-dmg-hp .fa-heart) { color: #842f29; }
+  :is(.khhud-gain, .midi-qol-enable-damage-button, .midi-qol-dmg-healing) { color: #255530; }
+  :is(.khhud-temp, .midi-qol-dmg-temp .fa-shield-alt) { color: #21506a; }
+  .khhud-ward { color: #57406a; border-color: currentColor; }
+  .khhud-results table :is(button, select) {
+    color: var(--khhud-ink);
+    background-color: var(--khhud-surface);
+    border-color: var(--khhud-border);
+  }
+  :is(.khhud-pools, .midi-qol-dmg-row) { border-block-start-color: var(--khhud-print-rule); }
+}
+
+/* The receipt stays a separate, permission-checked ChatMessage. Only its position
+   on this GM's screen changes, even when other messages arrive between the two. */
+:is(#chat-log, .chat-log).khhud-grouped-log {
+  &.khhud-reordered-log {
+    display: grid;
+    reading-flow: grid-rows;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    row-gap: 0;
+    > * { order: var(--khhud-log-order, 0); }
+  }
+  > .chat-message { margin-block: 0 var(--chat-message-spacing, 4px); }
+  > .chat-message.khhud-joined-next {
+    margin-block-end: 0;
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
+  }
+  > .chat-message.khhud-gm-receipt {
+    --khhud-tone: var(--khhud-record-tone, var(--khhud-neutral));
+    --khhud-element-end: var(--khhud-record-end, var(--khhud-tone));
+    --khhud-record-base: color-mix(in srgb, var(--khhud-leaf) 90%, var(--khhud-binding));
+    --khhud-record-start: color-mix(in srgb, var(--khhud-bloom) 34%, var(--khhud-record-base));
+    --khhud-panel: var(--khhud-record-base);
+    --khhud-surface: var(--khhud-leaf);
+    --khhud-gold: var(--khhud-print-accent);
+    background: linear-gradient(110deg, var(--khhud-record-start), var(--khhud-record-base) 80%) var(--khhud-record-base);
+    padding: 0;
+    /* The standalone message has Foundry's inline author border-color. */
+    border-inline-start-color: var(--khhud-record-edge, var(--khhud-dye)) !important;
+    border-inline-start-style: solid;
+    border-start-start-radius: 0;
+    border-start-end-radius: 0;
+    &::before, .khhud-results > .khhud-banner { display: none; }
+    > .message-header {
+      display: flex;
+      align-items: center;
+      min-height: 0;
+      margin: 0;
+      padding: 0 8px;
+      border: 0;
+      color: var(--khhud-ink);
+    }
+    > .message-header > :is(.message-sender, .whisper-to),
+    > .message-header .message-timestamp { display: none; }
+    > .message-header > .message-metadata { flex: none; }
+    > .message-content { padding: 2px 10px 8px; }
+    &:has(> .message-header > [aria-expanded="false"]) > .message-content { display: none; }
+    .khhud-receipt-toggle {
+      display: flex;
+      align-items: center;
+      flex: 1;
+      gap: 8px;
+      min-width: 0;
+      height: auto;
+      min-height: 34px;
+      padding: 4px;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      color: var(--khhud-ink);
+      font: 650 .9rem/1.2 var(--font-body, var(--font-sans, sans-serif));
+      text-align: start;
+      text-transform: none;
+      &:is(:hover, :focus-visible) { background: #79582b12; }
+      &:focus-visible { outline: 2px solid var(--khhud-gold); outline-offset: -2px; }
+      i { margin: 0; font-size: .65rem; color: var(--khhud-gold); }
+      .khhud-receipt-audience { margin-inline-start: auto; color: var(--khhud-muted); font-size: .72rem; }
+      &[aria-expanded="true"] .fa-chevron-down { rotate: 180deg; }
+    }
+  }
+}
+
+.khhud-message .dice-roll:not(.expanded) > .dice-result > .dice-formula,
+.khhud-message khhud-kept-die {
+  display: none;
+}
+.khhud-message .dice-roll > .dice-result > .dice-total {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+.khhud-message .dice-total:has(> khhud-kept-die[data-value]) { white-space: nowrap; }
+.khhud-message khhud-receipt-source { display: block; height: 1px; }
+.khhud-gm-receipt khhud-receipt-source { display: none; }
+.khhud-message .dice-roll:not(.expanded, .secret-roll) > .dice-result > .dice-total > khhud-kept-die[data-value] {
+  display: inline-grid;
+  place-items: center;
+  vertical-align: .18em;
+  align-self: center;
+  flex: none;
+  min-width: 23px;
+  height: 23px;
+  margin-inline-start: 2px;
+  background: var(--khhud-face, none) center / contain no-repeat;
+  color: #242018;
+  font: 750 .73rem/1 var(--font-body, var(--font-sans, sans-serif));
+  letter-spacing: normal;
+  text-shadow: 0 0 2px #fff5dd;
+  pointer-events: none;
+  &::before { content: attr(data-value); }
+  &[data-shape="d4"] { --khhud-face: url("../../../icons/svg/d4-grey.svg"); }
+  &[data-shape="d6"] { --khhud-face: url("../../../icons/svg/d6-grey.svg"); }
+  &[data-shape="d8"] { --khhud-face: url("../../../icons/svg/d8-grey.svg"); }
+  &[data-shape="d10"] { --khhud-face: url("../../../icons/svg/d10-grey.svg"); }
+  &[data-shape="d12"] { --khhud-face: url("../../../icons/svg/d12-grey.svg"); }
+  &[data-shape="d20"] { --khhud-face: url("../../../icons/svg/d20-grey.svg"); }
+  &:not([data-shape="d4"], [data-shape="d6"], [data-shape="d8"], [data-shape="d10"], [data-shape="d12"], [data-shape="d20"]) {
+    border: 1px solid var(--khhud-print-rule);
+    border-radius: 4px;
+    background-color: var(--khhud-leaf);
+    padding-inline: 3px;
+    &::before { content: attr(data-shape) "·" attr(data-value); }
+  }
+}
+
+/* Midi sizes its original thumbnails with !important in this cascade layer. */
+@layer modules {
+  :is(#chat-log, .chat-log, .chat-popout, #chat-notifications, body) .khhud-message ul.evaluation.wrapper
+  > .target:is(.midi-qol-target-select, [data-miss]) > img {
+    box-sizing: border-box;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+}

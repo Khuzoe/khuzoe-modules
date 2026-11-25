@@ -1,8 +1,8 @@
 {
   "id": "khuzoe-hud",
   "title": "Khuzoe HUD",
-  "description": "Card di combattimento per la chat D&D 5e, con riepilogo dei danni per tipo e per bersaglio.",
-  "version": "0.2.1",
+  "description": "Una veste Khuzoe per la chat D&D 5e, con i token di personaggi e mostri, fasce per i bersagli e riepiloghi dei danni.",
+  "version": "0.21.1",
   "authors": [{ "name": "Khuzoe" }],
   "compatibility": { "minimum": "14", "verified": "14.367", "maximum": "14" },
   "relationships": {
