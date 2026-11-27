@@ -2,12 +2,12 @@ import { damageTypes, hpChange } from "./damage.mjs";
 import { cssImageUrl } from "./artwork.mjs";
 import { bindReceiptReversal, syncReceiptState } from "./receipt-reversal.mjs";
 import { addTokenLayer, themeFromSpeaker } from "./message-theme.mjs";
-import { syncReceiptPalette, watchReceiptGroups } from "./receipt-groups.mjs";
-import { prepareRollSummary } from "./roll-summary.mjs";
+import { registerChatHistory, syncReceiptPalette, watchReceiptGroups } from "./receipt-groups.mjs";
+import { prepareRollSummary, registerRollSummary } from "./roll-summary.mjs";
 import { registerReducedCards } from "./reduced-cards.mjs";
 import { registerAttackRetries } from "./attack-retry.mjs";
 import { registerRollPresentation } from "./roll-presentation.mjs";
-import { attachWikiBanner, sharedWikiCover, wikiActorForSummary } from "./wiki-banner.mjs";
+import { attachWikiBanner, registerWikiBanners, sharedWikiCover, wikiActorForSummary } from "./wiki-banner.mjs";
 
 const tr = key => game.i18n.localize(`KHUZOE_HUD.${key}`);
 const number = value => value.toLocaleString(game.i18n.lang, { maximumFractionDigits: 3 });
@@ -22,7 +22,8 @@ const concealedArt = `${hidden}, [data-concealed], .hidden, .secret:not(.reveale
 // viewport subscription per rendered card and release it when Foundry removes it.
 const damageGroups = new WeakMap();
 const reflectionLifetime = 60_000;
-const visibleDamage = new IntersectionObserver(entries => {
+let visibleDamage;
+function updateVisibleDamage(entries) {
   for (const { target, isIntersecting } of entries) {
     const group = damageGroups.get(target);
     if (!group) continue;
@@ -36,7 +37,7 @@ const visibleDamage = new IntersectionObserver(entries => {
     }, remaining);
     else if (remaining <= 0) visibleDamage.unobserve(target);
   }
-});
+}
 
 class DamageTypesElement extends HTMLElement {
   connectedCallback() {
@@ -65,7 +66,6 @@ class DamageTypesElement extends HTMLElement {
     this.card = null;
   }
 }
-customElements.define("khhud-damage-types", DamageTypesElement);
 
 function node(tag, cls, text) {
   const element = document.createElement(tag);
@@ -216,19 +216,19 @@ function compactSaveLabels(content) {
 
 // Foundry constructs a page of chat history off-DOM, then prepends it in one
 // operation. Resolve the source after that insertion, when its own card exists.
-const visibleSources = new IntersectionObserver(entries => {
+let visibleSources;
+function updateVisibleSources(entries) {
   for (const {target, isIntersecting} of entries) {
     if (!isIntersecting || !target.isConnected || target.closest(".khhud-grouped-receipt")) continue;
     target.remove();
     target.render?.();
   }
-}, { rootMargin: "140px" });
+}
 
 class ReceiptSource extends HTMLElement {
   connectedCallback() { visibleSources.observe(this); }
   disconnectedCallback() { visibleSources.unobserve(this); }
 }
-customElements.define("khhud-receipt-source", ReceiptSource);
 const pendingSources = new WeakMap();
 
 function receiptSourceId(message) {
@@ -832,33 +832,70 @@ export function renderChatCard(message, html) {
   }
 }
 
-Hooks.on("renderChatMessageHTML", (_message, html) => {
+function markChatMessage(_message, html) {
   html.classList.add("khhud-message");
   // Foundry may render a generic blind-roll placeholder as well as the public summary.
   if (!_message.isContentVisible && _message.flags?.["khuzoe-hud"]?.reducedId) html.classList.add("khhud-reduced-duplicate");
   // Foundry puts the viewer's message border color directly on the entry.
   const edge = html.style.borderLeftColor;
   if (html.style.getPropertyValue("--khhud-sender-color") !== edge) html.style.setProperty("--khhud-sender-color", edge);
-});
-Hooks.on("dnd5e.renderChatMessage", renderChatCard);
-Hooks.on("updateActor", syncReceiptState);
-Hooks.on("renderChatLog", watchReceiptGroups);
-registerReducedCards(sharedWikiCover);
-registerAttackRetries();
-registerRollPresentation();
-Hooks.on("preCreateChatMessage", publishReceiptIcon);
-
-Hooks.on("i18nInit", () => {
-  for (const key of ["Hit", "Miss", "SavePassed", "SaveFailed"]) {
-    document.documentElement.style.setProperty(`--khhud-label-${key}`, JSON.stringify(tr(key)));
-  }
-});
+}
 
 // Midi forwards flagTags to both result cards. Store only the originating message ID.
-Hooks.on("midi-qol.preTargetDamageApplication", (_token, { workflow }) => {
+function linkDamageReceipt(_token, { workflow }) {
   const id = workflow?.itemCardId ?? /^ChatMessage\.([^.]+)$/.exec(workflow?.itemCardUuid)?.[1];
   if (!id) return;
   workflow.flagTags ??= {};
   workflow.flagTags["khuzoe-hud"] ??= {};
   workflow.flagTags["khuzoe-hud"].sourceMessageId = id;
+}
+
+function disableChatStyles() {
+  const url = new URL("../styles/chat-cards.css", import.meta.url).href;
+  const isHudStyle = href => new URL(href, document.baseURI).href.split(/[?#]/, 1)[0] === url;
+  // v14 emits module styles as @imports in a shared sheet. Leave every other
+  // module's rules and the enabled client's original cascade order intact.
+  for (const sheet of document.styleSheets) {
+    if (sheet.href) {
+      if (isHudStyle(sheet.href)) sheet.disabled = true;
+      continue;
+    }
+    for (const rule of sheet.cssRules) {
+      if (rule.type === CSSRule.IMPORT_RULE && isHudStyle(rule.href)) rule.media.mediaText = "not all";
+    }
+  }
+}
+
+Hooks.once("init", () => {
+  game.settings.register("khuzoe-hud", "enabled", {
+    name: "KHUZOE_HUD.EnableClient",
+    hint: "KHUZOE_HUD.EnableClientHint",
+    scope: "client", config: true, type: Boolean, default: true, requiresReload: true
+  });
+  if (!game.settings.get("khuzoe-hud", "enabled")) {
+    disableChatStyles();
+    return;
+  }
+
+  registerWikiBanners();
+  registerChatHistory();
+  registerRollSummary();
+  visibleDamage = new IntersectionObserver(updateVisibleDamage);
+  visibleSources = new IntersectionObserver(updateVisibleSources, { rootMargin: "140px" });
+  customElements.define("khhud-damage-types", DamageTypesElement);
+  customElements.define("khhud-receipt-source", ReceiptSource);
+  Hooks.on("renderChatMessageHTML", markChatMessage);
+  Hooks.on("dnd5e.renderChatMessage", renderChatCard);
+  Hooks.on("updateActor", syncReceiptState);
+  Hooks.on("renderChatLog", watchReceiptGroups);
+  registerReducedCards(sharedWikiCover);
+  registerAttackRetries();
+  registerRollPresentation();
+  Hooks.on("preCreateChatMessage", publishReceiptIcon);
+  Hooks.on("midi-qol.preTargetDamageApplication", linkDamageReceipt);
+  Hooks.on("i18nInit", () => {
+    for (const key of ["Hit", "Miss", "SavePassed", "SaveFailed"]) {
+      document.documentElement.style.setProperty(`--khhud-label-${key}`, JSON.stringify(tr(key)));
+    }
+  });
 });

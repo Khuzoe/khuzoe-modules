@@ -172,14 +172,15 @@ export async function sharedWikiCover(actor) {
   return sharedCoverUrl(image);
 }
 
-const nearby = new IntersectionObserver(entries => {
+let nearby;
+function updateNearbyBanners(entries) {
   for (const { target, isIntersecting } of entries) {
     const marker = target.querySelector(":scope > khhud-wiki-banner");
     if (!marker) continue;
     marker.nearChat = isIntersecting;
     if (isIntersecting) marker.refresh();
   }
-}, { rootMargin: "140px", scrollMargin: "140px" });
+}
 
 function needsLightInk(r, g, b) {
   function linearChannel(channel) {
@@ -318,7 +319,6 @@ class WikiBanner extends HTMLElement {
     this.host.setAttribute("data-khhud-wiki", "");
   }
 }
-customElements.define("khhud-wiki-banner", WikiBanner);
 
 export function attachWikiBanner(host, actor, message, allowed, cover) {
   const sharedCover = sharedCoverUrl(cover);
@@ -362,15 +362,23 @@ function refreshSession() {
   }
 }
 
-Hooks.on("khuzoeWikiSync.authChanged", refreshSession);
-// Wiki Sync registers its API on ready. History can already be in view at that point.
-Hooks.once("ready", () => queueMicrotask(refreshSession));
-Hooks.on("updateSetting", setting => { if (setting.key === `${wikiId}.campaignId`) refreshSession(); });
-Hooks.once("ready", () => game.socket.on(channel, async packet => {
+async function cacheRequestedBanner(packet) {
   if (game.user.id !== game.users.activeGM?.id || packet?.action !== "cacheWikiBanner" || typeof packet.actorId !== "string" || typeof packet.name !== "string") return;
   const actor = game.actors.get(packet.actorId);
   const ctx = actor && context(actor);
   if (!ctx || ctx.campaign !== packet.campaign) return;
   const remote = await limited(() => lookup(actor, ctx));
   if (remote && context(actor)?.key === ctx.key && filename(ctx, remote) === packet.name) await wikiBanner(actor);
-}));
+}
+
+export function registerWikiBanners() {
+  nearby = new IntersectionObserver(updateNearbyBanners, { rootMargin: "140px", scrollMargin: "140px" });
+  customElements.define("khhud-wiki-banner", WikiBanner);
+  Hooks.on("khuzoeWikiSync.authChanged", refreshSession);
+  Hooks.on("updateSetting", setting => { if (setting.key === `${wikiId}.campaignId`) refreshSession(); });
+  // Wiki Sync registers its API on ready. History can already be in view at that point.
+  Hooks.once("ready", () => {
+    queueMicrotask(refreshSession);
+    game.socket.on(channel, cacheRequestedBanner);
+  });
+}

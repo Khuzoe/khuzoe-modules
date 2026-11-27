@@ -47,7 +47,8 @@ test("players read wiki banners and only the GM provisions missing persistent st
       return { path };
     }
   } } };
-  const { wikiBanner } = await import("../scripts/wiki-banner.mjs");
+  const { registerWikiBanners, wikiBanner } = await import("../scripts/wiki-banner.mjs");
+  registerWikiBanners();
   for (const fn of ready) fn();
   assert.equal(await wikiBanner(actor), remote());
   assert.deepEqual(operations, []);

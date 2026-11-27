@@ -112,7 +112,9 @@ class ChatHistory extends HTMLElement {
     this.sizes = null;
   }
 }
-customElements.define("khhud-chat-history", ChatHistory);
+export function registerChatHistory() {
+  customElements.define("khhud-chat-history", ChatHistory);
+}
 
 function visibleEntry(element) {
   return element && !element.matches(concealed) && getComputedStyle(element).display !== "none";

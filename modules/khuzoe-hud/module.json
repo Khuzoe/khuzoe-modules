@@ -2,7 +2,7 @@
   "id": "khuzoe-hud",
   "title": "Khuzoe HUD",
   "description": "Una veste Khuzoe per la chat D&D 5e, con i token di personaggi e mostri, fasce per i bersagli e riepiloghi dei danni.",
-  "version": "0.29.8",
+  "version": "0.29.9",
   "persistentStorage": true,
   "socket": true,
   "authors": [{ "name": "Khuzoe" }],

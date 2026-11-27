@@ -15,14 +15,15 @@ function mayShowDie(message, roll) {
 
 // Only nearby rolls watch Midi for changes. Re-read the current viewer's dice
 // when returning to a roll that may have changed while off screen.
-const nearChat = new IntersectionObserver(entries => {
+let nearChat;
+function updateNearbyDice(entries) {
   for (const { target, isIntersecting } of entries) {
     const die = target.querySelector(":scope > khhud-kept-die");
     if (!die?.isConnected) continue;
     if (isIntersecting) die.activate();
     else die.suspend();
   }
-}, { rootMargin: "180px", scrollMargin: "180px" });
+}
 
 class KeptDie extends HTMLElement {
   connectedCallback() {
@@ -94,7 +95,10 @@ class KeptDie extends HTMLElement {
   }
 }
 
-customElements.define("khhud-kept-die", KeptDie);
+export function registerRollSummary() {
+  nearChat = new IntersectionObserver(updateNearbyDice, { rootMargin: "180px", scrollMargin: "180px" });
+  customElements.define("khhud-kept-die", KeptDie);
+}
 
 export function prepareRollSummary(roll, message) {
   // Older Midi receipts could embed the reason as plain HTML, without an

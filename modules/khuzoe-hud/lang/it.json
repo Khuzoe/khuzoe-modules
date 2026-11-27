@@ -1,5 +1,7 @@
 {
   "KHUZOE_HUD": {
+    "EnableClient": "Attiva Khuzoe HUD su questo browser",
+    "EnableClientHint": "Disattiva questa opzione per usare la chat standard di Foundry su questo browser. La modifica si applica dopo il ricaricamento.",
     "Roll": "Danni tirati",
     "HealingRoll": "Tiro di cura",
     "MixedRoll": "Totale del tiro",

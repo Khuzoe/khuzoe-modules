@@ -1,5 +1,7 @@
 {
   "KHUZOE_HUD": {
+    "EnableClient": "Enable Khuzoe HUD in this browser",
+    "EnableClientHint": "Turn this off to use the standard Foundry chat in this browser. The change takes effect after reloading.",
     "Roll": "Damage rolled",
     "HealingRoll": "Healing roll",
     "MixedRoll": "Roll total",

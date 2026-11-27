@@ -12,7 +12,8 @@ test("the chat follows late roll layout after a click and resumes after scrollin
     disconnect() {}
   };
   globalThis.IntersectionObserver = class { observe() {} disconnect() {} };
-  await import("../scripts/receipt-groups.mjs");
+  const { registerChatHistory } = await import("../scripts/receipt-groups.mjs");
+  registerChatHistory();
 
   const log = { children: [] };
   const scroll = Object.assign(new EventTarget(), {
