@@ -36,6 +36,10 @@
 /* D&D5e styles the chat log by ID and draws parchment on the outer message. */
 :is(#chat-log, .chat-log) > .chat-message.khhud-message { margin-inline: 0; }
 
+/* At the bottom we follow the log's height. In history the browser anchors
+   the entry being read as earlier cards and images change size. */
+.chat-scroll[data-khhud-follow-bottom] { overflow-anchor: none; }
+
 /* Keep the scroll range and native find/focus behaviour while the browser
    skips distant cards. The open card has its normal overflow and tooltips. */
 .chat-log > .chat-message.khhud-message[data-khhud-resting]:not(.khhud-grouped-receipt, :focus-within) {

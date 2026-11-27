@@ -32,22 +32,49 @@ export function midiFace(faces, percentage, uniform) {
   return Math.min(faces - 1, 1 + Math.floor((uniform - p) / (1 - p) * (faces - 1)));
 }
 
-export function configureMidiRolls(rolls, config, kind) {
+function incomingLowChance(config, message) {
+  // Midi can split a selection into one workflow per target. Without Midi,
+  // D&D5e stores the original selection as Actor UUIDs on the roll message.
+  const targets = config.workflow?.targets ?? message?.data?.flags?.dnd5e?.targets ?? globalThis.game?.user?.targets ?? [];
+  let sharedChance;
+  for (const target of targets) {
+    const actor = target?.actor ?? (target?.uuid && globalThis.fromUuidSync?.(target.uuid, {strict: false}));
+    const chance = (actor?._source?.flags ?? actor?.flags)?.[MODULE]?.midiRollConfig?.incomingAttackLowChance;
+    if (!Number.isFinite(chance) || chance < 0 || chance > 100) return;
+    if (sharedChance !== undefined && sharedChance !== chance) return;
+    sharedChance = chance;
+  }
+  return sharedChance;
+}
+
+function incomingAttackFace(lowChance, maxChance, uniform) {
+  const lowFaces = 7;
+  const middleFaces = 19 - lowFaces;
+  const low = lowChance / 100;
+  // With no configured 20, spread the remainder uniformly over 8–20.
+  const maximum = maxChance == null ? (1 - low) / (20 - lowFaces) : Math.min(maxChance / 100, 1 - low);
+  if (uniform < low || low === 1) return Math.min(lowFaces, 1 + Math.floor(uniform / low * lowFaces));
+  if (maximum > 0 && uniform >= 1 - maximum) return 20;
+  return Math.min(19, lowFaces + 1 + Math.floor((uniform - low) / (1 - maximum - low) * middleFaces));
+}
+
+export function configureMidiRolls(rolls, config, kind, message) {
   const activity = config?.subject;
   if (!activity?.item || !activity.id) return;
   // Read only the stored Item configuration, not derived Active Effect overrides.
   const settings = (activity.item._source?.flags ?? activity.item.flags)?.[MODULE]?.midiRollConfig;
-  if (!settings) return;
-  try { validateMidiRollConfig(settings); } catch { return; }
-  const rule = settings.activities[activity.id];
-  if (rule?.enabled !== true) return;
   if (kind === "attack" && activity.type !== "attack") return;
   if (kind === "damage" && !["attack", "save", "damage"].includes(activity.type)) return;
-  const chance = rule[kind === "attack" ? "attackMaxChance" : "damageMaxChance"];
-  if (chance == null) return;
+  let rule;
+  if (settings) {
+    try { rule = validateMidiRollConfig(settings).activities[activity.id]; } catch { /* Ignore malformed item settings. */ }
+  }
+  const chance = rule?.enabled === true ? rule[kind === "attack" ? "attackMaxChance" : "damageMaxChance"] : undefined;
+  const lowChance = kind === "attack" ? incomingLowChance(config, message) : undefined;
+  if (chance == null && lowChance == null) return;
   for (const roll of kind === "attack" ? rolls.slice(0, 1) : rolls) {
     if (!roll || roll._evaluated) continue;
-    policies.set(roll, {kind, chance});
+    policies.set(roll, {kind, chance, lowChance});
   }
 }
 
@@ -56,6 +83,7 @@ export function midiMapRandomFace(wrapped, uniform) {
   const policy = root && policies.get(root);
   if (!policy || !SUPPORTED_FACES.has(this.faces)) return wrapped(uniform);
   if (policy.kind === "attack" && (this.faces !== 20 || root.dice.find(die => die.faces === 20) !== this)) return wrapped(uniform);
+  if (policy.lowChance != null) return incomingAttackFace(policy.lowChance, policy.chance, uniform);
   return midiFace(this.faces, policy.chance, uniform);
 }
 
@@ -71,7 +99,7 @@ export function registerMidiRollConfig() {
   // WeakMaps keep configuration out of serialized Rolls and chat messages.
   libWrapper.register(MODULE, "foundry.dice.terms.Die.prototype.mapRandomFace", midiMapRandomFace, "MIXED");
   libWrapper.register(MODULE, "foundry.dice.Roll.prototype.clone", midiClone, "WRAPPER");
-  Hooks.on("dnd5e.postAttackRollConfiguration", (rolls, config) => { configureMidiRolls(rolls, config, "attack"); });
+  Hooks.on("dnd5e.postAttackRollConfiguration", (rolls, config, dialog, message) => { configureMidiRolls(rolls, config, "attack", message); });
   Hooks.on("dnd5e.postDamageRollConfiguration", (rolls, config) => { configureMidiRolls(rolls, config, "damage"); });
   const module = game.modules.get(MODULE);
   module.api ??= {};

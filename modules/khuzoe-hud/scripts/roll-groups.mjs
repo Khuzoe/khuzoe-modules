@@ -116,7 +116,7 @@ export function rollGroups(log, attached, onAttackTail) {
   const keys = new WeakMap();
   const parts = new WeakMap();
   function transparent(el) {
-    return attached.has(el) || el.matches(".khhud-reduced-duplicate, [hidden], .hidden, [aria-hidden='true'], [style*='display: none'], [style*='display:none']");
+    return attached.has(el) || el.matches(".dsn-hide, .khhud-reduced-duplicate, [hidden], .hidden, [aria-hidden='true'], [style*='display: none'], [style*='display:none']");
   }
   function neighbor(el, direction) {
     let other = el?.[direction];

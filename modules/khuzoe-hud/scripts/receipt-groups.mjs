@@ -5,29 +5,35 @@ const concealed = '[hidden], [aria-hidden="true"], [data-concealed], .secret:not
 const historySizeFromAttribute = CSS.supports("contain-intrinsic-block-size", "auto attr(data-khhud-resting px, 0px)");
 let nextPanelId = 0;
 
-// Foundry scrolls once after the initial batch of images. Wiki covers, grouped
-// rolls and a sidebar first opened from another tab can change the layout later.
-function followOpeningChat(log) {
-  const scroll = log.parentElement;
-  const controller = new AbortController();
-  const options = { signal: controller.signal, passive: true, capture: true };
-  const release = () => controller.abort();
+// Foundry replaces an existing roll without scrolling. Keep the last pixel in
+// view across replacements, dice reveals and image loads while the reader is there.
+function followChatBottom(scroll, openAtBottom, signal) {
+  const atEnd = (top, end) => top >= end - 1; // scrollTop can be fractional.
+  let following = openAtBottom || atEnd(scroll.scrollTop, scroll.scrollHeight - scroll.clientHeight);
   let bottom;
-  const sizes = new ResizeObserver(() => {
-    if (!scroll.clientHeight) { bottom = undefined; return; }
-    bottom = Math.max(0, scroll.scrollHeight - scroll.clientHeight);
-    if (Math.abs(scroll.scrollTop - bottom) > 1) scroll.scrollTo({ top: bottom, behavior: "instant" });
-  });
-  sizes.observe(log);
-  sizes.observe(scroll);
-  controller.signal.addEventListener("abort", () => sizes.disconnect(), { once: true });
-  for (const type of ["wheel", "pointerdown", "touchstart", "keydown", "focusin"]) scroll.addEventListener(type, release, options);
-  // Native scrollbar drags and assistive navigation may only emit a scroll.
-  scroll.addEventListener("scroll", () => {
-    if (bottom !== undefined && Math.abs(scroll.scrollTop - bottom) > 1
-      && scroll.clientHeight && scroll.scrollHeight - scroll.clientHeight === bottom) release();
-  }, { signal: controller.signal, passive: true });
-  return controller;
+  scroll.toggleAttribute("data-khhud-follow-bottom", following);
+  signal.addEventListener("abort", () => scroll.removeAttribute("data-khhud-follow-bottom"), { once: true });
+  function sync(resized) {
+    const height = scroll.clientHeight;
+    if (!height) { bottom = undefined; return; }
+    const end = Math.max(0, scroll.scrollHeight - height);
+    const top = scroll.scrollTop;
+    // The browser may deliver scroll and resize in either order. At the old
+    // end (or clamped to a shorter log) the reader is still following.
+    if (bottom !== undefined) {
+      const next = atEnd(top, Math.min(bottom, end));
+      if (next !== following) {
+        following = next;
+        scroll.toggleAttribute("data-khhud-follow-bottom", following);
+      }
+    }
+    if (resized) {
+      bottom = end;
+      if (following && !atEnd(top, end)) scroll.scrollTo({ top: end, behavior: "instant" });
+    }
+  }
+  scroll.addEventListener("scroll", () => sync(false), { signal, passive: true });
+  return () => sync(true);
 }
 
 // Measure each departing card once in layout pixels. ResizeObserver preserves
@@ -36,9 +42,15 @@ class ChatHistory extends HTMLElement {
   connectedCallback() {
     this.log = this.parentElement.querySelector(":scope > .chat-log");
     if (!this.log) return;
+    this.events = new AbortController();
+    const syncBottom = followChatBottom(this.parentElement, this.openAtBottom, this.events.signal);
+    this.openAtBottom = false;
     this.sizes = new ResizeObserver(entries => {
+      let resized = false;
       for (const { target, borderBoxSize, contentBoxSize } of entries) {
+        if (target === this.log) { resized = true; continue; }
         if (target === this.parentElement) {
+          resized = true;
           const width = contentBoxSize[0]?.inlineSize;
           if (!width || width === this.width) continue;
           if (this.width !== undefined) {
@@ -62,6 +74,7 @@ class ChatHistory extends HTMLElement {
         if (!historySizeFromAttribute) target.style.setProperty("--khhud-history-height", `${height}px`);
         target.setAttribute("data-khhud-resting", String(height));
       }
+      if (resized) syncBottom();
     });
     this.viewport = new IntersectionObserver(entries => {
       for (const { target, isIntersecting } of entries) {
@@ -75,6 +88,7 @@ class ChatHistory extends HTMLElement {
       }
     }, { root: this.parentElement, rootMargin: "320px 0px" });
     this.sizes.observe(this.parentElement);
+    this.sizes.observe(this.log);
     for (const card of this.log.children) this.track(card);
   }
 
@@ -90,7 +104,7 @@ class ChatHistory extends HTMLElement {
   }
 
   disconnectedCallback() {
-    this.openingScroll?.abort();
+    this.events?.abort();
     clearTimeout(this.resizeTimer);
     this.viewport?.disconnect();
     this.sizes?.disconnect();
@@ -158,6 +172,7 @@ export function watchReceiptGroups(_app, root, _context, options) {
   observedLogs.add(log);
   const history = document.createElement("khhud-chat-history");
   history.hidden = true;
+  history.openAtBottom = !!options?.isFirstRender;
   const byId = new Map();
   const groups = new Map();
   const origin = new WeakMap();
@@ -167,6 +182,7 @@ export function watchReceiptGroups(_app, root, _context, options) {
   const anchors = new Map();
   const ledgers = new Map();
   const changedReceipts = new Set();
+  const maskedRows = new WeakMap();
   const updateRolls = rollGroups(log, attached, (el, tail) => {
     if ((attackTails.get(el) ?? null) === tail) return;
     if (tail) attackTails.set(el, tail);
@@ -360,6 +376,8 @@ export function watchReceiptGroups(_app, root, _context, options) {
     const touched = new Set();
     for (const el of added) boundaries.add(el);
     for (const el of removed) {
+      maskedRows.get(el)?.disconnect();
+      maskedRows.delete(el);
       clearAttackPresentation(el);
       el.removeAttribute("data-khhud-roll-follow");
       el.removeAttribute("data-khhud-roll-next");
@@ -382,6 +400,21 @@ export function watchReceiptGroups(_app, root, _context, options) {
       const id = el.dataset.messageId;
       if (!id || !el.matches(".chat-message")) continue;
       byId.set(id, el);
+      // The roll may be posted before DSN reveals it. The preceding attack
+      // keeps its buttons and targets until this row actually becomes visible.
+      if (el.classList.contains("dsn-hide")) {
+        const reveal = new MutationObserver(() => {
+          if (el.classList.contains("dsn-hide")) return;
+          reveal.disconnect();
+          maskedRows.delete(el);
+          if (el.parentElement === log) {
+            updateRolls([el]);
+            if (changedReceipts.size) positionLedgers(new Set(), new Set());
+          }
+        });
+        maskedRows.set(el, reveal);
+        reveal.observe(el, { attributeFilter: ["class"] });
+      }
       const previousRank = ranks.get(replacements.get(el));
       if (previousRank !== undefined) {
         ranks.set(el, previousRank);
@@ -448,5 +481,4 @@ export function watchReceiptGroups(_app, root, _context, options) {
   observer.observe(log, { childList: true });
   update(new Set(log.children), new Set(), new Map());
   log.after(history);
-  if (options?.isFirstRender) history.openingScroll = followOpeningChat(log);
 }

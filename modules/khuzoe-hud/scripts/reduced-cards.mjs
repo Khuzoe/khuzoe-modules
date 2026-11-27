@@ -1,5 +1,6 @@
 import { reducedAttackGroup } from "./roll-groups.mjs";
 import { missedAttack } from "./attack-retry.mjs";
+import { pendingRoll } from "./roll-presentation.mjs";
 
 const scope = "khuzoe-hud";
 const localize = key => game.i18n.localize(`KHUZOE_HUD.${key}`);
@@ -9,6 +10,7 @@ const nativeType = message => message?.flags?.dnd5e?.roll?.type ?? message?.roll
 const isSave = type => ["save", "death", "concentration"].includes(type);
 const queues = new Map();
 const queuedPublications = new Map();
+const delayedPublications = new WeakMap();
 const applications = new WeakMap();
 const markupCache = new WeakMap();
 const childDamageRolls = new WeakMap();
@@ -275,6 +277,20 @@ function requestPublication(source) {
 
 async function publish(source) {
   if (!canPublish(source) || !isAction(source)) return;
+  // Leave the player's last published summary in place during the GM's roll.
+  // Do not hold the publication queue: withdrawal and deletion still run.
+  const delay = pendingRoll(source);
+  if (delay) {
+    if (delayedPublications.get(source) !== delay) {
+      delayedPublications.set(source, delay);
+      delay.then(() => {
+        if (delayedPublications.get(source) !== delay) return;
+        delayedPublications.delete(source);
+        if (game.messages.get(source.id) === source) requestPublication(source);
+      });
+    }
+    return;
+  }
   const summary = buildSummary(source);
   if (!summary) return;
   let id = data(source).reducedId;

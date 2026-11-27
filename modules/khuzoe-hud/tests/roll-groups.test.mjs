@@ -82,6 +82,11 @@ test("a repeated activity keeps the latest available controls and targets across
   const rows = [first, receipt, second, third];
   rows.forEach((row, i) => { row.previousElementSibling = rows[i - 1]; row.nextElementSibling = rows[i + 1]; });
   const update = rollGroups(log, new Map([[receipt, first]]), () => []);
+  second.matches = selector => selector.includes(".dsn-hide");
+  update([first, second, third]);
+  assert.equal(first.dataset.khhudSuperseded, undefined);
+  assert.equal(second.dataset.khhudRollFollow, undefined);
+  second.matches = () => false;
   update([first, second, third]);
   assert.ok(first.hasAttribute("data-khhud-attack-series") && third.hasAttribute("data-khhud-attack-series"));
   assert.equal(first.dataset.khhudSuperseded, "attack damage targets");

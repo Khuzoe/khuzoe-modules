@@ -6,6 +6,7 @@ import { syncReceiptPalette, watchReceiptGroups } from "./receipt-groups.mjs";
 import { prepareRollSummary } from "./roll-summary.mjs";
 import { registerReducedCards } from "./reduced-cards.mjs";
 import { registerAttackRetries } from "./attack-retry.mjs";
+import { registerRollPresentation } from "./roll-presentation.mjs";
 import { attachWikiBanner, sharedWikiCover, wikiActorForSummary } from "./wiki-banner.mjs";
 
 const tr = key => game.i18n.localize(`KHUZOE_HUD.${key}`);
@@ -844,6 +845,7 @@ Hooks.on("updateActor", syncReceiptState);
 Hooks.on("renderChatLog", watchReceiptGroups);
 registerReducedCards(sharedWikiCover);
 registerAttackRetries();
+registerRollPresentation();
 Hooks.on("preCreateChatMessage", publishReceiptIcon);
 
 Hooks.on("i18nInit", () => {

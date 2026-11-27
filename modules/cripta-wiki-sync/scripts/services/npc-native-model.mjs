@@ -154,6 +154,16 @@ export function nativeValidateChanges(source, target, patches, permissions = {})
   if (new Set(paths).size !== paths.length || paths.some((path,i) => paths.some((other,j) => i !== j && other.startsWith(path + ".")))) throw new Error("La richiesta contiene campi sovrapposti.");
   for (const patch of patches) nativeValidatePatch(target.type,patch,permissions);
   const next = nativeApply(source,patches);
+  if (target.type === "Actor") {
+    const path = "flags.khuzoe-automations.midiRollConfig";
+    const config = nativeGet(next, path);
+    const chance = config?.incomingAttackLowChance;
+    if (config != null && !nativeEqual(config, nativeGet(source, path))
+      && (typeof config !== "object" || Array.isArray(config)
+        || (chance != null && !(Number.isFinite(chance) && chance >= 0 && chance <= 100)))) {
+      throw new Error("La probabilità di un tiro da 1 a 7 deve essere compresa tra 0 e 100.");
+    }
+  }
   if (target.type === "Item" && nativeActivitiesAmbiguous(source) && (!nativeEqual(source.system?.activities,next.system?.activities)
     || !nativeEqual(source.flags?.["khuzoe-automations"]?.npcRules,next.flags?.["khuzoe-automations"]?.npcRules)
     || !nativeEqual(source.flags?.["khuzoe-automations"]?.midiRollConfig,next.flags?.["khuzoe-automations"]?.midiRollConfig))) throw new Error("Questa capacità contiene attività con identificativi duplicati. Correggile in Foundry prima di cambiarne le meccaniche.");

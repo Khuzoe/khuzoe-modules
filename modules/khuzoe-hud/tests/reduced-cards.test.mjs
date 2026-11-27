@@ -1,10 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { registerReducedCards } from "../scripts/reduced-cards.mjs";
+import { registerRollPresentation } from "../scripts/roll-presentation.mjs";
 
 test("GM-only actions publish one allowlisted result and record only committed HP", async () => {
   const hooks = new Map();
-  globalThis.Hooks = { on: (name, fn) => hooks.set(name, fn) };
+  globalThis.Hooks = { once() {}, on(name, fn) {
+    const previous = hooks.get(name);
+    hooks.set(name, previous ? (...args) => Promise.all([previous(...args), fn(...args)]) : fn);
+  } };
   const gm = { id: "gm", isGM: true, active: true }, player = { id: "pc", isGM: false };
   const docs = new Map();
   globalThis.game = {
@@ -44,6 +48,7 @@ test("GM-only actions publish one allowlisted result and record only committed H
     return doc(payload._id, payload);
   } };
   let coverLookups = 0;
+  registerRollPresentation();
   registerReducedCards(async actor => {
     coverLookups++;
     return `wiki-card-${actor.id}-12ab.webp`;
@@ -64,6 +69,18 @@ test("GM-only actions publish one allowlisted result and record only committed H
   const view = () => copy.flags[mod].reduced;
   assert.equal(writes.length, 1);
   assert.deepEqual(view().attack, { total: 24, critical: true });
+  game.dice3d = {};
+  game.settings = { get: () => false };
+  source._dice3danimating = true;
+  m.attackRoll.total = 19;
+  await emit("updateChatMessage", source);
+  m.attackRoll.total = 27;
+  await emit("updateChatMessage", source);
+  assert.equal(view().attack.total, 24);
+  delete source._dice3danimating;
+  emit("diceSoNiceRollComplete", source.id);
+  await tick();
+  assert.deepEqual(view().attack, { total: 27, critical: true });
   assert.equal(view().speaker.img, "token.webp");
   assert.equal(view().icon, "ability.webp");
   assert.equal(view().targets.length, 2);
@@ -142,7 +159,7 @@ test("GM-only actions publish one allowlisted result and record only committed H
   assert.equal(view().speaker.wikiActorType, "npc");
   assert.equal(view().rolledDamage, 23);
   assert.deepEqual(copy.flags[mod].cover, { actorId: "a", image: "wiki-card-a-12ab.webp" });
-  assert.deepEqual(view().attack, { total: 24, critical: true });
+  assert.deepEqual(view().attack, { total: 27, critical: true });
   assert.deepEqual(view().targets, before);
   assert.equal(JSON.stringify(copy.flags).includes("SECRET"), false);
   const previousLookups = coverLookups;

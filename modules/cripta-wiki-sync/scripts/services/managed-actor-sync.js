@@ -3563,6 +3563,12 @@ async function applyManagedDocumentPatches(documentValue, rawPatches, applyUpdat
 }
 
 async function applyManagedActorDocumentUpdate(actor, command) {
+    const invalidChance = command?.patches?.some(patch =>
+        patch.path === "flags.khuzoe-automations.midiRollConfig.incomingAttackLowChance"
+        && patch.value !== null && !(Number.isFinite(patch.value) && patch.value >= 0 && patch.value <= 100));
+    if (invalidChance) {
+        return {status: "failed", error: "La probabilità di un tiro da 1 a 7 deve essere compresa tra 0 e 100."};
+    }
     if ((command?.patches || []).some((patch) => patch.path === "system.attributes.prof")) {
         return { status: "failed", error: "Il bonus di competenza è calcolato da D&D5e. Modifica il GS, il livello o l'effetto che lo determina." };
     }
@@ -5012,6 +5018,10 @@ function buildManagedActorDocument(actor, media, link = {}, iconStates = {}) {
         } : {})
     };
     document.definition.items = items;
+    const incomingAttackLowChance = actor._source?.flags?.["khuzoe-automations"]?.midiRollConfig?.incomingAttackLowChance;
+    if (Number.isFinite(incomingAttackLowChance) && incomingAttackLowChance >= 0 && incomingAttackLowChance <= 100) {
+        document.definition.flags = {"khuzoe-automations": {midiRollConfig: {incomingAttackLowChance}}};
+    }
     document.definition.editor = buildManagedEditorMetadata(actor);
     return document;
 }

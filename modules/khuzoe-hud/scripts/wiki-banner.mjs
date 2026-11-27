@@ -1,15 +1,18 @@
 const moduleId = "khuzoe-hud";
 const wikiId = "cripta-wiki-sync";
 const channel = `module.${moduleId}`;
-const folder = `modules/${moduleId}/storage`;
+const moduleFolder = `modules/${moduleId}`;
+const folder = `${moduleFolder}/storage`;
 const cache = new Map();
 const lookups = new Map();
 const verifiedBanners = new Map();
 const cornerStyles = new Map();
+const replacingBanners = new WeakSet();
 const cornerWidth = .30;
 const cornerHeight = .20;
 const waiting = [];
 let running = 0;
+let preparingStorage;
 
 // When scrolling through a page of history, only nearby banners enter this queue.
 async function limited(task) {
@@ -50,7 +53,23 @@ function lookup(actor, ctx) {
   return entry.promise;
 }
 
+async function ensureStorageFolder(picker) {
+  // List the module's few directories, not every banner already in storage.
+  const exists = async () => (await picker.browse("data", moduleFolder, { type: "folder" })).dirs.includes(folder);
+  if (await exists()) return;
+  try {
+    await picker.createDirectory("data", folder);
+  } catch (error) {
+    // Another GM may have created it between the browse and the mkdir.
+    if (!await exists()) throw error;
+  }
+}
+
 async function saveBanner(remote, name, current) {
+  const picker = CONFIG.ux.FilePicker;
+  preparingStorage ??= ensureStorageFolder(picker).finally(() => { preparingStorage = undefined; });
+  await preparingStorage;
+  if (!game.user.isGM || !current()) return;
   const response = await fetch(remote, { credentials: "omit", signal: AbortSignal.timeout(15000) });
   if (!response.ok) return;
   const bitmap = await createImageBitmap(await response.blob());
@@ -62,9 +81,8 @@ async function saveBanner(remote, name, current) {
     canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
   } finally { bitmap.close(); }
   const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/webp", .88));
-  if (!blob || !current()) return;
+  if (!blob || !game.user.isGM || !current()) return;
   const file = new File([blob], name, { type: "image/webp" });
-  const picker = CONFIG.ux.FilePicker;
   const result = await picker.uploadPersistent(moduleId, "", file, {}, { notify: false });
   return Boolean(result?.path);
 }
@@ -113,7 +131,7 @@ export function wikiBanner(actor) {
     const localImage = await verifyBanner(local).catch(() => null);
     if (localImage) return current() ? localImage : null;
     if (!current()) return null;
-    if (game.user.isGM || game.user.can("FILES_UPLOAD")) {
+    if (game.user.isGM) {
       if (await saveBanner(remote, name, current).catch(() => false)) {
         const ready = await verifyBanner(local).catch(() => null);
         if (ready) return current() ? ready : null;
@@ -157,7 +175,9 @@ export async function sharedWikiCover(actor) {
 const nearby = new IntersectionObserver(entries => {
   for (const { target, isIntersecting } of entries) {
     const marker = target.querySelector(":scope > khhud-wiki-banner");
-    if (isIntersecting && marker) marker.refresh();
+    if (!marker) continue;
+    marker.nearChat = isIntersecting;
+    if (isIntersecting) marker.refresh();
   }
 }, { rootMargin: "140px", scrollMargin: "140px" });
 
@@ -221,9 +241,17 @@ class WikiBanner extends HTMLElement {
   connectedCallback() {
     this.host = this.parentElement;
     nearby.observe(this.host);
+    this.nearChat = replacingBanners.has(this.message);
+    if (this.nearChat) this.refresh();
   }
   disconnectedCallback() {
     nearby.unobserve(this.host);
+    // Foundry replaces the old ChatMessage element and connects the new one in
+    // the same turn. Restore its authorized banner before the next paint.
+    if (this.nearChat && this.cover) {
+      replacingBanners.add(this.message);
+      queueMicrotask(() => replacingBanners.delete(this.message));
+    }
     this.reset();
   }
   reset() {
@@ -257,7 +285,7 @@ class WikiBanner extends HTMLElement {
       const image = new Image();
       image.alt = "";
       image.decoding = "async";
-      image.addEventListener("load", () => {
+      const applyImage = () => {
         if (image !== this.cover?.firstElementChild || !this.allowed() || !image.naturalHeight) return;
         message.style.setProperty("--khhud-cover-ratio", String(image.naturalWidth / image.naturalHeight));
         const content = this.host.closest(".message-content");
@@ -273,7 +301,8 @@ class WikiBanner extends HTMLElement {
           content.append(this.texture);
         }
         styleCorner(this.texture, image);
-      });
+      };
+      image.addEventListener("load", applyImage);
       this.cover.append(image);
       if (this.authorName) {
         const author = document.createElement("span");
@@ -281,8 +310,11 @@ class WikiBanner extends HTMLElement {
         this.cover.append(author);
       }
       header.prepend(this.cover);
+      image.src = url;
+      if (image.naturalHeight) applyImage();
+    } else if (this.cover.firstElementChild.getAttribute("src") !== url) {
+      this.cover.firstElementChild.src = url;
     }
-    this.cover.firstElementChild.src = url;
     this.host.setAttribute("data-khhud-wiki", "");
   }
 }
@@ -295,6 +327,7 @@ export function attachWikiBanner(host, actor, message, allowed, cover) {
   const marker = document.createElement("khhud-wiki-banner");
   marker.setAttribute("aria-hidden", "true");
   marker.actor = actor;
+  marker.message = message;
   marker.sharedCover = sharedCover;
   marker.authorName = message.author?.name;
   marker.allowed = () => message.isContentVisible && (!allowed || allowed());
