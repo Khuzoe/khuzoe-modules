@@ -875,40 +875,48 @@ async function applyEnlargeReduce(workflow, item) {
     {label: "Enlarge", value: "enlarge"},
     {label: "Reduce", value: "reduce"}
   ]);
-  if (!choice) return;
-  const order = ["tiny", "sm", "med", "lg", "huge", "grg"];
-  const oldSize = String(target.actor.system?.traits?.size ?? "med");
-  const index = Math.max(0, order.indexOf(oldSize));
-  const newSize = order[Math.clamp?.(index + (choice === "enlarge" ? 1 : -1), 0, order.length - 1) ?? Math.max(0, Math.min(order.length - 1, index + (choice === "enlarge" ? 1 : -1)))];
-  const tokenSnapshots = (target.actor.getActiveTokens?.(false, true) ?? [])
-    .map(tokenDocument)
-    .filter(token => token?.uuid)
-    .map(token => ({
-      uuid: token.uuid,
-      width: token.width,
-      height: token.height,
-      scaleX: token.texture?.scaleX,
-      scaleY: token.texture?.scaleY
-    }));
-  const bonus = choice === "enlarge" ? "1d4" : "-1d4";
-  await createEffect(target.actor, item, {
-    identifier: "enlarge-reduce",
-    state: {kind: "size", choice, oldSize, newSize, tokenSnapshots},
-    effectChanges: changes(
-      {key: "system.traits.size", value: newSize, type: "override"},
-      {key: "system.bonuses.mwak.damage", value: bonus},
-      {key: "system.bonuses.rwak.damage", value: bonus},
-      {key: `flags.midi-qol.${choice === "enlarge" ? "advantage" : "disadvantage"}.ability.check.str`, value: "1", type: "override"},
-      {key: `flags.midi-qol.${choice === "enlarge" ? "advantage" : "disadvantage"}.ability.save.str`, value: "1", type: "override"}
-    ),
-    concentrationItem: item,
-    seconds: 60
+  if (!["enlarge", "reduce"].includes(choice)) return;
+  return withDocumentLock(target.actor, "enlarge-reduce", async () => {
+    const previousEffects = values(target.actor.effects).filter(effect => {
+      const state = effectState(effect);
+      return state.identifier === "enlarge-reduce" && state.kind === "size";
+    });
+    const previous = previousEffects.length ? effectState(previousEffects[0]) : null;
+    const savedTokens = new Map((previous?.tokenSnapshots ?? []).map(snapshot => [snapshot.uuid, snapshot]));
+    // Resolve a refresh against the size without the old spell, not its already
+    // enlarged/reduced value. Foundry prepares the Actor when the effect is removed.
+    for (const effect of previousEffects) await removeEffect(effect);
+    const order = ["tiny", "sm", "med", "lg", "huge", "grg"];
+    const oldSize = String(target.actor.system?.traits?.size ?? "med");
+    const index = Math.max(0, order.indexOf(oldSize));
+    const newSize = order[Math.max(0, Math.min(order.length - 1, index + (choice === "enlarge" ? 1 : -1)))];
+    // Include the explicitly targeted synthetic token even without a canvas;
+    // other unlinked copies of the base Actor must remain independent.
+    const tokens = new Map([target, ...values(target.actor.getActiveTokens?.(true, true))]
+      .map(tokenDocument).filter(token => token?.uuid).map(token => [token.uuid, token]));
+    const tokenSnapshots = Array.from(tokens.values(), token => {
+      const saved = previous?.oldSize === oldSize ? savedTokens.get(token.uuid) : null;
+      const original = saved ?? (previous ? tokenSizeForCategory(oldSize) : token);
+      return {uuid: token.uuid, width: original.width, height: original.height};
+    });
+    const bonus = choice === "enlarge" ? "1d4" : "-1d4";
+    const created = await createEffect(target.actor, item, {
+      identifier: "enlarge-reduce",
+      state: {kind: "size", choice, oldSize, newSize, tokenSnapshots},
+      effectChanges: changes(
+        {key: "system.traits.size", value: newSize, type: "override", priority: 40},
+        {key: "system.bonuses.mwak.damage", value: bonus},
+        {key: "system.bonuses.rwak.damage", value: bonus},
+        {key: `flags.midi-qol.${choice === "enlarge" ? "advantage" : "disadvantage"}.ability.check.str`, value: "1", type: "override"},
+        {key: `flags.midi-qol.${choice === "enlarge" ? "advantage" : "disadvantage"}.ability.save.str`, value: "1", type: "override"}
+      ),
+      concentrationItem: item,
+      seconds: 60,
+      replace: false
+    });
+    if (!created.length) return;
+    for (const token of tokens.values()) await updateDocumentSafely(token, tokenSizeForCategory(newSize));
   });
-  for (const snapshot of tokenSnapshots) {
-    const token = await globalThis.fromUuid?.(snapshot.uuid);
-    if (!token) continue;
-    await updateDocumentSafely(token, tokenSizeForCategory(newSize));
-  }
 }
 
 async function applySelfBuff(workflow, item, identifier, state, effectChanges, options = {}) {
@@ -1967,19 +1975,21 @@ export async function expandedEffectDeleted({document, actor} = {}) {
     if (generated) await globalThis.cat.utils.documentUtils.deleteDocument(generated);
   }
   if (state.kind === "size") {
+    const replacement = values(actor.effects).some(effect => effect !== document
+      && (!effect.uuid || effect.uuid !== document.uuid) && !effect.disabled && !effect.isSuppressed
+      && !effect.duration?.expired && effectState(effect).identifier === state.identifier
+      && effectState(effect).kind === "size");
     for (const snapshot of state.tokenSnapshots ?? []) {
       const token = await globalThis.fromUuid?.(snapshot.uuid);
       if (!token) continue;
       const category = actor.system?.traits?.size;
-      if (category && category !== state.oldSize) {
+      if (category && (category !== state.oldSize || replacement)) {
         await updateDocumentSafely(token, tokenSizeForCategory(category));
         continue;
       }
       await updateDocumentSafely(token, {
         width: snapshot.width,
-        height: snapshot.height,
-        "texture.scaleX": snapshot.scaleX,
-        "texture.scaleY": snapshot.scaleY
+        height: snapshot.height
       });
     }
   }

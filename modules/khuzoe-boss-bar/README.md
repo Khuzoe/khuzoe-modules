@@ -19,7 +19,15 @@ Modulo Foundry Virtual Tabletop V14 per mondi DnD5e. Il GM seleziona uno o piu t
 
 Ogni utente puo scegliere in `Impostazioni di Gioco` se ancorare le barre in alto o in basso. Le nuove barre crescono verso il centro dello schermo e la larghezza disponibile evita automaticamente i controlli scena, la sidebar e gli eventuali pannelli video laterali.
 
-Ogni utente puo inoltre scegliere gli effetti personali: `Disattivati`, `Discreti` oppure `Cinematici`. La modalita discreta anima solo la barra; quella cinematica usa le API native v14 per un leggero scuotimento e un breve burst di particelle sul token visibile quando subisce un colpo rilevante, entra in fase critica o viene sconfitto. Gli effetti rispettano automaticamente le preferenze di movimento ridotto e la modalita fotosensibile di Foundry, non mostrano valori numerici e sono limitati da soglie e tempi di recupero anti-spam.
+Ogni utente può scegliere gli effetti personali nelle impostazioni del modulo. Durante lo scontro, `Discreti` anima la barra. `Cinematici` aggiunge un leggero scuotimento e particelle sul token visibile quando subisce un colpo rilevante, entra in fase critica o viene sconfitto.
+
+### Ingresso del boss
+
+Quando il GM seleziona un NPC e preme il cuore `Aggiungi selezionati`, la sua card appare al centro dello schermo del GM e dei giocatori collegati per circa cinque secondi. L'ingresso funziona anche con il GM da solo. Il GM deve avere accesso alla card tramite **Khuzoe Wiki Sync**, la stessa fonte usata da Khuzoe HUD. I giocatori ricevono l'immagine anche senza un account wiki. La barra appare subito anche quando la card manca o tarda a caricarsi.
+
+Con `Discreti` la card si apre al centro e un riflesso attraversa l'illustrazione. Con `Cinematici` entra in prospettiva davanti a un sigillo in rotazione. Il nome e la cornice riprendono lo stile della barra. Movimento ridotto e modalità fotosensibile mostrano una card statica. `Disattivati` salta la presentazione.
+
+Le card dei boss aggiunti insieme appaiono una alla volta. Per ripetere l'ingresso, seleziona il boss e premi di nuovo il cuore, anche con la barra già visibile. I minion e gli aggiornamenti dei punti ferita non avviano la sequenza.
 
 Il modulo salva nel world setting solo percentuale, nome, immagine e riferimenti documento. Non salva HP correnti o massimi nello stato condiviso con i giocatori.
 

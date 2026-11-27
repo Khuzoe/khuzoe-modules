@@ -4,6 +4,10 @@ const SETTING_DISMISSED = "dismissedState";
 const SETTING_ANCHOR = "screenAnchor";
 const SETTING_EFFECT_MODE = "effectMode";
 const STATE_VERSION = 1;
+const INTRO_QUERY = `${MODULE_ID}.showBossCard`;
+const INTRO_DURATION = 4600;
+const bossIntros = new Map();
+let visibleIntro = null;
 const EFFECT_PRIORITY = Object.freeze({ damage: 1, heavy: 2, critical: 3, defeat: 4 });
 const EFFECT_COOLDOWN = Object.freeze({ damage: 800, heavy: 900, critical: 1400, defeat: 1800 });
 
@@ -204,6 +208,7 @@ function renderThemeField() {
 
 Hooks.once("init", () => {
   registerSettings();
+  CONFIG.queries[INTRO_QUERY] = receiveBossCard;
 });
 
 Hooks.once("ready", () => {
@@ -275,7 +280,10 @@ function registerSettings() {
     config: false,
     type: Object,
     default: defaultState(),
-    onChange: value => renderBossBars(value)
+    onChange: (value, options, userId) => {
+      renderBossBars(value);
+      if (options?.khbbIntroIds?.length) prepareBossIntros(value, options.khbbIntroIds, userId);
+    }
   });
 
   game.settings.register(MODULE_ID, SETTING_DISMISSED, {
@@ -331,17 +339,139 @@ async function addSelectedTokens() {
 
   const state = getState();
   const existingEntries = state.entries;
-  const selectedEntries = controlledTokens
-    .map((token, index) => buildEntryFromTokenDocument(token.document, index))
-    .filter(Boolean);
+  const selectedEntries = [];
+  const introIds = [];
+  for (const token of controlledTokens) {
+    const entry = buildEntryFromTokenDocument(token.document, selectedEntries.length);
+    if (!entry) continue;
+    selectedEntries.push(entry);
+    if (token.document.actor.type === "npc") introIds.push(entry.id);
+  }
 
   if (!selectedEntries.length) {
     return;
   }
 
   const nextEntries = mergeEntries(existingEntries, selectedEntries);
+  await setState(nextEntries, introIds.length ? { khbbIntroIds: introIds } : undefined);
+}
 
-  await setState(nextEntries);
+// The setting operation arms only clients present for this activation. The GM's
+// subsequent Foundry user query carries the artwork without persisting it in the world.
+function prepareBossIntros(state, ids, gmId) {
+  if (!Array.isArray(ids) || !game.users.get(gmId)?.isGM) return;
+  const publisher = game.user.id === gmId;
+  if (!publisher && (configuredEffectMode() === "off" || isStateDismissed(state))) return;
+  for (const entry of state.entries) {
+    if (!ids.includes(entry.id)) continue;
+    discardBossIntro(bossIntros.get(entry.id));
+    const intro = { id: entry.id, actorId: entry.actorId, gmId, activation: state.updatedAt };
+    bossIntros.set(entry.id, intro);
+    intro.timer = window.setTimeout(() => discardBossIntro(intro), 15000);
+    if (publisher) void publishBossCard(intro, entry);
+  }
+}
+
+function publicBossCardUrl(value) {
+  if (typeof value !== "string") return null;
+  const url = URL.parse(value);
+  if (url?.origin !== "https://sigillo-api.khuzoe.workers.dev" || !url.pathname.startsWith("/media/")
+    || url.username || url.password || url.hash || [...url.searchParams.keys()].some(key => key !== "rev")) return null;
+  return url.href;
+}
+
+async function publishBossCard(intro, entry) {
+  try {
+    const wiki = game.modules.get("cripta-wiki-sync");
+    const actor = game.scenes.get(entry.sceneId)?.tokens.get(entry.tokenId)?.actor;
+    if (actor?.type !== "npc" || !wiki?.active || !wiki.api?.getActorCardUrl) return;
+    const url = publicBossCardUrl(await wiki.api.getActorCardUrl(actor));
+    if (!url || bossIntros.get(entry.id) !== intro) return;
+    const packet = { id: entry.id, activation: intro.activation, url };
+    const localDisplay = receiveBossCard(packet, { user: game.user });
+    const peers = game.users.filter(user => user.active && user.id !== game.user.id);
+    await Promise.allSettled([localDisplay, ...peers.map(peer => peer.query(INTRO_QUERY, packet, { timeout: 15000 }))]);
+  } catch (error) {
+    console.debug(`${MODULE_ID} | Boss card unavailable`, error);
+  } finally {
+    // A decoded card, whether visible or queued, owns its own dismissal timer.
+    if (!intro.image) discardBossIntro(intro);
+  }
+}
+
+async function receiveBossCard(packet, { user }) {
+  const intro = bossIntros.get(packet?.id);
+  if (!user?.isGM || !intro || intro.gmId !== user.id
+    || intro.activation !== packet.activation || intro.image) return;
+  if (configuredEffectMode() === "off" || isStateDismissed(getState())) return;
+  const url = publicBossCardUrl(packet.url);
+  if (!url) return;
+  const image = new Image();
+  intro.image = image;
+  image.alt = "";
+  image.decoding = "async";
+  image.referrerPolicy = "no-referrer";
+  image.src = url;
+  try {
+    await image.decode();
+    if (bossIntros.get(intro.id) !== intro) return;
+    window.clearTimeout(intro.timer);
+    intro.ready = true;
+    showNextBossCard();
+  } catch {
+    discardBossIntro(intro);
+  }
+}
+
+function discardBossIntro(intro) {
+  if (!intro || bossIntros.get(intro.id) !== intro) return;
+  bossIntros.delete(intro.id);
+  window.clearTimeout(intro.timer);
+  intro.image?.removeAttribute("src");
+  if (visibleIntro === intro) {
+    intro.overlay.remove();
+    visibleIntro = null;
+    queueMicrotask(showNextBossCard);
+  }
+}
+
+function reconcileBossIntros(state, dismissed) {
+  for (const intro of bossIntros.values()) {
+    const active = state.entries.some(entry => entry.id === intro.id && entry.actorId === intro.actorId);
+    // Hiding the GM's own overlay must still let the pending lookup reach other clients.
+    const awaitingPublication = intro.gmId === game.user.id && !intro.image;
+    if (!active || (!awaitingPublication && (dismissed || configuredEffectMode() === "off"))) discardBossIntro(intro);
+  }
+  if (visibleIntro) visibleIntro.overlay.dataset.motion = motionEffectsSuppressed() ? "off" : configuredEffectMode();
+}
+
+function showNextBossCard() {
+  if (visibleIntro) return;
+  const state = getState();
+  reconcileBossIntros(state, isStateDismissed(state));
+  const intro = Array.from(bossIntros.values()).find(candidate => candidate.ready);
+  if (!intro) return;
+  const entry = state.entries.find(candidate => candidate.id === intro.id);
+  const overlay = document.createElement("div");
+  overlay.className = "khbb-intro";
+  overlay.setAttribute("aria-hidden", "true"); // The persistent bar already announces the name.
+  overlay.dataset.motion = motionEffectsSuppressed() ? "off" : configuredEffectMode();
+  overlay.style.setProperty("--khbb-intro-accent", entry.color || BOSS_THEMES[resolvedTheme(entry)].accent);
+  overlay.style.setProperty("--khbb-intro-duration", `${INTRO_DURATION}ms`);
+  overlay.style.setProperty("--khbb-card-ratio", String(intro.image.naturalWidth / intro.image.naturalHeight));
+  const seal = document.createElement("div");
+  seal.className = "khbb-intro-seal";
+  const mount = document.createElement("div");
+  mount.className = "khbb-intro-mount";
+  mount.append(intro.image);
+  const title = document.createElement("div");
+  title.className = "khbb-intro-title";
+  title.textContent = entry.name;
+  overlay.append(seal, mount, title);
+  document.body.append(overlay);
+  intro.overlay = overlay;
+  visibleIntro = intro;
+  intro.timer = window.setTimeout(() => discardBossIntro(intro), INTRO_DURATION);
 }
 
 async function clearBars() {
@@ -665,6 +795,7 @@ function renderBossBars(state = getState()) {
   const normalizedState = normalizeState(state);
   const entries = normalizedState.entries;
   const dismissed = isStateDismissed(normalizedState);
+  reconcileBossIntros(normalizedState, dismissed);
 
   syncRootAnchor(root);
   syncRootEffectMode(root);
@@ -1782,7 +1913,7 @@ function mergeMinions(existingMinions = [], selectedMinions = []) {
     .filter(Boolean);
 }
 
-async function setState(entries) {
+async function setState(entries, options) {
   if (!entries.length) {
     manualPosition = null;
     minimizedPosition = null;
@@ -1796,7 +1927,7 @@ async function setState(entries) {
     updatedAt: Date.now()
   };
 
-  await game.settings.set(MODULE_ID, SETTING_STATE, state);
+  await game.settings.set(MODULE_ID, SETTING_STATE, state, options);
 }
 
 function getState() {

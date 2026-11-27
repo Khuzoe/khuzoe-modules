@@ -1,6 +1,7 @@
 import { DEFAULT_AUTO_DEVICE_LOGIN_CODES, DEFAULT_CAMPAIGN_ID, DISCORD_WORKER_URL, FLAGS, MENUS, MODULE_ID, MODULE_TITLE, SECTIONS, SETTINGS } from "./constants.js";
 import { wikiStore } from "./services/wiki-store.js";
 import { wikiDataService } from "./services/wiki-data-service.js";
+import { getActorCardUrl } from "./services/actor-card.js";
 import { escapeHtml, normalizeWikiItemKey, slugify, withCampaign as withCampaignUrl } from "./services/wiki-utils.js";
 import { CriptaWikiBrowserApp } from "./apps/wiki-browser-app.js";
 import { CriptaWikiEntityApp } from "./apps/wiki-entity-app.js";
@@ -188,7 +189,8 @@ function registerSettings() {
         scope: "client",
         config: false,
         type: String,
-        default: ""
+        default: "",
+        onChange: () => Hooks.callAll("khuzoeWikiSync.authChanged")
     });
 
     game.settings.register(MODULE_ID, SETTINGS.DISCORD_USER, {
@@ -462,7 +464,7 @@ function getOpenWikiWindows() {
 }
 
 function propagateAuthToken(token, user = null) {
-    game.settings.set(MODULE_ID, SETTINGS.DISCORD_TOKEN, String(token || "")).then(() => Hooks.callAll("khuzoeWikiSync.authChanged")).catch(() => {});
+    game.settings.set(MODULE_ID, SETTINGS.DISCORD_TOKEN, String(token || "")).catch(() => {});
     if (user) {
         game.settings.set(MODULE_ID, SETTINGS.DISCORD_USER, user).catch(() => {});
     }
@@ -9223,6 +9225,7 @@ Hooks.once("ready", () => {
     const mod = game.modules.get(MODULE_ID);
     if (mod) {
         mod.api = {
+            getActorCardUrl,
             calendar: Object.freeze({ getContext: getCalendarContext, request: requestCalendar, login: promptDeviceLogin }),
             openWikiBrowser,
             openWikiForDocument,

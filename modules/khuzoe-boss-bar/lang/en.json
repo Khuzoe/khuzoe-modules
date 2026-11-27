@@ -18,7 +18,7 @@
   "KHBB.Settings.Anchor.Top": "Top",
   "KHBB.Settings.Anchor.Bottom": "Bottom",
   "KHBB.Settings.Effects.Name": "Boss bar effects",
-  "KHBB.Settings.Effects.Hint": "Choose effects for this device. Subtle only animates the bar; Cinematic adds a gentle screen shake and particles around the visible token. Reduced-motion and photosensitive modes automatically disable motion effects.",
+  "KHBB.Settings.Effects.Hint": "Subtle animates the bar and unveils the card when a boss enters. Cinematic adds a perspective entrance and, during combat, screen shake and particles. Off skips the introduction. Reduced motion and photosensitive mode display a still card.",
   "KHBB.Settings.Effects.Off": "Off",
   "KHBB.Settings.Effects.Subtle": "Subtle",
   "KHBB.Settings.Effects.Cinematic": "Cinematic",

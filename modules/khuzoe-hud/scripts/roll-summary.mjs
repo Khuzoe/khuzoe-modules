@@ -13,15 +13,16 @@ function mayShowDie(message, roll) {
   return !!settings && (settings[attack ? "gmAttackDisplay" : "gmDamageDisplay"] ?? "full") === "full";
 }
 
-// Wait until the system and Midi have applied this viewer's redactions. Scrolling
-// over an already prepared roll never queues another visibility calculation.
+// Only nearby rolls watch Midi for changes. Re-read the current viewer's dice
+// when returning to a roll that may have changed while off screen.
 const nearChat = new IntersectionObserver(entries => {
   for (const { target, isIntersecting } of entries) {
-    if (!isIntersecting) continue;
-    nearChat.unobserve(target);
-    target.querySelector(":scope > khhud-kept-die")?.activate();
+    const die = target.querySelector(":scope > khhud-kept-die");
+    if (!die?.isConnected) continue;
+    if (isIntersecting) die.activate();
+    else die.suspend();
   }
-}, { rootMargin: "180px" });
+}, { rootMargin: "180px", scrollMargin: "180px" });
 
 class KeptDie extends HTMLElement {
   connectedCallback() {
@@ -34,10 +35,19 @@ class KeptDie extends HTMLElement {
 
   disconnectedCallback() {
     nearChat.unobserve(this.total);
+    this.suspend();
+  }
+
+  suspend() {
     this.observer?.disconnect();
+    this.observer = null;
+    this.removeAttribute("data-value");
+    this.removeAttribute("data-shape");
+    this.removeAttribute("aria-label");
   }
 
   activate() {
+    if (this.observer) return;
     const roll = this.total.closest(".dice-roll");
     if (!roll) return;
     const entry = roll.closest(".chat-message");
@@ -75,7 +85,6 @@ class KeptDie extends HTMLElement {
       }
     };
     refresh();
-    this.observer?.disconnect();
     this.observer = new MutationObserver(refresh);
     this.observer.observe(roll, {childList: true, subtree: true, characterData: true, attributeFilter: visibility});
     // Also respect a concealment applied to a containing Midi section.

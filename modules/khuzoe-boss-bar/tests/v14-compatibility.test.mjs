@@ -7,7 +7,7 @@ const moduleRoot = new URL("../", import.meta.url);
 
 test("manifest targets Foundry V14", () => {
   const manifest = JSON.parse(readFileSync(new URL("module.json", moduleRoot), "utf8"));
-  assert.equal(manifest.version, "0.4.2");
+  assert.equal(manifest.version, "0.5.1");
   assert.equal(manifest.compatibility.minimum, "14");
   assert.equal(manifest.compatibility.verified, "14.367");
   assert.equal(manifest.relationships.systems[0].id, "dnd5e");
@@ -25,6 +25,7 @@ test("registers a personal top/bottom anchor and reserves the V14 side panels", 
     }
   ];
   const context = vm.createContext({
+    CONFIG: { queries: {} },
     canvas: { tokens: { controlled: [] } },
     console,
     document: {

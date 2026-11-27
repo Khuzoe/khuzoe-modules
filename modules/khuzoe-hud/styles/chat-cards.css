@@ -1,4 +1,5 @@
 .khhud-message {
+  --khhud-ivory: #fff2d9;
   --khhud-ink: #f6efdf;
   --khhud-muted: #cec5b5;
   --khhud-gold: #e6c88b;
@@ -30,8 +31,18 @@
   --khhud-title-font: "Palatino Linotype", "Book Antiqua", Georgia, serif;
 }
 
+.khhud-ability-note { display: none; }
+
 /* D&D5e styles the chat log by ID and draws parchment on the outer message. */
 :is(#chat-log, .chat-log) > .chat-message.khhud-message { margin-inline: 0; }
+
+/* Keep the scroll range and native find/focus behaviour while the browser
+   skips distant cards. The open card has its normal overflow and tooltips. */
+.chat-log > .chat-message.khhud-message[data-khhud-resting]:not(.khhud-grouped-receipt, :focus-within) {
+  content-visibility: auto;
+  contain-intrinsic-block-size: auto var(--khhud-history-height);
+  contain-intrinsic-block-size: auto attr(data-khhud-resting px, 0px);
+}
 
 :is(#chat-log, .chat-log, .chat-popout, #chat-notifications, body) .chat-message.khhud-message {
   --color-text-primary: var(--khhud-ink);
@@ -122,7 +133,9 @@
 
 /* One continuous field under the artwork, title, rolls and target tray. */
 :is(#chat-log, .chat-log, .chat-popout, #chat-notifications, body)
-.chat-message.khhud-message:has(.chat-card > .description > .khhud-source) {
+.chat-message.khhud-message:is(:has(.chat-card > .description > .khhud-source),
+  :where(.khhud-player-receipt:not(.khhud-grouped-receipt)):has(.khhud-results > .khhud-source),
+  :where(.khhud-hp-message:not(.khhud-grouped-receipt)):has(.khhud-results > .khhud-source[data-khhud-wiki])) {
   --khhud-gutter: 12px;
   --khhud-overlap: 2.7rem;
   --khhud-art-height: clamp(8rem, 46cqi, 11rem);
@@ -139,7 +152,7 @@
     padding: 7px var(--khhud-gutter) 4px;
     border: 0;
     border-image: none;
-    --khhud-muted: #efe7dd;
+    --khhud-muted: var(--khhud-ivory);
     &::before {
       content: "";
       position: absolute;
@@ -153,7 +166,7 @@
     }
   }
   > .message-content {
-    padding: 0 var(--khhud-gutter) 10px;
+    padding: 0 var(--khhud-gutter) var(--khhud-content-bottom, 10px);
     border-radius: inherit;
     color: var(--khhud-print);
     --color-text-primary: var(--khhud-print);
@@ -165,7 +178,7 @@
     background: var(--khhud-field) var(--khhud-leaf);
   }
   .chat-card > .description:has(> .khhud-source) { margin-inline: calc(0px - var(--khhud-gutter)); }
-  .chat-card > .description > .khhud-source {
+  :is(.chat-card > .description, .khhud-results) > .khhud-source {
     display: grid;
     grid-template: var(--khhud-art-height) auto / minmax(0, 1fr);
     gap: 0;
@@ -194,22 +207,137 @@
     &::after { content: none; }
     > :is(.name-stacked, .khhud-source-name) {
       grid-area: 2 / 1;
-      margin: -.3rem 0 0;
+      margin: var(--khhud-title-offset, -.3rem) 0 0;
       padding: 0 var(--khhud-gutter) 2px;
       text-align: start;
     }
     :is(.title, .khhud-source-name) {
       color: var(--khhud-binding);
-      font: 700 clamp(1.75rem, 11.8cqi, 2.85rem)/1 var(--khhud-display);
+      font: 700 clamp(1.63rem, 11cqi, 2.65rem)/1 var(--khhud-display);
       letter-spacing: -.035em;
       text-shadow: none;
     }
   }
-  &:not(.khhud-has-portrait):not(:has(.khhud-banner > .gold-icon[src]:not([src=""], [hidden], [aria-hidden="true"], [data-concealed]))) {
+  &:not(.khhud-has-portrait):not(:has(.khhud-banner[data-khhud-wiki], .khhud-banner > .gold-icon[src]:not([src=""], [hidden], [aria-hidden="true"], [data-concealed]), .khhud-results > [data-khhud-ability-art])) {
     --khhud-overlap: 0px;
     --khhud-art-height: 0px;
     > .message-header::before { content: none; }
     .khhud-banner > .name-stacked { margin-block-start: .6rem; }
+  }
+  &:is(.khhud-player-receipt, .khhud-hp-message:has(.khhud-results > .khhud-source[data-khhud-wiki])) {
+    > .message-header { --khhud-ink: #f6efdf; }
+    > .message-content { background: var(--khhud-record-field); }
+    .khhud-results { padding-block-start: 0; }
+    .khhud-results > .khhud-banner { margin-inline: calc(0px - var(--khhud-gutter)); }
+    .khhud-results > .khhud-damage-symbol::before {
+      background-size: auto 45%;
+      background-position: 68% 63%;
+    }
+  }
+  > .message-content:has(.khhud-banner[data-khhud-wiki][data-khhud-ability-art]
+    > .khhud-ability-image:not([hidden], [aria-hidden="true"], [data-concealed], .hidden, .secret:not(.revealed), [style*="display: none"], [style*="display:none"])
+  ):not(:has(:is([hidden], [aria-hidden="true"], [data-concealed], .hidden, .secret:not(.revealed), [style*="display: none"], [style*="display:none"]) .khhud-ability-image)) {
+    position: relative;
+    z-index: 2;
+    overflow: visible;
+    isolation: isolate;
+    anchor-scope: --khhud-ability;
+    /* Transparent artwork uses the same backing as the banner above. */
+    --khhud-seam-mid: calc(var(--khhud-seam-height) * .72);
+    --khhud-art-entry: transparent var(--khhud-seam-mid), black var(--khhud-seam-height);
+    background: linear-gradient(transparent var(--khhud-seam-mid), var(--khhud-binding) var(--khhud-seam-height));
+    > .khhud-banner-texture {
+      display: block;
+      position: absolute;
+      inset: 0;
+      /* Reach full colour before the icon starts to fade into this crop. */
+      --khhud-corner-fade: 1rem;
+      top: max(0px, calc(anchor(--khhud-ability top, 0px) + .8 * anchor-size(--khhud-ability height, 0px) - var(--khhud-corner-fade)));
+      z-index: -1;
+      overflow: clip;
+      border-radius: 0 0 6px 3px;
+      pointer-events: none;
+      mask-image: linear-gradient(transparent, black var(--khhud-corner-fade));
+      > img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: left top;
+        border: 0;
+        border-radius: 0;
+      }
+    }
+    &:has(> .khhud-banner-texture[data-khhud-outline-body]) {
+      :is(.dice-total, .dice-formula, .midi-roll-label, .targets-tray > label,
+        .khhud-public-results, .khhud-public-tray > summary) {
+        paint-order: stroke fill;
+        -webkit-text-stroke: 2px var(--khhud-text-halo, #fff6e8);
+      }
+    }
+    .khhud-card-wash { display: none; }
+  }
+  .khhud-source[data-khhud-wiki][data-khhud-ability-art]:has(> .khhud-ability-image:not([hidden], [aria-hidden="true"], [data-concealed], .hidden, .secret:not(.revealed), [style*="display: none"], [style*="display:none"])) {
+    --khhud-art-span: min(100%, 23rem, calc(23rem * var(--khhud-icon-ratio, 1)));
+    --khhud-cover-seventh: min(calc((100cqi + 2 * var(--khhud-gutter)) / var(--khhud-cover-ratio, 2.45) / 7), calc(16rem / 7));
+    grid-template: auto / minmax(0, 1fr);
+    overflow: visible;
+    background: transparent;
+    /* The restored top fifth occupies one quarter of the four visible fifths. */
+    &::before {
+      content: "";
+      grid-area: 1 / 1;
+      inset: 0;
+      z-index: 1;
+      border-radius: 0;
+      background: linear-gradient(to bottom, transparent, #09080a var(--khhud-seam-mid), #09080a calc(var(--khhud-seam-height) + .3rem),
+        #09080ae6 max(15%, calc(var(--khhud-seam-height) + .55rem)),
+        #09080a9c max(22%, calc(var(--khhud-seam-height) + .95rem)),
+        #09080a29 max(29%, calc(var(--khhud-seam-height) + 1.3rem)),
+        transparent max(35%, calc(var(--khhud-seam-height) + 1.7rem)));
+      mask-image: none;
+    }
+    > .khhud-ability-image {
+      anchor-name: --khhud-ability;
+      display: block;
+      grid-area: 1 / 1;
+      place-self: start center;
+      width: var(--khhud-art-span);
+      height: auto;
+      aspect-ratio: auto;
+      padding: 0;
+      margin: 0;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      object-fit: contain;
+      object-view-box: inset(0 0 20%);
+      opacity: 1;
+      background: transparent;
+      mask-image: linear-gradient(var(--khhud-art-entry), black 80%, #000b 89%, transparent);
+    }
+    > :is(.name-stacked, .khhud-source-name) {
+      grid-area: 1 / 1;
+      place-self: start center;
+      z-index: 2;
+      box-sizing: border-box;
+      width: var(--khhud-art-span);
+      margin: calc(var(--khhud-seam-height) + .25rem) 0 0;
+      padding: 0 var(--khhud-gutter);
+      translate: 0 max(calc(-50% - .35rem), calc(0px - var(--khhud-cover-seventh)));
+      scale: 1 1.12;
+      transform-origin: left center;
+      text-align: start;
+      background: transparent;
+    }
+    :is(.title, .khhud-source-name) {
+      color: var(--khhud-ivory);
+      font: 400 clamp(1.35rem, 8.2cqi, 2.1rem)/1.08 "Amiri", "Times New Roman", serif;
+      letter-spacing: -.02em;
+      paint-order: stroke fill;
+      -webkit-text-stroke: .5px #160f0c99;
+      text-shadow: 0 1px 3px #100c0e;
+    }
   }
   .chat-card > .description > .khhud-banner ~ .details { display: none; }
   @media (prefers-reduced-motion: no-preference) {
@@ -226,15 +354,8 @@
       animation: khhud-art-glint 6.6s ease-in-out -1s infinite;
     }
   }
-  .chat-card .card-footer.pills { border-color: var(--khhud-print-rule); }
-  .card-footer.pills > .pill { background: var(--khhud-binding); border-color: var(--khhud-print-accent); }
   .targets-tray > label, .targets-tray > label > i:first-of-type { color: var(--khhud-print-accent); }
   .targets-tray > label::after { border-color: var(--khhud-print-rule); }
-  .card-buttons button {
-    --button-background-color: var(--khhud-foil);
-    --button-text-color: var(--khhud-print);
-    --button-border-color: var(--khhud-print-rule);
-  }
 }
 
 /* Draw the hairline on the actual perimeter. Foundry keeps its own sender /
@@ -331,7 +452,7 @@
 /* Keep Foundry's timestamp and actor link in place for clock updates,
    targeting, and the chat menu. Only their positions on the card change. */
 :is(#chat-log, .chat-log, .chat-popout, #chat-notifications, body)
-.chat-message.khhud-message:not(.khhud-gm-receipt)
+.chat-message.khhud-message:not(.khhud-grouped-receipt)
 > .message-header:has(> .message-sender):not([hidden], [aria-hidden="true"], [data-concealed], .hidden, .secret-roll, .secret:not(.revealed)) {
   display: grid;
   grid-template-columns: fit-content(65%) minmax(0, 1fr);
@@ -388,6 +509,82 @@
   .message-metadata > :not(time) { grid-row: 1; align-self: center; }
   > .whisper-to { grid-area: 2 / 1; overflow-wrap: anywhere; }
   > .flavor-text { grid-column: 1 / -1; }
+
+  &:has(> .khhud-wiki-cover) {
+    --khhud-muted: #fff5e8;
+    position: relative;
+    isolation: isolate;
+    z-index: 1;
+    grid-template-columns: fit-content(54%) minmax(0, 1fr) repeat(3, max-content);
+    grid-template-rows: auto 1fr;
+    gap: 0;
+    min-height: 0;
+    margin: var(--khhud-wiki-top, 0px) var(--khhud-wiki-sides, 0px) var(--khhud-wiki-after, calc(0px - var(--khhud-seam-height)));
+    padding: 0;
+    border: 0;
+    background: transparent;
+    > .khhud-wiki-cover { display: contents; }
+    > .khhud-wiki-cover > img {
+      grid-area: 1 / 1 / 3 / -1;
+      z-index: -2;
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 16rem;
+      object-fit: contain;
+      padding: 0;
+      border: 0;
+      border-radius: 0 5px 0 0;
+      background: var(--khhud-binding);
+      mask-image: var(--khhud-cover-fade, linear-gradient(to bottom,
+        black calc(100% - var(--khhud-seam-height)),
+        #000e calc(100% - var(--khhud-seam-height) * .75),
+        #0008 calc(100% - var(--khhud-seam-height) * .5),
+        #0002 calc(100% - var(--khhud-seam-height) * .25), transparent));
+    }
+    &::before {
+      content: "";
+      grid-area: 1 / 1 / 3 / -1;
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: linear-gradient(to bottom, #100d1494, transparent 2.5rem);
+      mask-image: linear-gradient(to right, black, #000a 58%, transparent);
+      pointer-events: none;
+    }
+    .message-sender > .avatar { grid-area: 1 / 1 / 3 / -1; z-index: 0; }
+    .message-sender .title, .message-sender:not(:has(.name-stacked)) {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+    > .khhud-wiki-cover > span, .message-metadata > time {
+      align-self: start;
+      justify-self: start;
+      z-index: 1;
+      min-width: 0;
+      margin: 6px 0 0;
+      color: var(--khhud-ivory);
+      font: 400 .65rem/1.2 var(--font-body, var(--font-sans, sans-serif));
+      text-shadow: 0 1px 2px #140e16;
+      overflow-wrap: anywhere;
+    }
+    > .khhud-wiki-cover > span { grid-area: 1 / 1; padding-inline-start: 10px; }
+    .message-metadata > time {
+      grid-area: 1 / 2;
+      margin-inline-start: .5em;
+      padding-inline-start: .55em;
+      border-inline-start: 1px solid #fff5e854;
+    }
+    .message-sender .subtitle, > .whisper-to { display: none; }
+    .message-metadata > :not(time) { grid-row: 1; align-self: start; z-index: 2; margin: 5px 4px 0 0; color: #fff5e8; text-shadow: 0 1px 3px #140e16; }
+    .message-metadata > .message-dismiss { grid-column: -4; }
+    .message-metadata > .message-delete { grid-column: -3; }
+    .message-metadata > .chat-control { grid-column: -2; }
+    > .flavor-text { grid-row: 3; padding-inline: 12px; }
+  }
 }
 
 .khhud-message > .message-header {
@@ -409,10 +606,14 @@
   border-color: var(--khhud-border);
   color: var(--khhud-ink);
 }
-.khhud-message .card-buttons button {
-  --button-background-color: var(--khhud-surface);
-  --button-text-color: var(--khhud-ink);
-  --button-border-color: var(--khhud-border);
+:is(#chat-log, .chat-log, .chat-popout, #chat-notifications, body) .chat-message.khhud-message {
+  > .message-content :is(button, a.button), > .message-header > .khhud-receipt-toggle {
+    background: var(--khhud-ivory);
+    color: #302921;
+    &:hover:not(:disabled, [aria-disabled="true"]) { box-shadow: inset 0 0 0 1px #826846; }
+    &:focus-visible { outline: 2px solid #795c38; outline-offset: -2px; }
+    &:is(:disabled, [aria-disabled="true"]) { color: #756955; opacity: 1; }
+  }
 }
 .khhud-message .dice-result > .dice-total:not(.critical, .fumble, .success, .failure) { color: var(--khhud-ink); }
 .khhud-message .chat-card > .card-header.description {
@@ -431,33 +632,10 @@
   padding-top: var(--khhud-gap);
   font-weight: 400;
 }
-.khhud-message .chat-card .card-footer.pills {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 5px;
-  margin: var(--khhud-gap) 0 0;
-  padding: 8px 0 0;
-  border-top: 1px solid var(--khhud-line);
-}
-.khhud-message .chat-card .card-footer.pills > .pill {
-  box-sizing: border-box;
-  max-width: 100%;
-  align-items: center;
-  min-height: 22px;
-  padding: 3px 8px;
-  border: 1px solid color-mix(in srgb, var(--khhud-metal) 45%, #475260);
-  border-radius: 2px;
-  background: #263039;
-  color: #edf4f6;
-  font: 600 .75rem/1.2 var(--font-body, var(--font-sans, sans-serif));
-  letter-spacing: .015em;
-  text-transform: none;
-}
-.khhud-message .card-footer.pills .pill > .label {
-  color: inherit;
-  white-space: normal;
-  overflow-wrap: anywhere;
+.khhud-message .chat-card:is(.activation-card, .item-card) p.supplement,
+.khhud-message .chat-card .card-footer.pills,
+.khhud-message .midi-chat-card.activation-card > footer.card-footer:not(:has(> :not(span))) {
+  display: none;
 }
 .khhud-message .chat-card > .description.critical .summary {
   border-inline-start: 2px solid var(--dnd5e-color-success);
@@ -549,7 +727,7 @@
 }
 .khhud-message .khhud-banner :is(.title, .khhud-source-name) {
   color: #fff3d8;
-  font: 700 clamp(1.5rem, 9cqi, 2.35rem)/1 var(--khhud-title-font);
+  font: 700 clamp(1.4rem, 8.4cqi, 2.2rem)/1 var(--khhud-title-font);
   letter-spacing: -.04em;
   overflow-wrap: anywhere;
   text-shadow: 0 2px 3px #090a0d, 0 0 10px #080a0e;
@@ -589,7 +767,7 @@
   gap: 4px;
 }
 
-.khhud-results .midi-qol-dmg-controls :is(button, select) {
+.khhud-results .midi-qol-dmg-controls select {
   border: 1px solid var(--khhud-border);
   background: var(--khhud-surface);
   color: var(--khhud-ink);
@@ -700,7 +878,8 @@
 
 /* Slow, repeating reflections on visible cards only. */
 @media (prefers-reduced-motion: no-preference) {
-  .khhud-message[data-khhud-reflect] .khhud-badge[data-khhud-kind] {
+  .khhud-message[data-khhud-reflect] .khhud-badge[data-khhud-kind]:not(.khhud-roll-type),
+  .khhud-message[data-khhud-reflect] .dice-roll.expanded .khhud-roll-type[data-khhud-kind] {
     position: relative;
     isolation: isolate;
     overflow: clip;
@@ -814,7 +993,6 @@
   text-shadow: none;
 }
 
-.dice-roll.khhud-roll .khhud-types { margin-block-start: 5px; }
 .khhud-message .message-content > .khhud-roll .dice-result > .dice-total {
   border-block-end: 1px solid var(--khhud-metal);
   color: var(--khhud-foil);
@@ -824,14 +1002,6 @@
   font: 650 .75rem/1.25 var(--font-body, sans-serif);
 }
 
-/* Midi's condensed activity card puts attack and damage in a single flex row.
-   Keep both dice on the same baseline when only the damage has a breakdown. */
-.khhud-message .midi-results > .flexrow:has(> .midi-qol-attack-roll .dice-roll):has(> .midi-qol-damage-roll .dice-roll) {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
-  gap: var(--khhud-gap);
-}
 .khhud-message .midi-results :is(.midi-qol-attack-roll, .midi-qol-damage-roll) {
   min-width: 0;
   white-space: normal;
@@ -920,7 +1090,8 @@
   letter-spacing: normal;
 }
 .khhud-message .midi-results .midi-roll-label ~ .khhud-roll .dice-total::before { content: none; }
-.khhud-message .khhud-roll .dice-total > .khhud-repeated-type { display: none; }
+.khhud-message .khhud-roll .dice-total > .khhud-repeated-type,
+.khhud-message .dice-roll:not(.expanded) .dice-total > .midi-damage-type-icon { display: none; }
 
 /* Keep both totals on one reading line with a single rule between columns. */
 .khhud-message .midi-results > :is(
@@ -933,10 +1104,6 @@
   color: #251b17;
   background: var(--khhud-roll-surface, var(--khhud-leaf));
   > :is(.midi-qol-attack-roll, .midi-qol-damage-roll) { padding-inline: 2px; }
-  &:has(> .midi-qol-attack-roll .dice-roll) > .midi-qol-damage-roll:has(.dice-roll) {
-    border-inline-start: 1px solid var(--khhud-print-rule);
-    padding-inline-start: 12px;
-  }
   .midi-roll-label {
     color: #4c3929;
     padding: 0;
@@ -997,24 +1164,68 @@
       overflow-wrap: anywhere;
     }
   }
-  .khhud-types { order: 1; margin-top: 3px; }
   &:not(.flexrow) {
     padding-inline: 2px;
     .dice-total[data-khhud-label]::before { color: #4c3929; font: 700 .75rem/1.2 var(--font-body, sans-serif); letter-spacing: normal; }
   }
-  /* Midi keeps the other roll's insertion point even on an attack-only card. */
-  &.flexrow:has(> :is(.midi-qol-attack-roll, .midi-qol-damage-roll):empty,
-      > :is(.midi-qol-attack-roll, .midi-qol-damage-roll) > :is(.end-midi-qol-attack-roll, .end-midi-qol-damage-roll):only-child:empty) {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    row-gap: 0;
+}
+
+/* The condensed template has a wrapper. The standard template puts the target tray between the rolls. */
+.khhud-message .midi-results > .flexrow:has(> .midi-qol-attack-roll, > .midi-qol-damage-roll):not([hidden], [aria-hidden="true"]) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+.khhud-message :is(.midi-results, .midi-results > .flexrow):has(
+  > .midi-qol-attack-roll .dice-roll:not([hidden], [aria-hidden="true"], .secret-roll) .dice-total
+):has(
+  > .midi-qol-damage-roll .dice-roll:not([hidden], [aria-hidden="true"], .secret-roll) .dice-total
+):not([hidden], [aria-hidden="true"], :has(
+  > :is(.midi-qol-attack-roll, .midi-qol-damage-roll):is([hidden], [aria-hidden="true"], .hidden, [data-concealed], [style*="display: none"], [style*="display:none"])
+)), .khhud-message .khhud-public-results:has(> .khhud-public-attack + .khhud-public-damage) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 0;
+  > * { grid-column: 1 / -1; min-width: 0; }
+  > :is(.midi-qol-attack-roll, .khhud-public-attack) { grid-area: 1 / 1; padding-inline-end: 6px; }
+  > :is(.midi-qol-damage-roll, .khhud-public-damage) {
+    grid-area: 1 / 2;
+    border-block-start: 0;
+    border-inline-start: 1px solid var(--khhud-print-rule);
+    padding-inline-start: clamp(5px, 2.8cqi, 12px);
+  }
+  > :is(.midi-qol-attack-roll, .midi-qol-damage-roll) .dice-result > .dice-total {
+    font-size: clamp(1.5rem, 10cqi, 2.5rem);
+    white-space: nowrap;
   }
 }
-@container khhud-content (max-width: 15.5rem) {
-  .khhud-message .midi-results > .flexrow:has(> .midi-qol-attack-roll .dice-roll):has(> .midi-qol-damage-roll .dice-roll) {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 7px;
-    > .midi-qol-damage-roll:has(.dice-roll) { padding: 7px 2px 0; border-inline-start: 0; border-top: 1px solid var(--khhud-print-rule); }
+
+.khhud-message .dice-result .dice-tooltip .dice:has(> .khhud-roll-type) { flex-wrap: wrap; }
+.khhud-message .dice-result .dice-tooltip .khhud-roll-type {
+  --khhud-print: #30251e;
+  --khhud-print-soft: #514538;
+  flex: 1 1 100%;
+  grid-template-columns: minmax(0, 1fr);
+  margin-block: 2px;
+  > .total {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 4px;
+    max-width: none;
+    > img {
+      position: static;
+      width: 15px;
+      height: 15px;
+      opacity: 1;
+      filter: none;
+      background: var(--khhud-stamp);
+    }
+    &:has(> img) { grid-template-columns: auto minmax(0, 1fr) auto; }
+    .label, .value { color: #30251e; line-height: 1.2; }
+    .label { text-align: start; overflow-wrap: anywhere; }
+    .value { font-size: 1rem; white-space: nowrap; }
   }
 }
 
@@ -1040,26 +1251,13 @@
   white-space: normal;
   overflow-wrap: anywhere;
 }
-.khhud-message .chat-card:has(.khhud-banner) .card-buttons button:is([data-action="rollAttack"], [data-action="rollDamage"]):not(:disabled) {
-  background: color-mix(in srgb, var(--khhud-leaf) 72%, var(--khhud-metal));
-  color: var(--khhud-print);
-  border: 1px solid var(--khhud-print-rule);
+.khhud-message .chat-card:has(.khhud-banner) .card-buttons button:is([data-action="rollAttack"], [data-action="rollDamage"], [data-action="rollSave"]) {
+  border: 1px solid #826846;
   border-radius: 3px;
   box-shadow: none;
   text-transform: none;
-  &:is(:hover, :focus-visible) { background: var(--khhud-foil); border-color: var(--khhud-print-accent); }
 }
 .khhud-message .midi-buttons > .midi-dnd5e-buttons:has(button[data-action="rollSave"]) { margin-block-start: 3px; }
-.khhud-message .chat-card:has(.khhud-banner) .card-buttons button[data-action="rollSave"] {
-  box-shadow: none;
-  background: transparent;
-  color: var(--khhud-print-accent);
-  border-color: var(--khhud-print-rule);
-  text-transform: none;
-}
-.khhud-message .chat-card:has(.khhud-banner) .card-buttons button[data-action="rollSave"]:not(:disabled):is(:hover, :focus-visible) {
-  background: var(--khhud-foil);
-}
 
 /* Keep Midi's click handlers, collapsible trays and per-viewer visibility on
    the original elements. Only their visual order changes in a merged card. */
@@ -1088,7 +1286,7 @@
 }
 
 :is(#chat-log, .chat-log, .chat-popout, #chat-notifications, body) .khhud-message
-ul.evaluation.wrapper:has(> .midi-qol-target-select, > .target[data-miss]):not([hidden], [aria-hidden="true"]) {
+ul.evaluation.wrapper:has(> .midi-qol-target-select, > .target[data-miss], > .khhud-public-target):not([hidden], [aria-hidden="true"]) {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 5.4rem), 1fr));
   gap: 6px;
@@ -1189,7 +1387,7 @@ ul.evaluation.wrapper:has(> .midi-qol-target-select, > .target[data-miss]):not([
   > .midi-qol-save-class > i.fa-xmark {
     --khhud-outcome: var(--khhud-label-SaveFailed);
   }
-  > .target > :is(.ac, .midi-qol-ac, .midi-qol-save-indicators) {
+  > .target > :is(.ac, .midi-qol-ac, .midi-qol-save-indicators, .khhud-public-save) {
     grid-area: 1 / 2 / 2 / 4;
     z-index: 1;
     justify-self: end;
@@ -1234,10 +1432,86 @@ ul.evaluation.wrapper:has(> .midi-qol-target-select, > .target[data-miss]):not([
   > .target .name-stacked { min-height: 0; }
 }
 
+.khhud-message > .khhud-roll-avatar { display: none; }
+
+khhud-wiki-banner, .khhud-wiki-cover, .khhud-ability-image, .khhud-banner-texture { display: none; }
+.khhud-message { --khhud-seam-height: 1rem; }
+.khhud-message:has(.khhud-banner[data-khhud-wiki][data-khhud-ability-art] > .khhud-ability-image:not([hidden], [aria-hidden="true"], [data-concealed], .hidden)) {
+  --khhud-seam-height: 1.4rem;
+  > .message-header { --khhud-cover-fade: none; }
+}
+.khhud-message .khhud-banner[data-khhud-wiki] {
+  --khhud-art-height: 0px;
+  --khhud-title-offset: 0px;
+  > .khhud-portrait-band { visibility: hidden; }
+}
+.khhud-message:has(.khhud-banner[data-khhud-wiki]:not([data-khhud-ability-art]), .khhud-banner[data-khhud-wiki] > .gold-icon:is([hidden], [aria-hidden="true"], [data-concealed], .hidden)) {
+  --khhud-wiki-after: 0px;
+}
+.khhud-message[data-khhud-wiki]:not(:has(.khhud-banner)) {
+  --khhud-wiki-top: -10px;
+  --khhud-wiki-sides: -12px;
+  --khhud-wiki-after: 0px;
+  .khhud-token-layer, > .khhud-roll-avatar { visibility: hidden; }
+}
+
+.chat-message.khhud-reduced-duplicate { display: none !important; }
+.khhud-message .khhud-reduced-card {
+  color: var(--khhud-print);
+  .khhud-public-results {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    margin-block: 6px 2px;
+    padding-block: 8px 5px;
+  }
+  .khhud-public-label {
+    display: block;
+    color: var(--khhud-print-soft);
+    font: 700 .65rem/1.3 var(--font-body, sans-serif);
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    overflow-wrap: anywhere;
+  }
+  .khhud-public-result {
+    display: flex;
+    min-height: 41px;
+    flex-wrap: wrap;
+    gap: 2px 4px;
+    align-items: center;
+    > strong { font: 700 clamp(1.5rem, 10cqi, 2.5rem)/1 var(--khhud-display); white-space: nowrap; }
+  }
+  .khhud-public-target-name { flex-basis: 100%; font-size: .75rem; overflow-wrap: anywhere; }
+  .khhud-public-crit { color: #215139; font-size: .78rem; font-weight: 700; }
+  summary { cursor: pointer; }
+  .khhud-public-damage > summary {
+    position: relative;
+    display: block;
+    padding-inline-end: 1rem;
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 1.6rem .25rem auto auto;
+      width: .48rem;
+      height: .48rem;
+      border: solid var(--khhud-print-soft);
+      border-width: 0 2px 2px 0;
+      transform: rotate(-45deg);
+    }
+  }
+  .khhud-public-damage[open] > summary::after { transform: rotate(45deg); }
+  .khhud-public-pools { display: grid; gap: 2px; padding-block: 4px; border-top: 1px solid var(--khhud-print-rule); font-size: .8rem; overflow-wrap: anywhere; }
+  .khhud-public-tray { margin-block-start: 7px; }
+  .khhud-public-tray > summary { display: list-item; border-top: 1px solid var(--khhud-print-rule); padding-block: 6px; }
+  .khhud-public-outcome { grid-area: 4 / 1 / 5 / -1; margin: 0 6px 3px; color: var(--khhud-result-color); font: 700 .72rem/1.15 var(--font-body, sans-serif); }
+}
+
 /* Checks, saves and /roll use Foundry's dice template, even with no item or actor.
    Keep its disclosure, dice faces, outcomes and concealment under system control. */
 :is(#chat-log, .chat-log, .chat-popout, #chat-notifications, body) .chat-message.khhud-message:not(.khhud-hp-message) {
-  &:has(> .message-content .dice-roll):not(:has(.khhud-banner)) {
+  &:has(> .message-content .dice-roll):is(:not(:has(.khhud-banner)),
+    :has(> .khhud-roll-avatar):not(:has(.khhud-banner[data-khhud-ability-art]))),
+  &:has(.khhud-reduced-card):has(> .khhud-roll-avatar:not([hidden])):not(:has(.khhud-banner[data-khhud-wiki])) {
     --khhud-roll-surface: transparent;
     --khhud-ink: var(--khhud-print);
     --khhud-muted: var(--khhud-print-soft);
@@ -1255,6 +1529,32 @@ ul.evaluation.wrapper:has(> .midi-qol-target-select, > .target[data-miss]):not([
       height: min(85px, 58%);
       opacity: .24;
       mix-blend-mode: multiply;
+    }
+    &:has(> .khhud-roll-avatar) {
+      --khhud-overlap: 0px;
+      --khhud-art-height: 0px;
+      > .khhud-roll-avatar {
+        display: block;
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        border-radius: inherit;
+        object-view-box: inset(0 0 55% 0);
+        object-fit: cover;
+        object-position: 50% 18%;
+        opacity: .42;
+        mask-image: linear-gradient(110deg, #0009, #000c 58%, black);
+        pointer-events: none;
+      }
+      > .message-header { --khhud-muted: var(--khhud-print-soft); }
+      > .message-header::before { content: none; }
+      > .message-content { background: transparent; }
+      .khhud-token-layer { display: none; }
     }
     .whisper-to { color: #614462; }
     > .message-header .flavor-text {
@@ -1335,7 +1635,7 @@ ul.evaluation.wrapper:has(> .midi-qol-target-select, > .target[data-miss]):not([
   :is(.khhud-gain, .midi-qol-enable-damage-button, .midi-qol-dmg-healing) { color: #255530; }
   :is(.khhud-temp, .midi-qol-dmg-temp .fa-shield-alt) { color: #21506a; }
   .khhud-ward { color: #57406a; border-color: currentColor; }
-  .khhud-results table :is(button, select) {
+  .khhud-results table select {
     color: var(--khhud-ink);
     background-color: var(--khhud-surface);
     border-color: var(--khhud-border);
@@ -1343,9 +1643,29 @@ ul.evaluation.wrapper:has(> .midi-qol-target-select, > .target[data-miss]):not([
   :is(.khhud-pools, .midi-qol-dmg-row) { border-block-start-color: var(--khhud-print-rule); }
 }
 
-/* The receipt stays a separate, permission-checked ChatMessage. Only its position
-   on this GM's screen changes, even when other messages arrive between the two. */
-:is(#chat-log, .chat-log).khhud-grouped-log {
+/* Both audiences use the DM record's parchment. A standalone player receipt
+   can derive its tint from the breakdown visible to that player. */
+:is(#chat-log, .chat-log, .chat-popout, #chat-notifications, body)
+.chat-message:is(.khhud-player-receipt, .khhud-grouped-receipt) {
+  --khhud-tone: var(--khhud-record-tone, var(--khhud-neutral));
+  --khhud-element-end: var(--khhud-record-end, var(--khhud-tone));
+  --khhud-record-base: color-mix(in srgb, var(--khhud-leaf) 90%, var(--khhud-binding));
+  --khhud-record-start: color-mix(in srgb, var(--khhud-bloom) 34%, var(--khhud-record-base));
+  --khhud-record-field: linear-gradient(110deg, var(--khhud-record-start), var(--khhud-record-base) 80%) var(--khhud-record-base);
+  --khhud-panel: var(--khhud-record-base);
+  --khhud-surface: var(--khhud-leaf);
+  --khhud-gold: var(--khhud-print-accent);
+  background: var(--khhud-record-field);
+  &.khhud-player-receipt:not(.khhud-grouped-receipt) {
+    --khhud-tone: var(--khhud-record-tone, var(--khhud-receipt-tone, var(--khhud-sender-color, var(--khhud-neutral))));
+    --khhud-element-end: var(--khhud-record-end, var(--khhud-receipt-end, var(--khhud-tone)));
+    border-inline-start-color: var(--khhud-record-edge, var(--khhud-tone)) !important;
+  }
+}
+
+/* Adjacent receipts only change their own seam. Apply list-wide margins only
+   when reordering requires a grid, where the native block margins cannot collapse. */
+:is(#chat-log, .chat-log) {
   &.khhud-reordered-log {
     display: grid;
     reading-flow: grid-rows;
@@ -1353,22 +1673,15 @@ ul.evaluation.wrapper:has(> .midi-qol-target-select, > .target[data-miss]):not([
     align-content: start;
     row-gap: 0;
     > * { order: var(--khhud-log-order, 0); }
+    > .chat-message { margin-block: 0 var(--chat-message-spacing, 4px); }
   }
-  > .chat-message { margin-block: 0 var(--chat-message-spacing, 4px); }
   > .chat-message.khhud-joined-next {
     margin-block-end: 0;
     border-end-start-radius: 0;
     border-end-end-radius: 0;
   }
-  > .chat-message.khhud-gm-receipt {
-    --khhud-tone: var(--khhud-record-tone, var(--khhud-neutral));
-    --khhud-element-end: var(--khhud-record-end, var(--khhud-tone));
-    --khhud-record-base: color-mix(in srgb, var(--khhud-leaf) 90%, var(--khhud-binding));
-    --khhud-record-start: color-mix(in srgb, var(--khhud-bloom) 34%, var(--khhud-record-base));
-    --khhud-panel: var(--khhud-record-base);
-    --khhud-surface: var(--khhud-leaf);
-    --khhud-gold: var(--khhud-print-accent);
-    background: linear-gradient(110deg, var(--khhud-record-start), var(--khhud-record-base) 80%) var(--khhud-record-base);
+  > .chat-message.khhud-grouped-receipt {
+    margin-block-start: 0;
     padding: 0;
     /* The standalone message has Foundry's inline author border-color. */
     border-inline-start-color: var(--khhud-record-edge, var(--khhud-dye)) !important;
@@ -1390,6 +1703,21 @@ ul.evaluation.wrapper:has(> .midi-qol-target-select, > .target[data-miss]):not([
     > .message-header > .message-metadata { flex: none; }
     > .message-content { padding: 2px 10px 8px; }
     &:has(> .message-header > [aria-expanded="false"]) > .message-content { display: none; }
+    &[data-khhud-ledger-follow] > .message-header { display: none; }
+    &:is([data-khhud-ledger-row], .khhud-managed-reversal) :is(.midi-qol-dmg-all-row, tr:has(#all-reverse)) { display: none; }
+    &[data-khhud-ledger-follow]:not([data-khhud-ledger-open]) {
+      height: 0;
+      min-height: 0;
+      margin: 0;
+      overflow: clip;
+      border: 0;
+    }
+    .khhud-ledger-entry {
+      display: block;
+      padding: 6px 0 3px;
+      color: var(--khhud-print-accent);
+      font: 600 .85rem/1.2 var(--khhud-title-font);
+    }
     .khhud-receipt-toggle {
       display: flex;
       align-items: center;
@@ -1400,16 +1728,13 @@ ul.evaluation.wrapper:has(> .midi-qol-target-select, > .target[data-miss]):not([
       min-height: 34px;
       padding: 4px;
       border: 0;
-      background: transparent;
       box-shadow: none;
-      color: var(--khhud-ink);
       font: 650 .9rem/1.2 var(--font-body, var(--font-sans, sans-serif));
       text-align: start;
       text-transform: none;
-      &:is(:hover, :focus-visible) { background: #79582b12; }
-      &:focus-visible { outline: 2px solid var(--khhud-gold); outline-offset: -2px; }
       i { margin: 0; font-size: .65rem; color: var(--khhud-gold); }
       .khhud-receipt-audience { margin-inline-start: auto; color: var(--khhud-muted); font-size: .72rem; }
+      .khhud-receipt-title + .fa-chevron-down { margin-inline-start: auto; }
       &[aria-expanded="true"] .fa-chevron-down { rotate: 180deg; }
     }
   }
@@ -1425,7 +1750,7 @@ ul.evaluation.wrapper:has(> .midi-qol-target-select, > .target[data-miss]):not([
 }
 .khhud-message .dice-total:has(> khhud-kept-die[data-value]) { white-space: nowrap; }
 .khhud-message khhud-receipt-source { display: block; height: 1px; }
-.khhud-gm-receipt khhud-receipt-source { display: none; }
+.khhud-grouped-receipt khhud-receipt-source { display: none; }
 .khhud-message .dice-roll:not(.expanded, .secret-roll) > .dice-result > .dice-total > khhud-kept-die[data-value] {
   display: inline-grid;
   place-items: center;
@@ -1457,10 +1782,199 @@ ul.evaluation.wrapper:has(> .midi-qol-target-select, > .target[data-miss]):not([
   }
 }
 
+/* A series shares its first banner and byline. Roll controls remain with their message. */
+:is(#chat-log, .chat-log) > .chat-message.khhud-message[data-khhud-roll-next] {
+  margin-block-end: 0 !important;
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+  &::after { border-block-end: 0; }
+  &:not(.khhud-grouped-receipt) > .message-content > .khhud-banner-texture {
+    border-end-start-radius: 0 !important;
+    border-end-end-radius: 0 !important;
+    background-color: var(--khhud-series-fill);
+    > img { object-fit: fill !important; }
+  }
+}
+:is(#chat-log, .chat-log) > .chat-message.khhud-message[data-khhud-roll-follow] {
+  margin-block-start: 0 !important;
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+  padding-block-start: 0;
+  --khhud-art-height: 0px;
+  --khhud-overlap: 0px;
+  /* D&D5e paints its parchment on .message::before, above the row's own fill. */
+  &::before { content: none; }
+  &::after { border-block-start: 0; }
+  > .khhud-roll-avatar, .khhud-token-layer, .chat-card > .khhud-card-wash,
+  > .message-content > .khhud-banner-texture { display: none !important; }
+  > .message-header {
+    min-height: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+    grid-template: auto auto / minmax(0, 1fr) auto !important;
+    align-items: center;
+    border: 0;
+    background: transparent;
+    color: var(--khhud-print-soft);
+    &::before, > .khhud-wiki-cover, > .message-sender, > .whisper-to { display: none !important; }
+    > .flavor-text {
+      grid-area: 2 / 1 / 3 / -1 !important;
+      padding: 0 !important;
+      min-width: 0;
+    }
+    > .message-metadata:not([hidden], [aria-hidden="true"], .hidden, [data-concealed], [style*="display: none"], [style*="display:none"]) {
+      grid-area: 1 / 2;
+      display: inline-flex !important;
+      align-items: center;
+      gap: 5px;
+      color: inherit;
+      > * { margin: 0 !important; color: inherit !important; text-shadow: none; }
+      > time { padding: 0; border: 0; font-size: .65rem; }
+    }
+  }
+  &:has(.chat-card > .description > .khhud-banner) > .message-header {
+    padding-inline: var(--khhud-gutter) !important;
+  }
+  &[data-khhud-roll-follow="check"] {
+    /* Continue the parchment at the foot of the first roll, even while its wiki cover loads. */
+    background: var(--khhud-leaf) !important;
+    > .message-header {
+      position: relative;
+      grid-template: auto / minmax(0, 1fr) !important;
+      > .flavor-text { grid-area: 1 / 1 !important; }
+      > .message-metadata {
+        position: absolute;
+        inset-inline-end: 0;
+        inset-block-start: 0;
+        grid-area: auto;
+        z-index: 2;
+        opacity: 0;
+        > time { display: none; }
+      }
+      &:is(:hover, :focus-within) > .message-metadata { opacity: 1; }
+    }
+  }
+  &[data-khhud-roll-follow="attack"] {
+    background: var(--khhud-series-fill, var(--khhud-leaf)) !important;
+    > .message-content { background: transparent !important; }
+    > .message-header {
+      position: absolute !important;
+      min-height: 0 !important;
+      inset: 2px 4px auto auto;
+      z-index: 3 !important;
+      background: transparent;
+      > :not(.message-metadata), > .message-metadata > :is(time, .message-timestamp) { display: none !important; }
+      > .message-metadata { opacity: 0; }
+    }
+    &:is(:hover, :focus-within) > .message-header > .message-metadata { opacity: 1; }
+    &[data-khhud-repeat-ability] .chat-card > .description:has(> .khhud-banner) { display: none; }
+    &[data-khhud-series-crop]::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      border-radius: inherit;
+      /* The same top-left 30% by 20% used by the first banner texture. */
+      background: var(--khhud-series-art) left top / calc(100% / .30) 500% no-repeat;
+      filter: none;
+      mix-blend-mode: normal;
+    }
+    &[data-khhud-series-crop="up"]::before { transform: scaleY(-1); }
+  }
+  .chat-card > .description:has(> .khhud-banner) { margin-inline: 0 !important; }
+  .chat-card > .description > .khhud-banner {
+    grid-template: auto / minmax(0, 1fr) !important;
+    min-height: 0;
+    &::before, &::after, > .khhud-portrait-band, > .khhud-ability-image { display: none !important; }
+    > :is(.name-stacked, .khhud-source-name) {
+      grid-area: 1 / 1 !important;
+      place-self: start stretch !important;
+      width: auto !important;
+      padding: 5px 0 0 !important;
+      margin: 0 !important;
+      scale: none !important;
+      translate: none !important;
+    }
+    :is(.title, .khhud-source-name) {
+      font: 600 1rem/1.2 var(--khhud-title-font) !important;
+      color: var(--khhud-print) !important;
+      letter-spacing: normal;
+      -webkit-text-stroke: 0;
+      text-shadow: none;
+    }
+  }
+}
+
+/* Use the same line of type for a miss, a hit with damage and a public summary. */
+:is(#chat-log, .chat-log) > .chat-message[data-khhud-attack-series] {
+  --khhud-total-size: 1.875rem;
+  &[data-khhud-roll-next] { --khhud-content-bottom: 2px; }
+  .chat-card { row-gap: 0; }
+  .midi-results > :is(.flexrow, .midi-qol-attack-roll, .midi-qol-damage-roll):has(.dice-roll),
+  .khhud-public-results {
+    margin-block: 0;
+    padding-block: 3px;
+  }
+  .midi-results .dice-result { margin-block: 0; }
+  .midi-results .dice-result > .dice-total,
+  .khhud-public-result > strong { font-size: var(--khhud-total-size); }
+  .midi-results .dice-result > .dice-total, .khhud-public-result {
+    min-height: var(--khhud-total-size);
+    line-height: 1;
+  }
+  .midi-results > :has(> [class^="end-midi-qol-"]:only-child) { padding-block: 0; margin-block: 0; }
+
+  /* Keep Midi's buttons in their original message. In both Midi templates
+     the buttons follow the rolls and precede the hit/save trays. */
+  .card-buttons.midi-buttons {
+    flex-flow: row wrap;
+    gap: 0 6px;
+    padding-block: 0;
+    > *, > .midi-results > * { flex: 0 0 100%; min-width: 0; box-sizing: border-box; }
+    > .midi-results:has(.midi-qol-target-select):not([hidden], [aria-hidden="true"], [data-concealed],
+      .hidden, .gm-only, .secret-roll, .secret:not(.revealed), [style*="display: none"], [style*="display:none"]) { display: contents; }
+    > .midi-results > :is(.midi-qol-attack-roll, .midi-qol-damage-roll):has(.dice-total) {
+      order: -1;
+      flex: 1 1 0;
+    }
+    > :is(.midi-qol-attack-buttons, .midi-qol-damage-buttons, button[data-action="rollAttack"], button[data-action="rollDamage"]) {
+      order: 1;
+      margin-block-start: 3px;
+    }
+    > :is(.midi-qol-attack-buttons, .midi-qol-damage-buttons):has(> button:only-child),
+    > button:is([data-action="rollAttack"], [data-action="rollDamage"]) { flex: 1 1 0; }
+    > .midi-results > :is(.midi-qol-hits-display, .midi-qol-saves-display) { order: 2; }
+  }
+}
+
+/* Text follows the surface actually painted beneath this message. */
+:is(#chat-log, .chat-log, .chat-popout, #chat-notifications, body)
+.chat-message.khhud-message:not([data-khhud-roll-follow="attack"]) > .message-content:has(> .khhud-banner-texture[data-khhud-light-body]),
+:is(#chat-log, .chat-log) > .chat-message.khhud-message[data-khhud-roll-follow="attack"][data-khhud-series-light] > .message-content {
+  --khhud-text-halo: #181217;
+  --khhud-print: #fff8ef;
+  --khhud-print-soft: #f1e8df;
+  --khhud-print-accent: #fff4e8;
+  --khhud-print-rule: #fff3dd64;
+  .midi-results .dice-total { color: var(--khhud-print); }
+  .midi-results :is(.midi-roll-label, .dice-formula), .dice-total::after { color: var(--khhud-print-soft); }
+  .dice-total:is(.success, .critical), .khhud-public-crit, .khhud-gain { color: #c3f5d9; }
+  .dice-total:is(.failure, .fumble), .khhud-loss { color: #ffcec6; }
+}
+
+.khhud-message[data-khhud-superseded~="attack"] .card-buttons > :is(.midi-qol-attack-buttons, button[data-action="rollAttack"]),
+.khhud-message[data-khhud-superseded~="damage"] .card-buttons > :is(.midi-qol-damage-buttons, button[data-action="rollDamage"]),
+.khhud-message[data-khhud-superseded~="targets"]:not(:has(.midi-qol-attack-roll .dice-roll.expanded, .message-content > .dice-roll.expanded))
+  :is(.midi-qol-hits-display, .targets-tray:has(li.target[data-miss])),
+.khhud-message[data-khhud-superseded~="targets"] .khhud-public-tray:not(:has(.khhud-public-save, .khhud-public-outcome)) {
+  display: none !important;
+}
+
 /* Midi sizes its original thumbnails with !important in this cascade layer. */
 @layer modules {
   :is(#chat-log, .chat-log, .chat-popout, #chat-notifications, body) .khhud-message ul.evaluation.wrapper
-  > .target:is(.midi-qol-target-select, [data-miss]) > img {
+  > .target:is(.midi-qol-target-select, [data-miss], .khhud-public-target) > img {
     box-sizing: border-box;
     width: 100% !important;
     height: 100% !important;

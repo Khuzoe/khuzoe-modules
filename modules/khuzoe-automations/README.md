@@ -1,8 +1,16 @@
 # Khuzoe Automations
 
-Versione **0.28.16** - ambiente di riferimento **Foundry VTT 14.367 / D&D5e 5.3.3**. Arcane Ward e le capacità Armorer di Valdor sono descritte in [WARD-ARMORER-0.26.0.md](WARD-ARMORER-0.26.0.md). Le capacità introdotte nella 0.25.0 sono descritte nello storico [CAMPAIGN-FEATURES-0.25.0.md](CAMPAIGN-FEATURES-0.25.0.md); Difesa Impenetrabile usa ora la formulazione riportata qui sotto. Le copie già presenti sugli attori si aggiornano dall'icona Khuzoe nella barra della scheda oppure dal Medkit CAT. Nessun aggiornamento del mondo viene eseguito dagli strumenti di compilazione.
+Versione **0.28.17** - ambiente di riferimento **Foundry VTT 14.367 / D&D5e 5.3.3**. Arcane Ward e le capacità Armorer di Valdor sono descritte in [WARD-ARMORER-0.26.0.md](WARD-ARMORER-0.26.0.md). Le capacità introdotte nella 0.25.0 sono descritte nello storico [CAMPAIGN-FEATURES-0.25.0.md](CAMPAIGN-FEATURES-0.25.0.md); Difesa Impenetrabile usa ora la formulazione riportata qui sotto. Le copie già presenti sugli attori si aggiornano dall'icona Khuzoe nella barra della scheda oppure dal Medkit CAT. Nessun aggiornamento del mondo viene eseguito dagli strumenti di compilazione.
 
 Automazioni D&D 5e per Foundry VTT v14 basate su Coven's Automation Toolkit, Midi-QOL e DAE.
+
+## Enlarge/Reduce: taglia e ingombro del token
+
+Da 0.28.17, Enlarge/Reduce modifica la taglia effettiva dell'Actor e le dimensioni `width`/`height` del token. Non salva né ripristina `texture.scaleX` o `texture.scaleY`, nemmeno per gli effetti precedenti: i valori preparati dei token dinamici di D&D5e potevano altrimenti diventare una scala permanente errata alla fine dell'effetto. Le modifiche manuali alla scala rimangono intatte.
+
+Un nuovo lancio sostituisce il precedente calcolando la taglia senza il vecchio effetto e conserva l'ingombro originale, anche personalizzato. Il token bersagliato viene ridimensionato anche senza una ricerca sul canvas; le altre copie NPC non collegate restano indipendenti. La taglia di Enlarge può aumentare quella già conferita da Giant's Might e, alla fine, viene rispettata l'eventuale altra modifica di taglia ancora attiva. Concentrazione, bonus ai danni delle armi e vantaggio/svantaggio alle prove e ai TS di Forza restano gestiti dall'effetto.
+
+Ricaricare GM e giocatori con Ctrl+F5; non occorre riapplicare l'automazione sulla scheda. Per riprovare un effetto già attivo, terminarlo e rilanciare l'incantesimo dopo il ricaricamento. I test dedicati includono il codice di preparazione degli anelli dinamici della versione D&D5e installata.
 
 ## Armorer: uso senza vincoli di armatura
 
